@@ -84,7 +84,7 @@ typedef enum VMSAv6_section_domain {
 /***************************************************************************
  *             ENUMERATED SECTION MEMORY TYPES
  ***************************************************************************/
-typedef enum VMSAv6_SECTION_memtype {
+typedef enum VMSAv6_section_memtype {
 
 	VMSAv6_SECTION_MEMTYPE_SHARED_STRONGLY_ORDERED =
 		VMSAv6_SECTION_TEX(0) | VMSAv6_SECTION_C(0) | VMSAv6_SECTION_B(0),
@@ -215,8 +215,27 @@ typedef enum VMSAv6_SECTION_memtype {
 	VMSAv6_SECTION_MEMTYPE_SHARED_NORMAL_OUTER_WRITEBACK_INNER_WRITEBACK =
 		VMSAv6_SECTION_TEX(7) | VMSAv6_SECTION_C(1) | VMSAv6_SECTION_B(1) | VMSAv6_SECTION_S(1),
 
-}VMSAv6_SECTION_memtype_enum_t;
+}VMSAv6_section_memtype_enum_t;
 
+/***************************************************************************
+ *             ENUMERATED SECTION GLOBAL FLAGS
+ ***************************************************************************/
+typedef enum VSMAv6_section_global {
+	
+	VSMAv6_SECTION_GLOBAL    = VMSAv6_SECTION_nG(0),
+	VSMAv6_SECTION_NOTGLOBAL = VMSAv6_SECTION_nG(1),
+	
+} VSMAv6_section_global_t;
+
+/***************************************************************************
+ *             ENUMERATED SECTION EXECUTE NEVER FLAGS
+ ***************************************************************************/
+typedef enum VSMAv6_section_execute_never {
+	
+	VSMAv6_SECTION_EXECUTE      = VMSAv6_SECTION_XN(0),
+	VSMAv6_SECTION_EXECUTENEVER = VMSAv6_SECTION_XN(1),
+	
+} VSMAv6_section_execute_never_t;
 
 static inline vmsav6_build_section(
 		VMSAv6_section_t *                      s,
