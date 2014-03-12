@@ -1,4 +1,3 @@
-
 /***************************************************************************
  * Build VSMAv6 super sections.
  * See ARM Architecture reference manual, Issue 'I' - July 2005 Chapter B4.
@@ -25,7 +24,6 @@ typedef unsigned int VMSAv6_supersection_t;
 #define VMSAv6_SUPERSECTION_nG(ng1)      ( ng1  << 17 ) /* NOT GLOBAL                 */
 #define VMSAv6_SUPERSECTION_AP(ap2)      ( ap2  << 10 ) /* access permission          */
 #define VMSAv6_SUPERSECTION_APX(apx1)    ( apx1 << 15 ) /* access permission extended */
-#define VMSAv6_SUPERSECTION_DOMAIN(dom4) ( dom4 <<  5 ) /* DOMAIN                     */
 #define VMSAv6_SUPERSECTION_B(b1)        ( b1   <<  2 ) /* BUFFER        	          */
 #define VMSAv6_SUPERSECTION_C(c1)        ( c1   <<  3 ) /* CACHE              	      */
 #define VMSAv6_SUPERSECTION_TEX(tex3)    ( tex3 << 12 ) /* Type Extension Field       */
@@ -62,30 +60,6 @@ typedef enum VMSAv6_supersection_access_permission {
 
 } VMSAv6_supersection_access_permission_enum_t;
 
-
-/***************************************************************************
- *             ENUMERATED SUPER SECTION DOMAINS
- ***************************************************************************/
-typedef enum VMSAv6_supersection_domain {
-
-	VMSAv6_SUPERSECTION_DOMAIN_0  = VMSAv6_SUPERSECTION_DOMAIN( 0),
-	VMSAv6_SUPERSECTION_DOMAIN_1  = VMSAv6_SUPERSECTION_DOMAIN( 1),
-	VMSAv6_SUPERSECTION_DOMAIN_2  = VMSAv6_SUPERSECTION_DOMAIN( 2),
-	VMSAv6_SUPERSECTION_DOMAIN_3  = VMSAv6_SUPERSECTION_DOMAIN( 3),
-	VMSAv6_SUPERSECTION_DOMAIN_4  = VMSAv6_SUPERSECTION_DOMAIN( 4),
-	VMSAv6_SUPERSECTION_DOMAIN_5  = VMSAv6_SUPERSECTION_DOMAIN( 5),
-	VMSAv6_SUPERSECTION_DOMAIN_6  = VMSAv6_SUPERSECTION_DOMAIN( 6),
-	VMSAv6_SUPERSECTION_DOMAIN_7  = VMSAv6_SUPERSECTION_DOMAIN( 7),
-	VMSAv6_SUPERSECTION_DOMAIN_8  = VMSAv6_SUPERSECTION_DOMAIN( 8),
-	VMSAv6_SUPERSECTION_DOMAIN_9  = VMSAv6_SUPERSECTION_DOMAIN( 9),
-	VMSAv6_SUPERSECTION_DOMAIN_10 = VMSAv6_SUPERSECTION_DOMAIN(10),
-	VMSAv6_SUPERSECTION_DOMAIN_11 = VMSAv6_SUPERSECTION_DOMAIN(11),
-	VMSAv6_SUPERSECTION_DOMAIN_12 = VMSAv6_SUPERSECTION_DOMAIN(12),
-	VMSAv6_SUPERSECTION_DOMAIN_13 = VMSAv6_SUPERSECTION_DOMAIN(13),
-	VMSAv6_SUPERSECTION_DOMAIN_14 = VMSAv6_SUPERSECTION_DOMAIN(14),
-	VMSAv6_SUPERSECTION_DOMAIN_15 = VMSAv6_SUPERSECTION_DOMAIN(15),
-
-} VMSAv6_supersection_domain_enum_t;
 
 /***************************************************************************
  *             ENUMERATED SUPER SECTION MEMORY TYPES
@@ -228,13 +202,11 @@ static inline vmsav6_build_supersection32(
 		VMSAv6_supersection_t *                      ss,
 		phy_addr32_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,
-		VMSAv6_supersection_domain_enum_t            domain,
 		VMSAv6_supersection_access_permission_enum_t access)
 {
-	*ss = VMSAv6_SUPERSECTION_BITS                  |
+	*ss = VMSAv6_SUPERSECTION_BITS                      |
 		  VMSAv6_SUPERSECTION_BASEADDR_32(phy_addr) |
 		  mem_type                                  |
-		  domain                                    |
 		  access                                    ;
 }
 
@@ -242,13 +214,11 @@ static inline vmsav6_build_supersection40(
 		VMSAv6_supersection_t *                      ss,
 		phy_addr40_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,
-		VMSAv6_supersection_domain_enum_t            domain,
 		VMSAv6_supersection_access_permission_enum_t access)
 {
-	*ss = VMSAv6_SUPERSECTION_BITS                  |
+	*ss = VMSAv6_SUPERSECTION_BITS                      |
 		  VMSAv6_SUPERSECTION_BASEADDR_40(phy_addr) |
 		  mem_type                                  |
-		  domain                                    |
 		  access                                    ;
 }
 
