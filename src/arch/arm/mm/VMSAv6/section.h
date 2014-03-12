@@ -77,7 +77,7 @@ typedef enum VMSAv6_section_domain {
 	VMSAv6_SECTION_DOMAIN_12 = VMSAv6_SECTION_DOMAIN(12),
 	VMSAv6_SECTION_DOMAIN_13 = VMSAv6_SECTION_DOMAIN(13),
 	VMSAv6_SECTION_DOMAIN_14 = VMSAv6_SECTION_DOMAIN(14),
-	VMSAv6_SECTION_DOMAIN_15 = VMSAv6_ECTION_DOMAIN(15),
+	VMSAv6_SECTION_DOMAIN_15 = VMSAv6_SECTION_DOMAIN(15),
 
 } VMSAv6_section_domain_enum_t;
 
@@ -219,15 +219,15 @@ typedef enum VMSAv6_SECTION_memtype {
 
 
 static inline vmsav6_build_section(
-		VMSAv6_section_t *                      ss,
+		VMSAv6_section_t *                      s,
 		phy_addr32_t                            phy_addr,
 		VMSAv6_section_memtype_enum_t           mem_type,
 		VMSAv6_section_domain_enum_t            domain,
 		VMSAv6_section_access_permission_enum_t access)
 {
-	*ss = VMSAv6_SECTION_BITS                  |
-		  VMSAv6_SECTION_BASEADDR(phy_addr)      |
-		  mem_type                               |
-		  domain                                 |
-		  access                                 ;
+	*s  = VMSAv6_SECTION_BITS                    |
+	      VMSAv6_SECTION_BASEADDR(phy_addr)      |
+	      mem_type                               |
+	      domain                                 |
+	      access                                 ;
 }
