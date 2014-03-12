@@ -197,6 +197,25 @@ typedef enum VMSAv6_supersection_memtype {
 
 }VMSAv6_supersection_memtype_enum_t;
 
+/***************************************************************************
+ *             ENUMERATED SUPER SECTION GLOBAL FLAGS
+ ***************************************************************************/
+typedef enum VSMAv6_supersection_global {
+	
+	VSMAv6_SUPERSECTION_GLOBAL    = VMSAv6_SUPERSECTION_nG(0),
+	VSMAv6_SUPERSECTION_NOTGLOBAL = VMSAv6_SUPERSECTION_nG(1),
+	
+} VSMAv6_supersection_global_t;
+
+/***************************************************************************
+ *             ENUMERATED SUPER SECTION EXECUTE NEVER FLAGS
+ ***************************************************************************/
+typedef enum VSMAv6_supersection_execute_never {
+	
+	VSMAv6_SUPERSECTION_EXECUTE      = VMSAv6_SUPERSECTION_XN(0),
+	VSMAv6_SUPERSECTION_EXECUTENEVER = VMSAv6_SUPERSECTION_XN(1),
+	
+} VSMAv6_supersection_execute_never_t;
 
 static inline vmsav6_build_supersection32(
 		VMSAv6_supersection_t *                      ss,
