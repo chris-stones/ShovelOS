@@ -242,11 +242,15 @@ static inline vmsav6_build_section(
 		phy_addr32_t                            phy_addr,
 		VMSAv6_section_memtype_enum_t           mem_type,
 		VMSAv6_section_domain_enum_t            domain,
-		VMSAv6_section_access_permission_enum_t access)
+		VMSAv6_section_access_permission_enum_t access,
+		VSMAv6_section_global_t                 global,
+		VSMAv6_section_execute_never_t          execute_never)
 {
 	*s  = VMSAv6_SECTION_BITS                    |
 	      VMSAv6_SECTION_BASEADDR(phy_addr)      |
 	      mem_type                               |
 	      domain                                 |
-	      access                                 ;
+	      access                                 |
+              global                                 |
+              execute_never                          ;
 }
