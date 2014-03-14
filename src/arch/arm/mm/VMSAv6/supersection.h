@@ -221,23 +221,31 @@ static inline vmsav6_build_supersection32(
 		VMSAv6_supersection_t *                      ss,
 		phy_addr32_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,
-		VMSAv6_supersection_access_permission_enum_t access)
+		VMSAv6_supersection_access_permission_enum_t access,
+		VSMAv6_supersection_global_t                 global,
+		VSMAv6_supersection_execute_never_t          execute_never)
 {
 	*ss = VMSAv6_SUPERSECTION_BITS                      |
 		  VMSAv6_SUPERSECTION_BASEADDR_32(phy_addr) |
 		  mem_type                                  |
-		  access                                    ;
+		  access                                    |
+		  global                                    |
+                  execute_never                             ;
 }
 
 static inline vmsav6_build_supersection40(
 		VMSAv6_supersection_t *                      ss,
 		phy_addr40_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,
-		VMSAv6_supersection_access_permission_enum_t access)
+		VMSAv6_supersection_access_permission_enum_t access,
+		VSMAv6_supersection_global_t                 global,
+		VSMAv6_supersection_execute_never_t          execute_never)
 {
 	*ss = VMSAv6_SUPERSECTION_BITS                      |
 		  VMSAv6_SUPERSECTION_BASEADDR_40(phy_addr) |
 		  mem_type                                  |
-		  access                                    ;
+		  access                                    |
+		  global                                    |
+                  execute_never                             ;
 }
 
