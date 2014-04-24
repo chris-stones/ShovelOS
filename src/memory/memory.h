@@ -7,6 +7,9 @@
 #define KMALLOC_SIZE_MAX 512
 #define KMALLOC_SIZE_MIN  32
 
+#define IS_PAGE_ALIGNED(x)     (((size_t(x))&(PAGE_SIZE-1))==0)
+#define IS_NOT_PAGE_ALIGNED(x) (((size_t(x))&(PAGE_SIZE-1))   )
+
 typedef unsigned int gfp_flags;
 
 enum gfp_flags {

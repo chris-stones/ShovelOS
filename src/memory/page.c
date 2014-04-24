@@ -1,3 +1,8 @@
+/*******************************************************************
+ *
+ * Page frame allocator.
+ *
+ */
 
 #include "page.h"
 #include "memory.h"
@@ -8,13 +13,22 @@ struct order {
 	size_t * p;
 };
 
+
 struct orders {
 
-	struct order order[5];	// 1 bit  =  1 PAGE		(   4k )
-							// 1 bit  =  2 PAGES 	(   8k )
-							// 1 bit  =  4 PAGES	(  16k )
-							// 1 bit  =  8 PAGES	(  32k )
-							// 1 bit  = 16 PAGES    (  64k )
+	struct order order[13];	// 1 bit  =   1 PAGE	(   4k )
+							// 1 bit  =   2 PAGES 	(   8k )
+							// 1 bit  =   4 PAGES	(  16k )
+							// 1 bit  =   8 PAGES	(  32k )
+							// 1 bit  =  16 PAGES   (  64k )
+							// 1 bit  =  32 PAGES   ( 128k )
+							// 1 bit  =  64 PAGES   ( 256k )
+							// 1 bit  = 128 PAGES   ( 512k )
+							// 1 bit  = 256 PAGES   (   1M )
+							// 1 bit  = 256 PAGES   (   2M )
+							// 1 bit  = 256 PAGES   (   4M )
+							// 1 bit  = 256 PAGES   (   8M )
+							// 1 bit  = 256 PAGES   (  16M )
 };
 
 struct buddy {
@@ -160,21 +174,36 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 
 static struct buddy normal_buddy = {0, };
 
+// try to allocate a given number of free pages.
+//	returns NULL or virtual address of first block.
 void * get_free_pages(size_t pages, int flags) {
 
-	size_t block = buddy_alloc( &normal_buddy, pages );
+	size_t block;
+	void *p;
+
+	if( flags & GFP_KERNEL )
+		block = buddy_alloc( &normal_buddy, pages );
 
 	if(block == (size_t)-1)
 		return NULL;
 
-	return (void*)(block * PAGE_SIZE + PAGE_OFFSET);
+	p = (void*)(block * PAGE_SIZE + PAGE_OFFSET);
+
+	if( flags & GFP_ZERO )
+		memset(p, 0, pages * PAGE_SIZE);
+
+	return p;
 }
 
+// try to allocate a one free page.
+//	returns NULL or virtual address of first block.
+//	this is the same as get_free_page(1, flags)
 void * get_free_page(int flags) {
 
 	return get_free_pages(1, flags);
 }
 
+// free blocks previously allocated with get_free_pages().
 void free_pages(void * addr, size_t pages) {
 
 	if(addr) {
@@ -185,6 +214,8 @@ void free_pages(void * addr, size_t pages) {
 	}
 }
 
+// free pages previously allocated with get_free_page().
+//	this is the same as free_pages(addr,1)
 void free_page(void * addr) {
 
 	free_page(addr,1);
