@@ -3,6 +3,13 @@
 
 #include<types.h>
 
+// setup get_free_pages.
+//	virtual_base should be PAGE_OFFSET, or a malloc'ed buffer for testing!
+int get_free_page_setup(
+	size_t virtual_base,	// virtual base address.
+	size_t preallocated,	// memory already in use. ( page tables / kernel image )
+	size_t size);			// amount of ram in bytes.
+
 // try to allocate a given number of free pages.
 //	returns NULL or virtual address of first block.
 void * get_free_pages(size_t pages, int flags);

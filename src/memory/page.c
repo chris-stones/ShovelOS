@@ -7,12 +7,14 @@
 #include "page.h"
 #include "memory.h"
 
+static size_t _page_offset;
+static size_t _total_memory;
+
 struct order {
 
 	size_t bits;
 	size_t * p;
 };
-
 
 struct orders {
 
@@ -33,10 +35,8 @@ struct orders {
 
 struct buddy {
 
-	size_t nb;
 	struct orders orders;
 };
-
 
 #define NB_ORDERS (sizeof(struct orders)/sizeof(struct order))
 #define WORDBYTES (sizeof(size_t))
@@ -154,7 +154,13 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 				// at least one free block in the vicinity,
 				//	now do a more fine-grained search.
 				int b;
-				for(b=0;b<WORDBITS;b++)
+				int max = WORDBITS;
+
+				// ignoring bits beyond orders limit.
+				if(((w+1) * WORDBITS) > p->bits )
+					max = p->bits & (WORDBITS-1);
+
+				for(b=0;b<max;b++)
 					if((word & (1<<b))==0) {
 
 						// found a free block.
@@ -187,7 +193,7 @@ void * get_free_pages(size_t pages, int flags) {
 	if(block == (size_t)-1)
 		return NULL;
 
-	p = (void*)(block * PAGE_SIZE + PAGE_OFFSET);
+	p = (void*)(block * PAGE_SIZE + _page_offset);
 
 	if( flags & GFP_ZERO )
 		memset(p, 0, pages * PAGE_SIZE);
@@ -208,7 +214,7 @@ void free_pages(void * addr, size_t pages) {
 
 	if(addr) {
 
-		size_t block = ((size_t)addr - PAGE_OFFSET) / PAGE_SIZE;
+		size_t block = ((size_t)addr - _page_offset) / PAGE_SIZE;
 
 		buddy_free( &normal_buddy, (int)block, pages );
 	}
@@ -219,5 +225,64 @@ void free_pages(void * addr, size_t pages) {
 void free_page(void * addr) {
 
 	free_page(addr,1);
+}
+
+// setup get_free_pages.
+//	virtual_base should be PAGE_OFFSET, or a malloc'ed buffer for testing!
+//	NOTE: Assumes the buddy structure will fit in memory... Test that it does?
+int get_free_page_setup(
+	size_t virtual_base,	// virtual base address.
+	size_t preallocated,	// memory already in use.
+	size_t size)			// amount of ram in bytes.
+{
+	int order_idx;
+	uint8_t * free_base;
+	struct buddy * buddy0;
+	size_t pages = size / PAGE_SIZE;
+
+	_page_offset = virtual_base;
+	_total_memory = pages * PAGE_SIZE;
+
+	// bump up 'preallocated' to next word boundary.
+	if(preallocated & (WORDBYTES-1))
+		preallocated = (preallocated + WORDBYTES) & ~(WORDBYTES-1);
+
+	free_base = (uint8_t*)(virtual_base + preallocated);
+
+	// allocate buddy!
+	buddy0 = (struct buddy*)free_base;
+	free_base += sizeof(struct buddy);
+
+	// initialise buddy structure.
+	for(order_idx=0;order_idx<NB_ORDERS;order_idx++) {
+
+		size_t words;
+		size_t bmp_size;
+
+		struct order * order =
+			buddy0->orders.order + order_idx;
+
+		order->bits = (pages / (1<<order_idx));
+
+		words = (order->bits + (WORDBITS-1)) / WORDBITS;
+
+		// allocate bitmap!
+		bmp_size = words * WORDBYTES;
+		order->p = (size_t*)free_base;
+		free_base += bmp_size;
+
+		// set free!
+		memset(order->p, 0, bmp_size);
+	}
+
+	// now, mark as used all memory between 'virtual_base' and 'free_base'
+	{
+		size_t pages_used =
+			(((size_t)free_base + (PAGE_SIZE-1)) - virtual_base) / PAGE_SIZE;
+
+		buddy_set_used(buddy0, 0, pages_used);
+	}
+
+	return 0;
 }
 
