@@ -10,6 +10,9 @@ int get_free_page_setup(
 	size_t preallocated,	// memory already in use. ( page tables / kernel image )
 	size_t size);			// amount of ram in bytes.
 
+// only needed for testing leaks in the user-land test.
+int get_free_page_teardown();
+
 // try to allocate a given number of free pages.
 //	returns NULL or virtual address of first block.
 void * get_free_pages(size_t pages, int flags);

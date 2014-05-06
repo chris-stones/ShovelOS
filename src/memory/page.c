@@ -178,7 +178,7 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 	return -1;
 }
 
-static struct buddy normal_buddy = {0, };
+static struct buddy * normal_buddy = NULL;
 
 // try to allocate a given number of free pages.
 //	returns NULL or virtual address of first block.
@@ -188,7 +188,7 @@ void * get_free_pages(size_t pages, int flags) {
 	void *p;
 
 	if( flags & GFP_KERNEL )
-		block = buddy_alloc( &normal_buddy, pages );
+		block = buddy_alloc( normal_buddy, pages );
 
 	if(block == (size_t)-1)
 		return NULL;
@@ -216,7 +216,7 @@ void free_pages(void * addr, size_t pages) {
 
 		size_t block = ((size_t)addr - _page_offset) / PAGE_SIZE;
 
-		buddy_free( &normal_buddy, (int)block, pages );
+		buddy_free( normal_buddy, (int)block, pages );
 	}
 }
 
@@ -225,6 +225,22 @@ void free_pages(void * addr, size_t pages) {
 void free_page(void * addr) {
 
 	free_page(addr,1);
+}
+
+int get_free_page_teardown() {
+
+#if defined(GFP_USERLAND_DEBUG)
+	if(normal_buddy)
+	{
+		int order_idx;
+		for(order_idx=0;order_idx<NB_ORDERS;order_idx++)
+			free( normal_buddy->orders.order[order_idx].p );
+	}
+
+	free(normal_buddy);
+	free((const void*)_page_offset);
+#endif
+	return 0;
 }
 
 // setup get_free_pages.
@@ -240,8 +256,13 @@ int get_free_page_setup(
 	struct buddy * buddy0;
 	size_t pages = size / PAGE_SIZE;
 
-	_page_offset = virtual_base;
 	_total_memory = pages * PAGE_SIZE;
+
+#if defined(GFP_USERLAND_DEBUG)
+	virtual_base = (size_t)malloc(_total_memory);
+#endif
+
+	_page_offset = virtual_base;
 
 	// bump up 'preallocated' to next word boundary.
 	if(preallocated & (WORDBYTES-1))
@@ -252,6 +273,9 @@ int get_free_page_setup(
 	// allocate buddy!
 	buddy0 = (struct buddy*)free_base;
 	free_base += sizeof(struct buddy);
+#if defined(GFP_USERLAND_DEBUG)
+	buddy0 = malloc(sizeof(struct buddy));
+#endif
 
 	// initialise buddy structure.
 	for(order_idx=0;order_idx<NB_ORDERS;order_idx++) {
@@ -271,6 +295,10 @@ int get_free_page_setup(
 		order->p = (size_t*)free_base;
 		free_base += bmp_size;
 
+#if defined(GFP_USERLAND_DEBUG)
+		order->p = malloc(bmp_size);
+#endif
+
 		// set free!
 		memset(order->p, 0, bmp_size);
 	}
@@ -280,8 +308,12 @@ int get_free_page_setup(
 		size_t pages_used =
 			(((size_t)free_base + (PAGE_SIZE-1)) - virtual_base) / PAGE_SIZE;
 
+#if !defined(GFP_USERLAND_DEBUG)
 		buddy_set_used(buddy0, 0, pages_used);
+#endif
 	}
+
+	normal_buddy = buddy0;
 
 	return 0;
 }
