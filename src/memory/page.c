@@ -60,16 +60,21 @@ static void buddy_set_used(struct buddy * buddy, int block, size_t nb) {
 	// mark block as non-free on all orders.
 	for(order=0;order<NB_ORDERS;order++) {
 
-		const int div = (WORDBITS*(1<<order));
-
 		struct order * p =
 			buddy->orders.order + order;
 
+		if(!p->bits)
+			break;
+
+#if defined(GFP_USERLAND_DEBUG)
+	printf("buddy_set_used order = %d, n = %d; n<=(%d+%d); \n",order, block, block, bits);
+#endif
 		int n;
 		for(n=block;n<(block+bits);n++)
-			p->p[n/div] |= (1 << (n%div));
+			p->p[n/WORDBITS] |= (1 << (n%WORDBITS));
 
-		bits = (bits+1)/2;
+		block = (block    ) / 2;
+		bits  = (bits  + 1) / 2;
 	}
 }
 
@@ -85,43 +90,51 @@ static void buddy_join_free(struct buddy * buddy, int first, int last) {
 
 	for(order=0; order<(NB_ORDERS-1); order++) {
 
-		int b;
-
-		const int div0 = (WORDBITS*(1<<(order+0)));
-		const int div1 = (WORDBITS*(1<<(order+1)));
+		int b0;
 
 		p0 = buddy->orders.order + (order+0);
 		p1 = buddy->orders.order + (order+1);
 
-		for(b=first; b<=last; b+=2)
-			if((p0->p[b/div0] &   (3 << (b%div0))) == 0)
-				p1->p[b/div1] &= ~(1 << (b%div1));
+		if(!p1->bits)
+			break;
+
+#if defined(GFP_USERLAND_DEBUG)
+		printf("buddy_join_free order=%d, first=%d, last=%d\n", order, first, last);
+#endif
+
+		for(b0=first; b0<=last; b0+=2)
+			if((p0->p[b0/WORDBITS] &   (3 << (b0%WORDBITS))) == 0) {
+				const int b1 = b0/2;
+				p1->p[b1/WORDBITS] &= ~(1 << (b1%WORDBITS));
+			}
 
 		first = (first+0) /2;
-		last  = (last +1) /2;
+		last  = (last +0) /2;
 	}
 }
 
 // set blocks as free.
-static void buddy_free(struct buddy * buddy, const int block, const size_t nb) {
+static void buddy_free(struct buddy * buddy, const int _block, const size_t nb) {
 
 	int bits = nb;
+	int block = _block;
 	int order;
 
 	// mark block as free on all orders.
 	for(order=0;order<NB_ORDERS;order++) {
 
-		const int div = (WORDBITS*(1<<order));
-
 		struct order * p =
 			buddy->orders.order + order;
 
+		if(!p->bits)
+			break;
+
 		int n;
 		for(n=block;n<(block+bits);n++)
-			p->p[n/div] &= ~(1 << (n%div));
+			p->p[n/WORDBITS] &= ~(1 << (n%WORDBITS));
 
-		bits /= 2;
-
+		block /= 2;
+		bits  /= 2;
 		if(bits==0)
 			break;
 	}
@@ -129,10 +142,12 @@ static void buddy_free(struct buddy * buddy, const int block, const size_t nb) {
 	// join adjacent smaller blocks to create new larger free blocks.
 	{
 		const int multiple = 1 << (NB_ORDERS-1);
-		const int first    =  block / multiple;
-		const int last     = (block+nb+(multiple-1)) / multiple;
+		const int first    =  _block / multiple;
+		const int last     = (_block+nb+(multiple-1)) / multiple;
 
-		buddy_join_free(buddy, first * multiple, last * multiple -1);
+		#define _MIN(x,y) (x)<(y) ? (x) : (y)
+
+		buddy_join_free(buddy, first * multiple, _MIN(last * multiple -1, (buddy->orders.order[0].bits-1) ));
 	}
 }
 
@@ -224,7 +239,7 @@ void free_pages(void * addr, size_t pages) {
 //	this is the same as free_pages(addr,1)
 void free_page(void * addr) {
 
-	free_page(addr,1);
+	free_pages(addr,1);
 }
 
 int get_free_page_teardown() {
@@ -259,7 +274,7 @@ int get_free_page_setup(
 	_total_memory = pages * PAGE_SIZE;
 
 #if defined(GFP_USERLAND_DEBUG)
-	virtual_base = (size_t)malloc(_total_memory);
+	posix_memalign((void**)&virtual_base, PAGE_SIZE, _total_memory);
 #endif
 
 	_page_offset = virtual_base;
@@ -296,6 +311,7 @@ int get_free_page_setup(
 		free_base += bmp_size;
 
 #if defined(GFP_USERLAND_DEBUG)
+		printf("bitmap for order %d == %d bits, %d words\n", order_idx, order->bits, words);
 		order->p = malloc(bmp_size);
 #endif
 
