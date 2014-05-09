@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * Page frame allocator.
+ * Page frame allocator for ShovelOS.
  *
  *
  *	DEBUGGING:
@@ -10,6 +10,15 @@
  *		Building this file on its own with "-DGFP_USERLAND_DEBUG" will
  *		create a test program to visualise allocations. ( requires GNU getline ).
  *			"gcc -Wall -g -DGFP_USERLAND_DEBUG page.c -lreadline -o test_page"
+ *
+ *			enter: "alloc X" to allocate x number of pages.
+ *			enter: "free X Y" to free Y pages staring from block X.
+ *			enter: "quit" to quit.
+ *				after each alloc / free, page allocation is displayed.
+ *				each 0 in first row represents a free block,
+ *				each 0 in second row represents 2 free blocks,
+ *				each 0 in third row represents 4 free blocks,
+ *					etc etc etc.
  */
 
 #if defined(GFP_USERLAND_DEBUG) && !defined(GFP_USERLAND)
@@ -77,11 +86,6 @@ static void buddy_set_used(struct buddy * buddy, int block, size_t nb) {
 	int bits = nb;
 	int order;
 
-#if defined(GFP_USERLAND_DEBUG)
-	printf("buddy_set_used(%p, %d, %zu)\n",
-		buddy, block, nb);
-#endif
-
 	// mark block as non-free on all orders.
 	for(order=0;order<NB_ORDERS;order++) {
 
@@ -92,19 +96,8 @@ static void buddy_set_used(struct buddy * buddy, int block, size_t nb) {
 		if(!p->bits)
 			break;
 
-		for(n=block;n<(block+bits);n++) {
-#if defined(GFP_USERLAND_DEBUG)
-			printf("order %d: block %d [%zu] == 0x%016zx\n",
-				order, n, n/WORDBITS, p->p[n/WORDBITS]);
-			printf("order %d: block %d [%zu] |= (1<<%zu)\n",
-				order, n, n/WORDBITS, n%WORDBITS);
-#endif
+		for(n=block;n<(block+bits);n++)
 			p->p[n/WORDBITS] |= ((size_t)1 << (n%WORDBITS));
-#if defined(GFP_USERLAND_DEBUG)
-			printf("order %d: block %d [%zu] == 0x%016zx\n",
-				order, n, n/WORDBITS, p->p[n/WORDBITS]);
-#endif
-		}
 
 		block = (block    ) / 2;
 		bits  = (bits  + 1) / 2;
@@ -178,6 +171,34 @@ static void buddy_free(struct buddy * buddy, const int _block, const size_t nb) 
 	}
 }
 
+#define _FF_FREE(w,p)\
+	(((w) & (p)) != (p))
+
+// looking for an clear bit, where should we start looking?
+static int _fast_forward32( size_t word ) {
+
+	if( _FF_FREE(word, 0x0000ffff) ) {
+		if( _FF_FREE(word, 0x000000ff) )
+			return 0;
+		return 8;
+	}
+	if( _FF_FREE(word, 0x00ff0000) )
+		return 16;
+	return 24;
+}
+
+// looking for an clear bit, where should we start looking?
+static int _fast_forward( size_t word ) {
+
+	if(WORDBITS==32)
+		return _fast_forward32(word);
+
+	if( _FF_FREE(word, 0xffffffff) )
+		return _fast_forward32( word );
+
+	return 32 + _fast_forward32( word >> 32 );
+}
+
 // allocate given number of blocks from given buddy.
 static int buddy_alloc(struct buddy * buddy, size_t nb) {
 
@@ -189,35 +210,22 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 		struct order * p =
 			buddy->orders.order + order;
 
-#if defined(GFP_USERLAND_DEBUG)
-	printf("buddy_alloc() order: %d, bits: %zu, words %zu\n",
-		order, p->bits, ((p->bits+(WORDBITS-1))/WORDBITS));
-#endif
-
 		// test 32/64 blocks at a time.
 		for(w=0;w<((p->bits+(WORDBITS-1))/WORDBITS);w++) {
 			size_t word = p->p[w];
 
-#if defined(GFP_USERLAND_DEBUG)
-			printf("buddy_alloc() p->p[%d]==0x%zx\n",
-				w, word);
-#endif
 
 			if(~word) {
 				// at least one free block in the vicinity,
 				//	now do a more fine-grained search.
-				int b;
+				int b   = 0; // WORDBITS;
 				int max = WORDBITS;
 
 				// ignoring bits beyond orders limit.
 				if(((w+1) * WORDBITS) > p->bits )
-					max = p->bits & (WORDBITS-1); // eh!? TODO: FIXME: is this correct !?
+					max = p->bits & (WORDBITS-1);
 
-				#if defined(GFP_USERLAND_DEBUG)
-					printf("maxbits %d\n", max);
-				#endif
-
-				for(b=0;b<max;b++)
+				for(b = _fast_forward(word);b<max;b++)
 					if((word & ((size_t)1<<b))==0) {
 
 						// found a free block.
