@@ -21,15 +21,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-
-#define GFP_KERNEL 1
-#define GFP_ZERO   2
-#define PAGE_SIZE 4096
-
 #else
 #include "page.h"
-#include "memory.h"
 #endif
+
+#include "memory.h"
 
 static size_t _page_offset;
 static size_t _total_memory;
