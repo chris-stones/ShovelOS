@@ -51,10 +51,10 @@ struct orders {
 							// 1 bit  =  64 PAGES   ( 256k )
 							// 1 bit  = 128 PAGES   ( 512k )
 							// 1 bit  = 256 PAGES   (   1M )
-							// 1 bit  = 256 PAGES   (   2M )
-							// 1 bit  = 256 PAGES   (   4M )
-							// 1 bit  = 256 PAGES   (   8M )
-							// 1 bit  = 256 PAGES   (  16M )
+							// 1 bit  = 512 PAGES   (   2M )
+							// 1 bit  =1024 PAGES   (   4M )
+							// 1 bit  =2048 PAGES   (   8M )
+							// 1 bit  =4096 PAGES   (  16M )
 };
 
 struct buddy {
