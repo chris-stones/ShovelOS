@@ -2,6 +2,7 @@
 #pragma once
 
 #include<types.h>
+#include<stdint.h>
 
 // setup get_free_pages.
 //	virtual_base should be PAGE_OFFSET, or a malloc'ed buffer for testing!

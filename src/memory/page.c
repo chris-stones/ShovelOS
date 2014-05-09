@@ -2,10 +2,34 @@
  *
  * Page frame allocator.
  *
+ *
+ *	DEBUGGING:
+ *		Building this file with "-DGFP_USERLAND" will cause the page allocator
+ *		to use a host operating systems 'malloc/free' to allocate virtual memory.
+ *
+ *		Building this file on its own with "-DGFP_USERLAND_DEBUG" will
+ *		create a test program to visualise allocations. ( requires GNU getline ).
+ *			"gcc -Wall -g -DGFP_USERLAND_DEBUG page.c -lreadline -o test_page"
  */
 
+#if defined(GFP_USERLAND_DEBUG) && !defined(GFP_USERLAND)
+#define GFP_USERLAND
+#endif
+
+#if defined(GFP_USERLAND)
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+
+#define GFP_KERNEL 1
+#define GFP_ZERO   2
+#define PAGE_SIZE 4096
+
+#else
 #include "page.h"
 #include "memory.h"
+#endif
 
 static size_t _page_offset;
 static size_t _total_memory;
@@ -57,21 +81,34 @@ static void buddy_set_used(struct buddy * buddy, int block, size_t nb) {
 	int bits = nb;
 	int order;
 
+#if defined(GFP_USERLAND_DEBUG)
+	printf("buddy_set_used(%p, %d, %zu)\n",
+		buddy, block, nb);
+#endif
+
 	// mark block as non-free on all orders.
 	for(order=0;order<NB_ORDERS;order++) {
 
+		int n;
 		struct order * p =
 			buddy->orders.order + order;
 
 		if(!p->bits)
 			break;
 
+		for(n=block;n<(block+bits);n++) {
 #if defined(GFP_USERLAND_DEBUG)
-	printf("buddy_set_used order = %d, n = %d; n<=(%d+%d); \n",order, block, block, bits);
+			printf("order %d: block %d [%zu] == 0x%016zx\n",
+				order, n, n/WORDBITS, p->p[n/WORDBITS]);
+			printf("order %d: block %d [%zu] |= (1<<%zu)\n",
+				order, n, n/WORDBITS, n%WORDBITS);
 #endif
-		int n;
-		for(n=block;n<(block+bits);n++)
-			p->p[n/WORDBITS] |= (1 << (n%WORDBITS));
+			p->p[n/WORDBITS] |= ((size_t)1 << (n%WORDBITS));
+#if defined(GFP_USERLAND_DEBUG)
+			printf("order %d: block %d [%zu] == 0x%016zx\n",
+				order, n, n/WORDBITS, p->p[n/WORDBITS]);
+#endif
+		}
 
 		block = (block    ) / 2;
 		bits  = (bits  + 1) / 2;
@@ -83,10 +120,8 @@ static void buddy_join_free(struct buddy * buddy, int first, int last) {
 
 	int order;
 
-	struct order * p0 =
-		buddy->orders.order + (order+0);
-	struct order * p1 =
-		buddy->orders.order + (order+1);
+	struct order * p0;
+	struct order * p1;
 
 	for(order=0; order<(NB_ORDERS-1); order++) {
 
@@ -98,14 +133,10 @@ static void buddy_join_free(struct buddy * buddy, int first, int last) {
 		if(!p1->bits)
 			break;
 
-#if defined(GFP_USERLAND_DEBUG)
-		printf("buddy_join_free order=%d, first=%d, last=%d\n", order, first, last);
-#endif
-
 		for(b0=first; b0<=last; b0+=2)
-			if((p0->p[b0/WORDBITS] &   (3 << (b0%WORDBITS))) == 0) {
+			if((p0->p[b0/WORDBITS] &   ((size_t)3 << (b0%WORDBITS))) == 0) {
 				const int b1 = b0/2;
-				p1->p[b1/WORDBITS] &= ~(1 << (b1%WORDBITS));
+				p1->p[b1/WORDBITS] &= ~((size_t)1 << (b1%WORDBITS));
 			}
 
 		first = (first+0) /2;
@@ -131,7 +162,7 @@ static void buddy_free(struct buddy * buddy, const int _block, const size_t nb) 
 
 		int n;
 		for(n=block;n<(block+bits);n++)
-			p->p[n/WORDBITS] &= ~(1 << (n%WORDBITS));
+			p->p[n/WORDBITS] &= ~((size_t)1 << (n%WORDBITS));
 
 		block /= 2;
 		bits  /= 2;
@@ -141,7 +172,7 @@ static void buddy_free(struct buddy * buddy, const int _block, const size_t nb) 
 
 	// join adjacent smaller blocks to create new larger free blocks.
 	{
-		const int multiple = 1 << (NB_ORDERS-1);
+		const int multiple = (size_t)1 << (NB_ORDERS-1);
 		const int first    =  _block / multiple;
 		const int last     = (_block+nb+(multiple-1)) / multiple;
 
@@ -162,9 +193,20 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 		struct order * p =
 			buddy->orders.order + order;
 
+#if defined(GFP_USERLAND_DEBUG)
+	printf("buddy_alloc() order: %d, bits: %zu, words %zu\n",
+		order, p->bits, ((p->bits+(WORDBITS-1))/WORDBITS));
+#endif
+
 		// test 32/64 blocks at a time.
-		for(w=0;w<(p->bits+(WORDBITS-1))/WORDBITS;w++) {
+		for(w=0;w<((p->bits+(WORDBITS-1))/WORDBITS);w++) {
 			size_t word = p->p[w];
+
+#if defined(GFP_USERLAND_DEBUG)
+			printf("buddy_alloc() p->p[%d]==0x%zx\n",
+				w, word);
+#endif
+
 			if(~word) {
 				// at least one free block in the vicinity,
 				//	now do a more fine-grained search.
@@ -173,15 +215,17 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 
 				// ignoring bits beyond orders limit.
 				if(((w+1) * WORDBITS) > p->bits )
-					max = p->bits & (WORDBITS-1);
+					max = p->bits & (WORDBITS-1); // eh!? TODO: FIXME: is this correct !?
+
+				#if defined(GFP_USERLAND_DEBUG)
+					printf("maxbits %d\n", max);
+				#endif
 
 				for(b=0;b<max;b++)
-					if((word & (1<<b))==0) {
+					if((word & ((size_t)1<<b))==0) {
 
 						// found a free block.
-						int block = (1 << order) * (w * WORDBITS + b);
-						int bits = nb;
-						int o;
+						int block = ((size_t)1 << order) * (w * WORDBITS + b);
 
 						buddy_set_used(buddy, block, nb);
 
@@ -244,7 +288,7 @@ void free_page(void * addr) {
 
 int get_free_page_teardown() {
 
-#if defined(GFP_USERLAND_DEBUG)
+#if defined(GFP_USERLAND)
 	if(normal_buddy)
 	{
 		int order_idx;
@@ -252,8 +296,8 @@ int get_free_page_teardown() {
 			free( normal_buddy->orders.order[order_idx].p );
 	}
 
-	free(normal_buddy);
-	free((const void*)_page_offset);
+	free((void*)normal_buddy);
+	free((void*)_page_offset);
 #endif
 	return 0;
 }
@@ -273,7 +317,7 @@ int get_free_page_setup(
 
 	_total_memory = pages * PAGE_SIZE;
 
-#if defined(GFP_USERLAND_DEBUG)
+#if defined(GFP_USERLAND)
 	posix_memalign((void**)&virtual_base, PAGE_SIZE, _total_memory);
 #endif
 
@@ -288,7 +332,7 @@ int get_free_page_setup(
 	// allocate buddy!
 	buddy0 = (struct buddy*)free_base;
 	free_base += sizeof(struct buddy);
-#if defined(GFP_USERLAND_DEBUG)
+#if defined(GFP_USERLAND)
 	buddy0 = malloc(sizeof(struct buddy));
 #endif
 
@@ -301,7 +345,7 @@ int get_free_page_setup(
 		struct order * order =
 			buddy0->orders.order + order_idx;
 
-		order->bits = (pages / (1<<order_idx));
+		order->bits = (pages / ((size_t)1<<order_idx));
 
 		words = (order->bits + (WORDBITS-1)) / WORDBITS;
 
@@ -310,8 +354,7 @@ int get_free_page_setup(
 		order->p = (size_t*)free_base;
 		free_base += bmp_size;
 
-#if defined(GFP_USERLAND_DEBUG)
-		printf("bitmap for order %d == %d bits, %d words\n", order_idx, order->bits, words);
+#if defined(GFP_USERLAND)
 		order->p = malloc(bmp_size);
 #endif
 
@@ -324,13 +367,105 @@ int get_free_page_setup(
 		size_t pages_used =
 			(((size_t)free_base + (PAGE_SIZE-1)) - virtual_base) / PAGE_SIZE;
 
-#if !defined(GFP_USERLAND_DEBUG)
 		buddy_set_used(buddy0, 0, pages_used);
-#endif
 	}
 
 	normal_buddy = buddy0;
 
 	return 0;
 }
+
+#if defined(GFP_USERLAND_DEBUG)
+/*
+ * Test the page allocator in from within a Host OS.
+ * build page with 'GFP_USERLAND_DEBUG' defined. -DGFP_USERLAND_DEBUG
+ */
+
+
+#include <stdio.h>
+#include <readline/readline.h>
+
+#define TOTAL_MEMORY (PAGE_SIZE * 64)
+
+void dump_state() {
+
+	int order_index;
+	for ( order_index=0; order_index<NB_ORDERS; order_index++ ) {
+
+		int b,g;
+		struct order * order =
+			normal_buddy->orders.order + order_index;
+
+		if(!order->bits)
+			break;
+
+		for(b = 0; b<order->bits; b++) {
+
+			if( order->p[b / WORDBITS] & ((size_t)1<<(b % WORDBITS)))
+				printf("1");
+			else
+				printf("0");
+
+			for(g=1; g<((size_t)1<<order_index); g++)
+				printf("-");
+		}
+
+		printf("\n");
+	}
+}
+
+size_t page_to_addr( size_t p ) {
+
+	return (p * PAGE_SIZE) + _page_offset;
+}
+
+size_t addr_to_page( size_t a ) {
+
+	return (((size_t)a) - _page_offset) / PAGE_SIZE;
+}
+
+int main() {
+
+	size_t e,i,s;
+	char mode[6]; // alloc, free or quit.
+	char * line;
+
+	e = get_free_page_setup(0, 0, TOTAL_MEMORY);
+	printf("%zu == get_free_page_setup(0, 0, %d);\n", e, TOTAL_MEMORY);
+	printf("WORDBITS %zu, WORDBYTES %zu\n", WORDBITS, WORDBYTES);
+
+	for(;;) {
+
+		dump_state();
+
+		line = readline(">");
+
+		e = sscanf(line, "%s %zu %zu", mode, &i, &s);
+
+		free(line);
+		line = NULL;
+
+		if((e == 1) && (strcmp("quit",mode)==0)) {
+			break;
+		}
+		else if((e==2) && (strcmp("alloc",mode)==0)) {
+
+			e = (size_t)get_free_pages(i, GFP_KERNEL);
+			e = addr_to_page(e);
+			printf("%zu == alloc(%zu)\n", e, i);
+		}
+		else if((e==3) && (strcmp("free",mode)==0)) {
+
+			i = page_to_addr(i);
+			free_pages((void*)i, s);
+		}
+	}
+
+	e = get_free_page_teardown();
+	printf("%zu == get_free_page_teardown();\n", e);
+
+	return 0;
+}
+
+#endif /*** GFP_USERLAND_DEBUG ***/
 
