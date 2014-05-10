@@ -6,6 +6,9 @@ struct mem_cache;
 // initialise the mem_cache.
 int mem_cache_setup();
 
+// for debugging in host OS, don't leak initial structure.
+int mem_cache_teardown();
+
 // create a new memory cache.
 int mem_cache_new(
 		struct mem_cache **mem_cache,	// OUT: new mem_cache.
