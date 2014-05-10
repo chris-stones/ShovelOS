@@ -13,6 +13,10 @@ struct kmalloc_pool {
 // TODO: what is the maximum amount of memory we should deal with here?
 //	Note that any code with funny memory requirements can create its own mem_cache,
 //	and get_free_pages() is available for anything that requires a huge amount of memory.
+// NOTE: do NOT add GFP_ZERO here.
+//	we handle GFP_ZERO in kmalloc. IF the flag is also set in mem_cache,
+//	then memory will needlessly be zeroed multiple times (PERFORMANCE BUG).
+//	We do this to avoid the need for multiple caches of the same size.
 struct kmalloc_pool _pools[] = {
 
 	{ NULL, GFP_KERNEL,  32, 1 },

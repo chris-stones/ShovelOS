@@ -431,7 +431,7 @@ size_t addr_to_page( size_t a ) {
 int main() {
 
 	size_t e,i,s;
-	char mode[6]; // alloc, free or quit.
+	char mode[7] = {0,}; // alloc, free or quit.
 	char * line;
 
 	e = get_free_page_setup(0, 0, TOTAL_MEMORY);
@@ -444,7 +444,7 @@ int main() {
 
 		line = readline(">");
 
-		e = sscanf(line, "%s %zu %zu", mode, &i, &s);
+		e = sscanf(line, "%6s %zu %zu", mode, &i, &s);
 
 		free(line);
 		line = NULL;
