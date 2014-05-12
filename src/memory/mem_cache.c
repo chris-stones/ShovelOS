@@ -11,12 +11,6 @@
  *		for use inside a host OS.
  */
 
-/// DELETE ME
-#if !defined(MC_USERLAND_DEBUG)
-	#define MC_USERLAND_DEBUG
-#endif
-
-
 #if defined(MC_USERLAND_DEBUG) && !defined(MC_USERLAND)
 	#define MC_USERLAND
 #endif
@@ -61,6 +55,9 @@
 		_userland_free_pages(addr, 1)
 
 #else
+
+	#include <stdint.h>
+	#include <types.h>
 
 	#define GET_FREE_PAGES(pages,flags)\
 		get_free_pages(pages,flags)
@@ -410,12 +407,18 @@ static enum far __find_allocated(
 
 		if( __page_contains_address( mem_cache, slab, mem ) )
 		{
-			size_t slab_offset = (size_t)mem - (size_t)(slab->page);
+			size_t slab_offset =
+				((size_t)mem - (size_t)(slab->page)) / mem_cache->chunk_sz;
 
 			*alloc_word = slab_offset / WORDBITS;
 			*alloc_bit  = slab_offset % WORDBITS;
 
-			if( slab->bitmap[*alloc_word] & ((size_t)1<*alloc_bit) )
+#if defined(MC_USERLAND_DEBUG)
+			printf("page %p contains address %p ( chunk offset %zx)\n",
+				slab->page, mem, slab_offset);
+#endif
+
+			if( slab->bitmap[*alloc_word] & ((size_t)1<<*alloc_bit) )
 				return FAR_FOUND; // we have the address, and it is free-able.
 
 			return FAR_DOUBLEFREE; // ADDRESS IS NOT ALLOCATED. CRITICAL CLIENT ERROR!
