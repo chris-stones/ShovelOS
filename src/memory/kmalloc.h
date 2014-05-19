@@ -10,5 +10,5 @@ int kmalloc_setup();
 void * kmalloc(size_t size, int gfp_flags);
 
 // free memory allocated with kmalloc()
-void kfree(const void * mem);
+int kfree(const void * mem);
 

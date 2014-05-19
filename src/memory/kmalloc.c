@@ -68,12 +68,17 @@ void * kmalloc(size_t size, int gfp_flags) {
 	return NULL;
 }
 
-void kfree(const void * mem) {
+int kfree(const void * mem) {
 
 	int i;
+
+	if(!mem)
+		return 0;
+
 	for(i=0;i<SIZEOFARRAY(_pools);i++)
 		if( _pools[i].mem_cache )
 			if( mem_cache_free(_pools[i].mem_cache, mem) == 0 )
-				return;
+				return 0;
+	return -1;
 }
 
