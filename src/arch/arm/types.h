@@ -10,8 +10,8 @@ typedef          int ssize_t;
 
 typedef          ssize_t off_t;
 
-typedef unsigned int blkd_major_t;
-typedef unsigned int blkd_minor_t;
+typedef unsigned int chrd_major_t;
+typedef unsigned int chrd_minor_t;
 
 typedef unsigned           int phy_addr32_t;
 typedef unsigned long long int phy_addr40_t;
