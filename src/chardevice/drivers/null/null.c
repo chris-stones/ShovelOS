@@ -1,5 +1,5 @@
 /***
- * This driver implements the /dev/null block-device driver.
+ * This driver implements the /dev/null character-device driver.
  * All writes to this device will be successful.
  * The data written is discarded.
  * All reads will report EOF.

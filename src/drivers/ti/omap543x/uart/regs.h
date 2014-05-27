@@ -47,9 +47,9 @@ struct OMAP543X {
 		volatile uint32_t * MCR; 			/* RW 32 */
 	};
 	union {
-		volatile uint32_t * LSR; 			/* R 32 */
-		volatile uint32_t * LSR_IRDA; 		/* R 32 */
-		volatile uint32_t * LSR_CIR; 		/* R 32 */
+		volatile uint32_t * LSR; 			/*  R 32 : Line Status Register*/
+		volatile uint32_t * LSR_IRDA; 		/*  R 32 */
+		volatile uint32_t * LSR_CIR; 		/*  R 32 */
 		volatile uint32_t * XON2_ADDR2; 	/* RW 32 */
 	};
 	union {

@@ -1,4 +1,5 @@
 
+#include<types.h>
 #include "chardevice.h"
 
 /*** block-device drivers ***/
