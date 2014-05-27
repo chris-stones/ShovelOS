@@ -42,7 +42,7 @@ typedef enum VMSAv6_coarse_pt_domain {
 } VMSAv6_coarse_pt_domain_enum_t;
 
 
-static inline vmsav6_build_coarse_pt(
+static inline void vmsav6_build_coarse_pt(
 		VMSAv6_coarse_pt_t *                    cpt,
 		phy_addr32_t                            phy_addr,
 		VMSAv6_section_domain_enum_t            domain)

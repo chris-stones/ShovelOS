@@ -217,7 +217,7 @@ typedef enum VSMAv6_supersection_execute_never {
 	
 } VSMAv6_supersection_execute_never_t;
 
-static inline vmsav6_build_supersection32(
+static inline void vmsav6_build_supersection32(
 		VMSAv6_supersection_t *                      ss,
 		phy_addr32_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,
@@ -233,7 +233,7 @@ static inline vmsav6_build_supersection32(
                   execute_never                             ;
 }
 
-static inline vmsav6_build_supersection40(
+static inline void vmsav6_build_supersection40(
 		VMSAv6_supersection_t *                      ss,
 		phy_addr40_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,

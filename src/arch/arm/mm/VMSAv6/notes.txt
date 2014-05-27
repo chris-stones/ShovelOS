@@ -1,0 +1,12 @@
+
+No attempts have been made to support legacy formats.
+
+First level:
+	Supersection (16M)
+	Section (1M)
+	Coarse page table. ( address of second level )
+	
+Second level:
+	Large Page (64k)
+	Extended small page (4k)
+

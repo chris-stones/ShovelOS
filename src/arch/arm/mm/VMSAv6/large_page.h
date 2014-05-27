@@ -212,7 +212,7 @@ typedef enum VSMAv6_largepage_execute_never {
 
 } VSMAv6_largepage_execute_never_t;
 
-static inline vmsav6_build_largepage(
+static inline void vmsav6_build_largepage(
 		VMSAv6_largepage_t *                      s,
 		phy_addr32_t                              phy_addr,
 		VMSAv6_largepage_memtype_enum_t           mem_type,

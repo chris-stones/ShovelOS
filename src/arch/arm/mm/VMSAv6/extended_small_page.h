@@ -212,7 +212,7 @@ typedef enum VSMAv6_extendedsmallpage_execute_never {
 
 } VSMAv6_extendedsmallpage_execute_never_t;
 
-static inline vmsav6_build_extendedsmallpage(
+static inline void vmsav6_build_extendedsmallpage(
 		VMSAv6_extendedsmallpage_t *                      s,
 		phy_addr32_t                                      phy_addr,
 		VMSAv6_extendedsmallpage_memtype_enum_t           mem_type,

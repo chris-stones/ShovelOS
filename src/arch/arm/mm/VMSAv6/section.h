@@ -237,7 +237,7 @@ typedef enum VSMAv6_section_execute_never {
 	
 } VSMAv6_section_execute_never_t;
 
-static inline vmsav6_build_section(
+static inline void vmsav6_build_section(
 		VMSAv6_section_t *                      s,
 		phy_addr32_t                            phy_addr,
 		VMSAv6_section_memtype_enum_t           mem_type,
