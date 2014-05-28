@@ -105,3 +105,23 @@ struct OMAP543X {
 	volatile uint32_t * TX_DMA_THRESHOLD; 	/* RW 32 */
 };
 
+// UART->LSR ( line status register )
+enum line_status {
+	RX_FIFO_STS = (1<<7),	/* RX FIFO ERROR ( parity, framing or break ) */
+	TX_SR_E		= (1<<6),	/* TX HOLD AND SHIFT REGISTERS EMPTY */
+	TX_FIFO_E	= (1<<5),	/* TX HOLD REGISTER IS EMPTY */
+	RX_BI		= (1<<4),	/* RX BREAK CONDITION */
+	RX_FE		= (1<<3),	/* RX FRAMING ERROR */
+	RX_PE		= (1<<2),	/* RX PARITY ERROR */
+	RX_OE		= (1<<1),	/* RX OVERRUN ERROR */
+	RX_FIFO_E	= (1<<0),	/* RX FIFO NOT EMPTY */
+};
+
+// UART SSR ( supplementary status register )
+enum supplementary_status {
+
+	DMA_COUNTER_RST 		= 	(1<<2),
+	RX_CTS_DSR_WAKE_UP_STS 	= 	(1<<1),
+	TX_FIFO_FULL 			=	(1<<0),	/* TX FIFO IS FULL */
+};
+
