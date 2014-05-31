@@ -1,34 +1,42 @@
 
+/*** UART ***
+ * Implements 'file' interface.
+ */
+
+#include <stdint.h>
+#include <memory/memory.h>
+#include <chardevice/chardevice.h>
 #include <uart/uart.h>
-#include <types.h>
+#include <file/file.h>
 
 #include "regs.h"
 
-struct instance {
+struct context {
 
-	// first member of instance MUST be a pointer to the interface.
-	struct uart * interface;
+	// implemented interfaces.
+	CHARD_INTERFACE(struct uart, uart_interface);	// implements UART interface.
+	CHARD_INTERFACE(struct file, file_interface);	// implements FILE interface.
 
-	// private member data:
-	struct OMAP543X * uart;
+	// private data.
+	struct OMAP543X * regs;
 };
 
 /*
  * read up to 'count' bytes from the UART.
  * returns the number of bytes read.
  */
-static ssize_t _read(uart_itf self, void * vbuffer, size_t count) {
+static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
 
-	struct instance * instance =
-		(struct instance *)self;
+	struct context * context =
+		STRUCT_BASE(struct context, file_interface, itf);
 
-	struct OMAP543X * uart =
-		instance->uart;
+	struct OMAP543X * regs =
+			context->regs;
 
 	uint8_t * p = (uint8_t*)vbuffer;
 
-	while( count-- && (*(uart->SSR) & RX_FIFO_E))
-		*p++ = (uint8_t)*(instance->uart->RHR);
+	while( count-- && (*(regs->SSR) & RX_FIFO_E))
+		*p++ = (uint8_t)*(regs->RHR);
 
 	return (size_t)p - (size_t)vbuffer;
 }
@@ -37,44 +45,43 @@ static ssize_t _read(uart_itf self, void * vbuffer, size_t count) {
  * write up to 'count' bytes to the UART.
  * returns the number of bytes written.
  */
-static ssize_t _write(uart_itf self, const void * vbuffer, size_t count) {
+static ssize_t _write(file_itf itf, const void * vbuffer, size_t count) {
 
-	struct instance * instance =
-		(struct instance *)self;
+	struct context * context =
+			STRUCT_BASE(struct context, file_interface, itf);
 
-	struct OMAP543X * uart =
-		instance->uart;
+	struct OMAP543X * regs =
+		context->regs;
 
 	const uint8_t * p = (const uint8_t*)vbuffer;
 
-	while( count-- && ( (*(uart->SSR) & TX_FIFO_FULL) == 0 ) )
-		*(instance->uart->THR) = (uint32_t)*p++;
+	while( count-- && ( (*(regs->SSR) & TX_FIFO_FULL) == 0 ) )
+		*(regs->THR) = (uint32_t)*p++;
 
 	return (size_t)p - (size_t)vbuffer;
 }
 
 // free resources and NULL out the interface.
-static int _close(uart_itf *pself) {
+static int _close(file_itf *itf) {
 
-	if(pself && *pself) {
-		kfree( *pself );
-		*pself = NULL;
+	if(itf && *itf) {
+
+		struct context * context =
+			STRUCT_BASE(struct context, file_interface, *itf);
+
+		kfree( context );
+
+		*itf = NULL;
 		return 0;
 	}
 	return -1;
 }
 
-// for efficiency, allocate the instance and interface in the same block.
-struct context {
-	struct instance instance;	// private instance data.
-	struct uart     interface;	// public interface functions.
-};
-
 // Open and initialise a UART instance.
 //	This is the drivers main entry point.
 //	All other access to the driver will be via the interface
 //	function pointers set in this function.
-int uart_open(uart_itf *itf, uint8_t uart) {
+static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 
 	struct context *ctx;
 
@@ -83,6 +90,8 @@ int uart_open(uart_itf *itf, uint8_t uart) {
 		UART3_PA_BASE_OMAP543X, UART4_PA_BASE_OMAP543X,
 		UART5_PA_BASE_OMAP543X, UART6_PA_BASE_OMAP543X,
 	};
+
+	uint32_t uart = minor - CHRD_UART_MINOR_MIN;
 
 	// OMAP543X has 6 UARTS. ( 0..5 )
 	if(uart >= ( sizeof(_uart_base) / sizeof(_uart_base[0]) ) )
@@ -93,17 +102,36 @@ int uart_open(uart_itf *itf, uint8_t uart) {
 	if(!ctx)
 		return -1;
 
-	ctx->instance.interface =   &ctx->interface;
-	ctx->interface.close = 		&_close;
-	ctx->interface.read = 		&_read;
-	ctx->interface.write = 		&_write;
+	// initialise instance pointers.
+	CHARD_INIT_INTERFACE( ctx, uart_interface );
+	CHARD_INIT_INTERFACE( ctx, file_interface );
 
-	// TODO: Virtual Address.
-	ctx->instance.uart =
-		(struct OMAP543X *)_uart_base[uart];
+	// initialise function pointers.
+	ctx->file_interface->close 		= &_close;
+	ctx->file_interface->read 		= &_read;
+	ctx->file_interface->write 		= &_write;
 
-	*itf = (chrd_itf)ctx;
+	// initialise private data.
+	ctx->regs = (struct OMAP543X *)_uart_base[uart]; // TODO: Virtual Address.
+
+	// return desired interface.
+	*itf = (file_itf)&(ctx->file_interface);
 
 	return 0;
 }
+
+// install drivers.
+static int ___install___() {
+
+	int i;
+	int e = 0;
+	for(i=CHRD_UART_MINOR_MIN; i<=CHRD_UART_MINOR_MAX; i++)
+		if( chrd_install( &_chrd_open, CHRD_UART_MAJOR, i ) != 0 )
+			e = -1;
+
+	return e;
+}
+
+// put pointer to installer function somewhere we can find it.
+chrd_drv_install_func_ptr __omap543x_uart_install_ptr ATTRIBUTE_CHRD_INSTALL_FUNC = &___install___;
 

@@ -1,10 +1,10 @@
 
-#include<types.h>
+
 #include "chardevice.h"
 
 /*** block-device drivers ***/
 static chrdev_open_func_t
-	_chrdev_drivers[CHRD_MAJOR_MAX+1][CHRD_MINOR_MAX+1] = { 0, };
+	_chrdev_drivers[CHRD_MAJOR_MAX+1][CHRD_MINOR_MAX+1];// = {{0,}};
 
 static int _bcheck(chrd_major_t major, chrd_minor_t minor) {
 
@@ -27,10 +27,10 @@ int chrd_install( chrdev_open_func_t open_func, chrd_major_t major, chrd_minor_t
 
 int chrd_uninstall( chrd_major_t major, chrd_minor_t minor ) {
 
-	return chrd_install(major, minor, NULL);
+	return chrd_install(NULL, major, minor);
 }
 
-int chrd_open(chrd_itf *self, chrd_major_t major, chrd_minor_t minor)
+int chrd_open(file_itf *self, chrd_major_t major, chrd_minor_t minor)
 {
 	chrdev_open_func_t open_func;
 	if(_bcheck(major,minor))
