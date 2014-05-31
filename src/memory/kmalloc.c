@@ -1,6 +1,8 @@
 
+
+#include "memory.h"
 #include "mem_cache.h"
-#include <types.h>
+
 
 struct kmalloc_pool {
 

@@ -57,7 +57,6 @@
 #else
 
 	#include <stdint.h>
-	#include <types.h>
 
 	#define GET_FREE_PAGES(pages,flags)\
 		get_free_pages(pages,flags)
@@ -293,8 +292,8 @@ static void * __chunk_address(struct mem_cache * mem_cache, struct slab * slab, 
 //	returns a free virtual address, or NULL on out of memory.
 void * mem_cache_alloc(struct mem_cache *mem_cache) {
 
-	size_t word;
-	size_t bit;
+	size_t word = 0;
+	size_t bit = 0;
 	struct slab * slab;
 	struct slab ** free_slab_ptr =
 		&(mem_cache->partial);
@@ -364,7 +363,7 @@ void * mem_cache_alloc(struct mem_cache *mem_cache) {
 static int __page_contains_address(
 		struct mem_cache * mem_cache,
 		struct slab      * slab,
-		void             * addr)
+		const void       * addr)
 {
 	if( (size_t)addr <  (size_t)slab->page )
 		return 0;
@@ -385,7 +384,7 @@ enum far {
 };
 
 static enum far __find_allocated(
-		void             *    mem,				// IN     - allocated chunk to find.
+		const void       *    mem,				// IN     - allocated chunk to find.
 		struct mem_cache *    mem_cache, 		// IN     - cache to search
 		struct slab      ***  alloc_slab_ptr,	// IN/OUT - pointer to pointer to slab.
 		size_t 			 *    alloc_word, 		// OUT    - word offset into slabs bitmap.
@@ -432,7 +431,7 @@ static enum far __find_allocated(
 
 // Free a memory chunk from a memory cache.
 //	returns non zero on error.
-int mem_cache_free(struct mem_cache *mem_cache, void * mem) {
+int mem_cache_free(struct mem_cache *mem_cache, const void * mem) {
 
 	struct slab ** partial_slab_ptr = &(mem_cache->partial);
 	struct slab **    full_slab_ptr = &(mem_cache->full   );
@@ -527,6 +526,7 @@ int mem_cache_free(struct mem_cache *mem_cache, void * mem) {
 	return 0;
 }
 
+#if defined(MC_USERLAND_DEBUG)
 /*
  * Test the page allocator in from within a Host OS.
  * build page with 'GFP_USERLAND_DEBUG' defined. -DGFP_USERLAND_DEBUG
@@ -592,5 +592,6 @@ int main(int argc, char * argv[]) {
 
 	return 0;
 }
+#endif
 
 

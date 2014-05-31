@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 struct mem_cache;
 
 // initialise the mem_cache.
@@ -23,5 +25,5 @@ void * mem_cache_alloc(struct mem_cache *mem_cache);
 
 // Free a memory chunk from a memory cache.
 //	returns non zero on error.
-int mem_cache_free(struct mem_cache *mem_cache, void * mem);
+int mem_cache_free(struct mem_cache *mem_cache, const void * mem);
 

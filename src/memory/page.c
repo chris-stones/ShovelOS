@@ -36,6 +36,7 @@
 
 #include "memory.h"
 
+static size_t _phy_base;
 static size_t _page_offset;
 static size_t _total_memory;
 
@@ -196,7 +197,14 @@ static int _fast_forward( size_t word ) {
 	if( _FF_FREE(word, 0xffffffff) )
 		return _fast_forward32( word );
 
-	return 32 + _fast_forward32( word >> 32 );
+	// NOTE: this code will be optimised out on 32bit builds,
+	//	BUT on 32bit builds, it generates a warning when we >>= 32.
+	//	shift in two steps to avoid the warning.
+	//	lets hope the compiler optimises it nicely on 64bit builds.
+	word >>= 16;
+	word >>= 16;
+
+	return 32 + _fast_forward32( word );
 }
 
 // allocate given number of blocks from given buddy.
@@ -247,7 +255,7 @@ static struct buddy * normal_buddy = NULL;
 //	returns NULL or virtual address of first block.
 void * get_free_pages(size_t pages, int flags) {
 
-	size_t block;
+	size_t block = (size_t)-1;
 	void *p;
 
 	if( flags & GFP_KERNEL )
@@ -256,7 +264,7 @@ void * get_free_pages(size_t pages, int flags) {
 	if(block == (size_t)-1)
 		return NULL;
 
-	p = (void*)(block * PAGE_SIZE + _page_offset);
+	p = (void*)(block * PAGE_SIZE + _phy_base + _page_offset);
 
 	if( flags & GFP_ZERO )
 		memset(p, 0, pages * PAGE_SIZE);
@@ -277,7 +285,7 @@ void free_pages(void * addr, size_t pages) {
 
 	if(addr) {
 
-		size_t block = ((size_t)addr - _page_offset) / PAGE_SIZE;
+		size_t block = ((size_t)((addr - _page_offset) - _phy_base)) / PAGE_SIZE;
 
 		buddy_free( normal_buddy, (int)block, pages );
 	}
@@ -311,6 +319,7 @@ int get_free_page_teardown() {
 //	NOTE: Assumes the buddy structure will fit in memory... Test that it does?
 int get_free_page_setup(
 	size_t virtual_base,	// virtual base address.
+	size_t phy_base,		// physical memory base.
 	size_t preallocated,	// memory already in use.
 	size_t size)			// amount of ram in bytes.
 {
@@ -323,9 +332,11 @@ int get_free_page_setup(
 
 #if defined(GFP_USERLAND)
 	posix_memalign((void**)&virtual_base, PAGE_SIZE, _total_memory);
+	phy_base = 0;
 #endif
 
-	_page_offset = virtual_base;
+	_phy_base    = phy_base;
+	_page_offset = virtual_base - phy_base;
 
 	// bump up 'preallocated' to next word boundary.
 	if(preallocated & (WORDBYTES-1))

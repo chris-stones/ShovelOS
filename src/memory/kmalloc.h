@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include <types.h>
-
 // setup kmalloc root structure.
 int kmalloc_setup();
 
