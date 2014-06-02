@@ -1,0 +1,9 @@
+
+make LD_FLAGS="-L /usr/lib64/gcc/armv7a-none-eabi/4.8.2/" ARCH="arm" CROSS_COMPILE="armv7a-none-eabi-" -C src/
+
+replace LD_FLAGS="" with the path to your cross-compilers libgcc.a ( compiled for bare-metal )
+replace CROSS_COMPILE="" with your cross compiler prefix.
+
+I Built my cross compiler in gentoo with crossdev. ( crossdev -t armv7a-none-eabi ).
+
+
