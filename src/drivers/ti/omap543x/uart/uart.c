@@ -133,5 +133,5 @@ static int ___install___() {
 }
 
 // put pointer to installer function somewhere we can find it.
-chrd_drv_install_func_ptr __omap543x_uart_install_ptr ATTRIBUTE_CHRD_INSTALL_FUNC = &___install___;
+const chrd_drv_install_func_ptr __omap543x_uart_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
 

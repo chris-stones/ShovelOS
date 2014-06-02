@@ -39,7 +39,8 @@ int chrd_uninstall( chrd_major_t major, chrd_minor_t minor );
 #define CHRD_UART_MINOR_MIN 0
 #define CHRD_UART_MINOR_MAX 5
 
-#define ATTRIBUTE_CHRD_INSTALL_FUNC __attribute__ ((section ("_chrd_install_funcs")))
+//constructor
+#define ATTRIBUTE_REGISTER_DRIVER __attribute__ ((section (".register_drivers")))
 
 typedef int (*chrd_drv_install_func_ptr)();
 #define CHARACTER_DEVICE_DRIVER(name, openfunc, major, minor)\

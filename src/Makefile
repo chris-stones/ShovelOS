@@ -16,13 +16,17 @@ SRC_C = main.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
-LIBS = chardevice/chardevice.a stdlib/stdlib.a drivers/ti/omap543x/omap543x.a memory/memory.a
+LIBS = chardevice/chardevice.a \
+		stdlib/stdlib.a \
+		drivers/ti/omap543x/omap543x.a \
+		memory/memory.a 
 
 kernel.bin : kernel.elf
 	$(OC) -O binary $< $@
 
+#TODO: fix library search path!!!
 kernel.elf : $(OBJ) $(LIBS)
-	$(LD) -s -Map link.map -static -nodefaultlibs -nostdlib --nmagic -o $@ $(OBJ) $(LIBS)
+	$(LD) $(LD_FLAGS) -Map link.map -T link.script -static -nodefaultlibs -nostdlib --nmagic -o $@ -whole-archive $(OBJ) $(LIBS) -no-whole-archive -lgcc
 
 stdlib/stdlib.a:
 	make -C stdlib stdlib.a
@@ -35,6 +39,9 @@ memory/memory.a:
 
 chardevice/chardevice.a:
 	make -C chardevice chardevice.a
+
+arch/arm/arm.a:
+	make -C arch/arm arm.a
 
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
