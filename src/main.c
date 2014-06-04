@@ -28,12 +28,12 @@ typedef void (*register_func)();
 
 static void register_drivers() {
 
-	register_func begin = 	(register_func)&__REGISTER_DRIVERS_BEGIN;
-	register_func end 	= 	(register_func)&__REGISTER_DRIVERS_END;
-	register_func itor;
+	register_func * begin 	= 	(register_func*)&__REGISTER_DRIVERS_BEGIN;
+	register_func * end 	= 	(register_func*)&__REGISTER_DRIVERS_END;
+	register_func * itor;
 
 	for(itor = begin; itor != end; itor++)
-		(*itor)();
+		(**itor)();
 }
 
 void main() {
@@ -63,5 +63,7 @@ void main() {
 
 	// close file.
 	(*serial)->close(&serial);
+
+	for(;;);
 }
 
