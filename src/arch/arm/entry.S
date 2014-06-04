@@ -1,5 +1,5 @@
 
-.equ pre_gpf_stacksize, 128			@ stack size ( before real memory manager takes over )
+.equ pre_gpf_stacksize, 4096			@ stack size ( before real memory manager takes over )
 
 .arm
 .text
