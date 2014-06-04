@@ -16,7 +16,8 @@ SRC_C = main.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
-LIBS = chardevice/chardevice.a \
+LIBS =  arch/$(ARCH)/arch.a \
+		chardevice/chardevice.a \
 		stdlib/stdlib.a \
 		drivers/ti/omap543x/omap543x.a \
 		memory/memory.a 
@@ -40,8 +41,8 @@ memory/memory.a:
 chardevice/chardevice.a:
 	make -C chardevice chardevice.a
 
-arch/arm/arm.a:
-	make -C arch/arm arm.a
+arch/$(ARCH)/arch.a:
+	make -C arch/$(ARCH) arch.a
 
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -50,6 +51,7 @@ arch/arm/arm.a:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
+	make -C arch/$(ARCH) clean
 	make -C drivers/ti/omap543x clean
 	make -C memory clean
 	make -C chardevice clean

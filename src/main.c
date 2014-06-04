@@ -1,7 +1,26 @@
 
-#include<chardevice/chardevice.h>
+#include<config.h>
 
-const char greeting[] = "HELLO WORLD FROM ShovelOS...\n";
+#include<chardevice/chardevice.h>
+#include<memory/memory.h>
+
+void * setup_memory() {
+
+	// TODO: setup and enable MMU
+
+	// TODO: assuming maximum of 2meg has been consumed so far.
+	get_free_page_setup(
+		VIRTUAL_MEMORY_BASE_ADDRESS,
+		PHYSICAL_MEMORY_BASE_ADDRESS,
+		0x200000,
+		PHYSICAL_MEMORY_LENGTH);
+
+	mem_cache_setup();
+
+	kmalloc_setup();
+
+	return get_free_page( GFP_KERNEL );
+}
 
 extern int __REGISTER_DRIVERS_BEGIN;
 extern int __REGISTER_DRIVERS_END;
@@ -17,7 +36,9 @@ static void register_drivers() {
 		(*itor)();
 }
 
-void _start() {
+void main() {
+
+	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\n";
 
 	file_itf serial;
 

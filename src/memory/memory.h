@@ -5,9 +5,9 @@
 #include "page.h"
 #include "mem_cache.h"
 #include "page.h"
+#include "kmalloc.h"
 
 #define PAGE_SIZE         4096
-#define PAGE_OFFSET 0xC0000000
 #define PHY_BASE    0x80200000
 
 #define KMALLOC_SIZE_MIN  32
