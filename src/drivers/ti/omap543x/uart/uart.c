@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <memory/memory.h>
 #include <chardevice/chardevice.h>
-#include <uart/uart.h>
 #include <file/file.h>
 
 #include "regs.h"
@@ -15,7 +14,7 @@
 struct context {
 
 	// implemented interfaces.
-	CHARD_INTERFACE(struct uart, uart_interface);	// implements UART interface.
+//	CHARD_INTERFACE(struct uart, uart_interface);	// implements UART interface.
 	CHARD_INTERFACE(struct file, file_interface);	// implements FILE interface.
 
 	// private data.
@@ -131,7 +130,7 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 		return -1;
 
 	// initialise instance pointers.
-	CHARD_INIT_INTERFACE( ctx, uart_interface );
+//	CHARD_INIT_INTERFACE( ctx, uart_interface );
 	CHARD_INIT_INTERFACE( ctx, file_interface );
 
 	// initialise function pointers.

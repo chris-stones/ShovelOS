@@ -25,7 +25,6 @@ LIBS =  arch/$(ARCH)/arch.a \
 kernel.bin : kernel.elf
 	$(OC) -O binary $< $@
 
-#TODO: fix library search path!!!
 kernel.elf : $(OBJ) $(LIBS)
 	$(LD) $(LD_FLAGS) -Map link.map -T link.script -static -nodefaultlibs -nostdlib --nmagic -o $@ -whole-archive $(OBJ) $(LIBS) -no-whole-archive -lgcc
 
