@@ -11,6 +11,7 @@
 
 #include "regs.h"
 
+
 struct context {
 
 	// implemented interfaces.
@@ -22,43 +23,43 @@ struct context {
 };
 
 /*
- * read up to 'count' bytes from the UART.
- * returns the number of bytes read.
+ * write up to 'count' bytes to the UART.
+ * returns the number of bytes written.
  */
-static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
+static ssize_t __write(struct OMAP543X * regs, const void * vbuffer, size_t count) {
 
-	struct context * context =
-		STRUCT_BASE(struct context, file_interface, itf);
+	const uint8_t * p = (const uint8_t*)vbuffer;
 
-	struct OMAP543X * regs =
-			context->regs;
+	while(count) {
 
-	uint8_t * p = (uint8_t*)vbuffer;
+		if( regs->SSR & TX_FIFO_FULL )
+			break;
 
-	while( count-- && (*(regs->SSR) & RX_FIFO_E))
-		*p++ = (uint8_t)*(regs->RHR);
+		regs->THR = (uint32_t)*p++;
+
+		--count;
+	}
 
 	return (size_t)p - (size_t)vbuffer;
 }
 
-/*
- * write up to 'count' bytes to the UART.
- * returns the number of bytes written.
- */
 static ssize_t _write(file_itf itf, const void * vbuffer, size_t count) {
 
 	struct context * context =
 			STRUCT_BASE(struct context, file_interface, itf);
 
-	struct OMAP543X * regs =
-		context->regs;
+	return __write(context->regs, vbuffer, count);
+}
 
-	const uint8_t * p = (const uint8_t*)vbuffer;
+// Bypass the character device and just dump a debug string to the serial port.
+ssize_t _debug_out( const char * string ) {
 
-	while( count-- && ( (*(regs->SSR) & TX_FIFO_FULL) == 0 ) )
-		*(regs->THR) = (uint32_t)*p++;
+	size_t len = 0;
 
-	return (size_t)p - (size_t)vbuffer;
+	while(string[len] != '\0')
+		len++;
+
+	return __write( (struct OMAP543X *)UART3_PA_BASE_OMAP543X, string, len );
 }
 
 // free resources and NULL out the interface.
@@ -75,6 +76,33 @@ static int _close(file_itf *itf) {
 		return 0;
 	}
 	return -1;
+}
+
+/*
+ * read up to 'count' bytes from the UART.
+ * returns the number of bytes read.
+ */
+static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
+
+	struct context * context =
+		STRUCT_BASE(struct context, file_interface, itf);
+
+	struct OMAP543X * regs =
+			context->regs;
+
+	uint8_t * p = (uint8_t*)vbuffer;
+
+	while(count) {
+
+		if((regs->LSR & RX_FIFO_E)==0)
+			break;
+
+		*p++ = (volatile uint8_t)(regs->RHR);
+
+		--count;
+	}
+
+	return (size_t)p - (size_t)vbuffer;
 }
 
 // Open and initialise a UART instance.

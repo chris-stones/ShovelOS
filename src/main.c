@@ -4,7 +4,11 @@
 #include<chardevice/chardevice.h>
 #include<memory/memory.h>
 
+ssize_t _debug_out( const char * string );
+
 void * setup_memory() {
+
+//	_debug_out("HELLO WORLD\n");
 
 	// TODO: setup and enable MMU
 
@@ -38,7 +42,7 @@ static void register_drivers() {
 
 void main() {
 
-	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\n";
+	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
 
 	file_itf serial;
 
@@ -52,13 +56,10 @@ void main() {
 
 	// echo inputs back to sender
 	for(;;) {
-		uint8_t c;
-		if( (*serial)->read(serial, &c, 1) == 1 ) {
-
-			(*serial)->write(serial, &c, 1);
-			if(c == '\n')
-				break;
-		}
+		uint8_t c[4];
+		size_t s;
+		if( ( s = (*serial)->read(serial, &c, 4) ) > 0 )
+			(*serial)->write(serial, &c, s);
 	}
 
 	// close file.
