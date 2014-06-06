@@ -1,5 +1,8 @@
 /***************************************************************************
- * Build VSMAv6 super sections.
+ * Build VMSAv6 super sections.
+ * See ARM Architecture Reference Manual
+ * 	ARMv7-A and ARMv7-R edition ( Issue C.b )
+ * 	Section B3.5
  ***************************************************************************/
 #pragma once
 
@@ -18,17 +21,16 @@ typedef unsigned int VMSAv7_supersection_t;
 	( ( base40 & 0x0f00000000ULL ) >> 12 ) | \
 	( ( base40 & 0xf000000000ULL ) >> 31 )
 
-#define VMSAv7_SUPERSECTION_XN(xn1)      ( xn1  <<  4 ) /* EXECUTE NEVER              */
-#define VMSAv7_SUPERSECTION_S(s1)        ( s1   << 16 ) /* SHARED                     */
-#define VMSAv7_SUPERSECTION_nG(ng1)      ( ng1  << 17 ) /* NOT GLOBAL                 */
-#define VMSAv7_SUPERSECTION_AP(ap2)      ( ap2  << 10 ) /* access permission          */
-#define VMSAv7_SUPERSECTION_APX(apx1)    ( apx1 << 15 ) /* access permission extended */
-#define VMSAv7_SUPERSECTION_B(b1)        ( b1   <<  2 ) /* BUFFER        	          */
-#define VMSAv7_SUPERSECTION_C(c1)        ( c1   <<  3 ) /* CACHE              	      */
-#define VMSAv7_SUPERSECTION_TEX(tex3)    ( tex3 << 12 ) /* Type Extension Field       */
-#define VMSAv7_SUPERSECTION_NS(ns1)    	 ( ns1  << 19 ) /* Non-secure                 */
-#define VMSAv7_SUPERSECTION_PXN(pxn1)	 ( pxn1 <<  0 ) /* Privileged execute never   */
-
+#define VMSAv7_SUPERSECTION_XN(xn1)      ( xn1  <<  4 ) // EXECUTE NEVER
+#define VMSAv7_SUPERSECTION_S(s1)        ( s1   << 16 ) // SHARED
+#define VMSAv7_SUPERSECTION_nG(ng1)      ( ng1  << 17 ) // NOT GLOBAL
+#define VMSAv7_SUPERSECTION_AP(ap2)      ( ap2  << 10 ) // access permission
+#define VMSAv7_SUPERSECTION_APX(apx1)    ( apx1 << 15 ) // access permission extended
+#define VMSAv7_SUPERSECTION_B(b1)        ( b1   <<  2 ) // BUFFER
+#define VMSAv7_SUPERSECTION_C(c1)        ( c1   <<  3 ) // CACHE
+#define VMSAv7_SUPERSECTION_TEX(tex3)    ( tex3 << 12 ) // Type Extension Field
+#define VMSAv7_SUPERSECTION_NS(ns1)    	 ( ns1  << 19 ) // Non-secure ( when accessed from secure state.
+#define VMSAv7_SUPERSECTION_PXN(pxn1)	 ( pxn1 <<  0 ) // Privileged execute never
 
 /***************************************************************************
  *             ENUMERATED SUPER SECTION ACCESS PERMISSIONS
@@ -201,7 +203,7 @@ typedef enum VMSAv7_supersection_memtype {
 /***************************************************************************
  *             ENUMERATED SUPER SECTION GLOBAL FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_supersection_global {
+typedef enum VMSAv6_supersection_global {
 
 	VMSAv7_SUPERSECTION_GLOBAL    = VMSAv7_SUPERSECTION_nG(0),
 	VMSAv7_SUPERSECTION_NOTGLOBAL = VMSAv7_SUPERSECTION_nG(1),
@@ -218,35 +220,64 @@ typedef enum VMSAv7_supersection_execute_never {
 
 } VMSAv7_supersection_execute_never_t;
 
+/***************************************************************************
+ *         ENUMERATED SUPER SECTION PRIVILEGED EXECUTE NEVER FLAGS
+ ***************************************************************************/
+typedef enum VMSAv7_supersection_privileged_execute_never {
+
+	VMSAv7_SUPERSECTION_PRIVILEGED_EXECUTE      = VMSAv7_SUPERSECTION_PXN(0),
+	VMSAv7_SUPERSECTION_PRIVILEGED_EXECUTENEVER = VMSAv7_SUPERSECTION_PXN(1),
+
+} VMSAv7_supersection_privileged_execute_never_t;
+
+/***************************************************************************
+ *         ENUMERATED SUPER SECTION PRIVILEGED EXECUTE NEVER FLAGS
+ ***************************************************************************/
+typedef enum VMSAv7_supersection_non_secure {
+
+	VMSAv7_SUPERSECTION_SECURE      = VMSAv7_SUPERSECTION_NS(0),
+	VMSAv7_SUPERSECTION_NON_SECURE  = VMSAv7_SUPERSECTION_NS(1),
+
+} VMSAv7_supersection_non_secure_t;
+
+
 static inline void vmsav7_build_supersection32(
-		VMSAv7_supersection_t *                      ss,
-		phy_addr32_t                                 phy_addr,
-		VMSAv7_supersection_memtype_enum_t           mem_type,
-		VMSAv7_supersection_access_permission_enum_t access,
-		VMSAv7_supersection_global_t                 global,
-		VMSAv7_supersection_execute_never_t          execute_never)
+		VMSAv7_supersection_t *                      	ss,
+		phy_addr32_t                                 	phy_addr,
+		VMSAv7_supersection_memtype_enum_t           	mem_type,
+		VMSAv7_supersection_access_permission_enum_t 	access,
+		VMSAv7_supersection_global_t                 	global,
+		VMSAv7_supersection_execute_never_t          	execute_never,
+		VMSAv7_supersection_privileged_execute_never_t	privileged_execute_never,
+		VMSAv7_supersection_non_secure_t				non_secure)
 {
-	*ss = VMSAv7_SUPERSECTION_BITS                      |
+	*ss = VMSAv7_SUPERSECTION_BITS                  |
 		  VMSAv7_SUPERSECTION_BASEADDR_32(phy_addr) |
 		  mem_type                                  |
 		  access                                    |
 		  global                                    |
-                  execute_never                             ;
+          execute_never                             |
+          privileged_execute_never					|
+          non_secure								;
 }
 
 static inline void vmsav7_build_supersection40(
-		VMSAv7_supersection_t *                      ss,
-		phy_addr40_t                                 phy_addr,
-		VMSAv7_supersection_memtype_enum_t           mem_type,
-		VMSAv7_supersection_access_permission_enum_t access,
-		VMSAv7_supersection_global_t                 global,
-		VMSAv7_supersection_execute_never_t          execute_never)
+		VMSAv7_supersection_t *                      	ss,
+		phy_addr40_t                                 	phy_addr,
+		VMSAv7_supersection_memtype_enum_t           	mem_type,
+		VMSAv7_supersection_access_permission_enum_t 	access,
+		VMSAv7_supersection_global_t                 	global,
+		VMSAv7_supersection_execute_never_t          	execute_never,
+		VMSAv7_supersection_privileged_execute_never_t	privileged_execute_never,
+		VMSAv7_supersection_non_secure_t				non_secure)
 {
-	*ss = VMSAv7_SUPERSECTION_BITS                      |
+	*ss = VMSAv7_SUPERSECTION_BITS                  |
 		  VMSAv7_SUPERSECTION_BASEADDR_40(phy_addr) |
 		  mem_type                                  |
 		  access                                    |
 		  global                                    |
-                  execute_never                             ;
+          execute_never                             |
+          privileged_execute_never					|
+          non_secure								;
 }
 

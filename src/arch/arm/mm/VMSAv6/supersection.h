@@ -1,5 +1,5 @@
 /***************************************************************************
- * Build VSMAv6 super sections.
+ * Build VMSAv6 super sections.
  * See ARM Architecture reference manual, Issue 'I' - July 2005 Chapter B4.
  ***************************************************************************/
 #pragma once
@@ -200,30 +200,30 @@ typedef enum VMSAv6_supersection_memtype {
 /***************************************************************************
  *             ENUMERATED SUPER SECTION GLOBAL FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_supersection_global {
+typedef enum VMSAv6_supersection_global {
 	
-	VSMAv6_SUPERSECTION_GLOBAL    = VMSAv6_SUPERSECTION_nG(0),
-	VSMAv6_SUPERSECTION_NOTGLOBAL = VMSAv6_SUPERSECTION_nG(1),
+	VMSAv6_SUPERSECTION_GLOBAL    = VMSAv6_SUPERSECTION_nG(0),
+	VMSAv6_SUPERSECTION_NOTGLOBAL = VMSAv6_SUPERSECTION_nG(1),
 	
-} VSMAv6_supersection_global_t;
+} VMSAv6_supersection_global_t;
 
 /***************************************************************************
  *             ENUMERATED SUPER SECTION EXECUTE NEVER FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_supersection_execute_never {
+typedef enum VMSAv6_supersection_execute_never {
 	
-	VSMAv6_SUPERSECTION_EXECUTE      = VMSAv6_SUPERSECTION_XN(0),
-	VSMAv6_SUPERSECTION_EXECUTENEVER = VMSAv6_SUPERSECTION_XN(1),
+	VMSAv6_SUPERSECTION_EXECUTE      = VMSAv6_SUPERSECTION_XN(0),
+	VMSAv6_SUPERSECTION_EXECUTENEVER = VMSAv6_SUPERSECTION_XN(1),
 	
-} VSMAv6_supersection_execute_never_t;
+} VMSAv6_supersection_execute_never_t;
 
 static inline void vmsav6_build_supersection32(
 		VMSAv6_supersection_t *                      ss,
 		phy_addr32_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,
 		VMSAv6_supersection_access_permission_enum_t access,
-		VSMAv6_supersection_global_t                 global,
-		VSMAv6_supersection_execute_never_t          execute_never)
+		VMSAv6_supersection_global_t                 global,
+		VMSAv6_supersection_execute_never_t          execute_never)
 {
 	*ss = VMSAv6_SUPERSECTION_BITS                      |
 		  VMSAv6_SUPERSECTION_BASEADDR_32(phy_addr) |
@@ -238,8 +238,8 @@ static inline void vmsav6_build_supersection40(
 		phy_addr40_t                                 phy_addr,
 		VMSAv6_supersection_memtype_enum_t           mem_type,
 		VMSAv6_supersection_access_permission_enum_t access,
-		VSMAv6_supersection_global_t                 global,
-		VSMAv6_supersection_execute_never_t          execute_never)
+		VMSAv6_supersection_global_t                 global,
+		VMSAv6_supersection_execute_never_t          execute_never)
 {
 	*ss = VMSAv6_SUPERSECTION_BITS                      |
 		  VMSAv6_SUPERSECTION_BASEADDR_40(phy_addr) |

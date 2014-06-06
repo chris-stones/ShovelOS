@@ -1,5 +1,5 @@
 /***************************************************************************
- * Build VSMAv6 coarse page tables.
+ * Build VMSAv6 coarse page tables.
  * See ARM Architecture reference manual, Issue 'I' - July 2005 Chapter B4.
  ***************************************************************************/
 #pragma once

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Build VSMAv6 extended small pages.
+ * Build VMSAv6 extended small pages.
  * See ARM Architecture reference manual, Issue 'I' - July 2005 Chapter B4.
  ***************************************************************************/
 #pragma once
@@ -195,30 +195,30 @@ typedef enum VMSAv6_extendedsmallpage_memtype {
 /***************************************************************************
  *             ENUMERATED EXTENDEDSMALLPAGE GLOBAL FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_extendedsmallpage_global {
+typedef enum VMSAv6_extendedsmallpage_global {
 
-	VSMAv6_EXTENDEDSMALLPAGE_GLOBAL    = VMSAv6_EXTENDEDSMALLPAGE_nG(0),
-	VSMAv6_EXTENDEDSMALLPAGE_NOTGLOBAL = VMSAv6_EXTENDEDSMALLPAGE_nG(1),
+	VMSAv6_EXTENDEDSMALLPAGE_GLOBAL    = VMSAv6_EXTENDEDSMALLPAGE_nG(0),
+	VMSAv6_EXTENDEDSMALLPAGE_NOTGLOBAL = VMSAv6_EXTENDEDSMALLPAGE_nG(1),
 
-} VSMAv6_extendedsmallpage_global_t;
+} VMSAv6_extendedsmallpage_global_t;
 
 /***************************************************************************
  *             ENUMERATED EXTENDEDSMALLPAGE EXECUTE NEVER FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_extendedsmallpage_execute_never {
+typedef enum VMSAv6_extendedsmallpage_execute_never {
 
-	VSMAv6_EXTENDEDSMALLPAGE_EXECUTE      = VMSAv6_EXTENDEDSMALLPAGE_XN(0),
-	VSMAv6_EXTENDEDSMALLPAGE_EXECUTENEVER = VMSAv6_EXTENDEDSMALLPAGE_XN(1),
+	VMSAv6_EXTENDEDSMALLPAGE_EXECUTE      = VMSAv6_EXTENDEDSMALLPAGE_XN(0),
+	VMSAv6_EXTENDEDSMALLPAGE_EXECUTENEVER = VMSAv6_EXTENDEDSMALLPAGE_XN(1),
 
-} VSMAv6_extendedsmallpage_execute_never_t;
+} VMSAv6_extendedsmallpage_execute_never_t;
 
 static inline void vmsav6_build_extendedsmallpage(
 		VMSAv6_extendedsmallpage_t *                      s,
 		phy_addr32_t                                      phy_addr,
 		VMSAv6_extendedsmallpage_memtype_enum_t           mem_type,
 		VMSAv6_extendedsmallpage_access_permission_enum_t access,
-		VSMAv6_extendedsmallpage_global_t                 global,
-		VSMAv6_extendedsmallpage_execute_never_t          execute_never)
+		VMSAv6_extendedsmallpage_global_t                 global,
+		VMSAv6_extendedsmallpage_execute_never_t          execute_never)
 {
 	*s  = VMSAv6_EXTENDEDSMALLPAGE_BITS                  |
 	      VMSAv6_EXTENDEDSMALLPAGE_BASEADDR(phy_addr)    |

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Build VSMAv6 large pages.
+ * Build VMSAv6 large pages.
  * See ARM Architecture reference manual, Issue 'I' - July 2005 Chapter B4.
  ***************************************************************************/
 #pragma once
@@ -195,30 +195,30 @@ typedef enum VMSAv6_largepage_memtype {
 /***************************************************************************
  *             ENUMERATED LARGEPAGE GLOBAL FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_largepage_global {
+typedef enum VMSAv6_largepage_global {
 
-	VSMAv6_LARGEPAGE_GLOBAL    = VMSAv6_LARGEPAGE_nG(0),
-	VSMAv6_LARGEPAGE_NOTGLOBAL = VMSAv6_LARGEPAGE_nG(1),
+	VMSAv6_LARGEPAGE_GLOBAL    = VMSAv6_LARGEPAGE_nG(0),
+	VMSAv6_LARGEPAGE_NOTGLOBAL = VMSAv6_LARGEPAGE_nG(1),
 
-} VSMAv6_largepage_global_t;
+} VMSAv6_largepage_global_t;
 
 /***************************************************************************
  *             ENUMERATED LARGEPAGE EXECUTE NEVER FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_largepage_execute_never {
+typedef enum VMSAv6_largepage_execute_never {
 
-	VSMAv6_LARGEPAGE_EXECUTE      = VMSAv6_LARGEPAGE_XN(0),
-	VSMAv6_LARGEPAGE_EXECUTENEVER = VMSAv6_LARGEPAGE_XN(1),
+	VMSAv6_LARGEPAGE_EXECUTE      = VMSAv6_LARGEPAGE_XN(0),
+	VMSAv6_LARGEPAGE_EXECUTENEVER = VMSAv6_LARGEPAGE_XN(1),
 
-} VSMAv6_largepage_execute_never_t;
+} VMSAv6_largepage_execute_never_t;
 
 static inline void vmsav6_build_largepage(
 		VMSAv6_largepage_t *                      s,
 		phy_addr32_t                              phy_addr,
 		VMSAv6_largepage_memtype_enum_t           mem_type,
 		VMSAv6_largepage_access_permission_enum_t access,
-		VSMAv6_largepage_global_t                 global,
-		VSMAv6_largepage_execute_never_t          execute_never)
+		VMSAv6_largepage_global_t                 global,
+		VMSAv6_largepage_execute_never_t          execute_never)
 {
 	*s  = VMSAv6_LARGEPAGE_BITS                  |
 	      VMSAv6_LARGEPAGE_BASEADDR(phy_addr)    |

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Build VSMAv6 sections.
+ * Build VMSAv6 sections.
  * See ARM Architecture reference manual, Issue 'I' - July 2005 Chapter B4.
  ***************************************************************************/
 #pragma once
@@ -220,22 +220,22 @@ typedef enum VMSAv6_section_memtype {
 /***************************************************************************
  *             ENUMERATED SECTION GLOBAL FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_section_global {
+typedef enum VMSAv6_section_global {
 	
-	VSMAv6_SECTION_GLOBAL    = VMSAv6_SECTION_nG(0),
-	VSMAv6_SECTION_NOTGLOBAL = VMSAv6_SECTION_nG(1),
+	VMSAv6_SECTION_GLOBAL    = VMSAv6_SECTION_nG(0),
+	VMSAv6_SECTION_NOTGLOBAL = VMSAv6_SECTION_nG(1),
 	
-} VSMAv6_section_global_t;
+} VMSAv6_section_global_t;
 
 /***************************************************************************
  *             ENUMERATED SECTION EXECUTE NEVER FLAGS
  ***************************************************************************/
-typedef enum VSMAv6_section_execute_never {
+typedef enum VMSAv6_section_execute_never {
 	
-	VSMAv6_SECTION_EXECUTE      = VMSAv6_SECTION_XN(0),
-	VSMAv6_SECTION_EXECUTENEVER = VMSAv6_SECTION_XN(1),
+	VMSAv6_SECTION_EXECUTE      = VMSAv6_SECTION_XN(0),
+	VMSAv6_SECTION_EXECUTENEVER = VMSAv6_SECTION_XN(1),
 	
-} VSMAv6_section_execute_never_t;
+} VMSAv6_section_execute_never_t;
 
 static inline void vmsav6_build_section(
 		VMSAv6_section_t *                      s,
@@ -243,8 +243,8 @@ static inline void vmsav6_build_section(
 		VMSAv6_section_memtype_enum_t           mem_type,
 		VMSAv6_section_domain_enum_t            domain,
 		VMSAv6_section_access_permission_enum_t access,
-		VSMAv6_section_global_t                 global,
-		VSMAv6_section_execute_never_t          execute_never)
+		VMSAv6_section_global_t                 global,
+		VMSAv6_section_execute_never_t          execute_never)
 {
 	*s  = VMSAv6_SECTION_BITS                    |
 	      VMSAv6_SECTION_BASEADDR(phy_addr)      |
