@@ -13,7 +13,7 @@ typedef unsigned int VMSAv7_pagetable_t;
 
 /* convert a 32bit physical address into the base address components of a pagetable. */
 #define VMSAv7_PAGETABLE_BASEADDR(base32) \
-	( base32 & 0xfffffc00 )
+	( ((size_t)base32) & 0xfffffc00 )
 
 #define VMSAv7_PAGETABLE_DOMAIN(dom4)	( dom4 <<  5 ) /* DOMAIN                     */
 #define VMSAv7_PAGETABLE_NS(ns1) 		( ns1  <<  3 ) /* NON SECURE                 */
@@ -64,15 +64,15 @@ typedef enum VMSAv7_pagetable_non_secure {
 
 static inline void vmsav7_build_pagetable(
 		VMSAv7_pagetable_t *                    	pt,
-		phy_addr32_t                            	phy_addr,
+		VMSAv7_smallpage_t *                        phy_addr,
 		VMSAv7_pagetable_domain_enum_t          	domain,
 		VMSAv7_pagetable_privileged_execute_never_t privileged_execute_never,
 		VMSAv7_pagetable_non_secure_t				non_secure)
 {
-	*pt = VMSAv7_PAGETABLE_BITS             	|
-		  VMSAv6_COARSE_PT_BASEADDR(phy_addr)	|
-		  domain                            	|
-		  privileged_execute_never				|
-		  non_secure							;
+	*pt = 	VMSAv7_PAGETABLE_BITS             	|
+			VMSAv7_PAGETABLE_BASEADDR(phy_addr)	|
+			domain                            	|
+			privileged_execute_never			|
+			non_secure							;
 }
 
