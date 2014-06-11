@@ -4,25 +4,37 @@
 #include<chardevice/chardevice.h>
 #include<memory/memory.h>
 
-ssize_t _debug_out( const char * string );
+// TODO: put me somwhere else!
+//ssize_t _debug_out( const char * string );
 
 void * setup_memory() {
 
-//	_debug_out("HELLO WORLD\n");
-
-	// TODO: setup and enable MMU
-
-	// TODO: assuming maximum of 2meg has been consumed so far.
-	get_free_page_setup(
-		VIRTUAL_MEMORY_BASE_ADDRESS,
+	init_page_tables(
 		PHYSICAL_MEMORY_BASE_ADDRESS,
-		0x200000,
+		VIRTUAL_MEMORY_BASE_ADDRESS,
 		PHYSICAL_MEMORY_LENGTH);
+
+	// TODO: enable MMU
+
+	{
+		/************************************************************
+		 * retire get_boot_pages() and setup main memory management.
+		 */
+		size_t boot_pages =
+			end_boot_pages();
+
+		get_free_page_setup(
+			VIRTUAL_MEMORY_BASE_ADDRESS,
+			PHYSICAL_MEMORY_BASE_ADDRESS,
+			PAGE_SIZE * boot_pages,
+			PHYSICAL_MEMORY_LENGTH);
+	}
 
 	mem_cache_setup();
 
 	kmalloc_setup();
 
+	// return a bigger stack! we can retire the tiny boot-stack.
 	return get_free_page( GFP_KERNEL );
 }
 

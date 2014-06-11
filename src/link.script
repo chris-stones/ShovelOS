@@ -3,6 +3,8 @@ ENTRY(_start)
 SECTIONS
 {
 	. = 0x80200000;
+	
+	PROVIDE_HIDDEN (__KERNEL_BEGIN = .);
 
 	.text : AT(0x80200000)
 	{
@@ -32,6 +34,7 @@ SECTIONS
 		*(.bss)
 	}
 	
+	PROVIDE_HIDDEN (__KERNEL_END = .);
 }
 
 

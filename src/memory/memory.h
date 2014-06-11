@@ -6,6 +6,7 @@
 #include "mem_cache.h"
 #include "page.h"
 #include "kmalloc.h"
+#include "boot_pages.h"
 
 #define PAGE_SIZE         4096
 #define PHY_BASE    0x80200000
@@ -24,4 +25,7 @@ enum gfp_flags {
 
 void *kmalloc(size_t size, int flags );
 int kfree(const void * p);
+
+// implemented in /src/arch/$ARCH
+int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_length);
 

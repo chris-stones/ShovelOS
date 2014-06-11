@@ -1,12 +1,15 @@
 # DONT delete the .o files ( THIN archive requires them! )
-.SECONDARY:
+#.SECONDARY:
 
 SRC_C = uart/uart.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
-%.a : $(OBJ)
-	$(AR) csrT $@ $(OBJ) $(LIBS) 
+#%.a : $(OBJ)
+#	$(AR) csrT $@ $(OBJ) $(LIBS)
+
+omap543x.o : $(OBJ)
+	$(LD) -r -o $@ $(OBJ) 
 	
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<

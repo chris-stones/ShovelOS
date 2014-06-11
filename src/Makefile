@@ -16,32 +16,33 @@ SRC_C = main.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
-LIBS =  arch/$(ARCH)/arch.a \
-		chardevice/chardevice.a \
-		stdlib/stdlib.a \
-		drivers/ti/omap543x/omap543x.a \
-		memory/memory.a 
+LIBS =  arch/$(ARCH)/arch.o \
+		chardevice/chardevice.o \
+		stdlib/stdlib.o \
+		drivers/ti/omap543x/omap543x.o \
+		memory/memory.o 
 
 kernel.bin : kernel.elf
 	$(OC) -O binary $< $@
 
 kernel.elf : $(OBJ) $(LIBS)
-	$(LD) $(LD_FLAGS) -Map link.map -T link.script -static -nodefaultlibs -nostdlib --nmagic -o $@ -whole-archive $(OBJ) $(LIBS) -no-whole-archive -lgcc
+	$(LD) $(LD_FLAGS) -Map link.map -T link.script -static -nodefaultlibs -nostdlib --nmagic -o $@ $(OBJ) $(LIBS) -lgcc
+#	$(LD) $(LD_FLAGS) -Map link.map -T link.script -static -nodefaultlibs -nostdlib --nmagic -o $@ -whole-archive $(OBJ) $(LIBS) -no-whole-archive -lgcc
 
-stdlib/stdlib.a:
-	make -C stdlib stdlib.a
+stdlib/stdlib.o:
+	make -C stdlib stdlib.o
 
-drivers/ti/omap543x/omap543x.a:
-	make -C drivers/ti/omap543x omap543x.a
+drivers/ti/omap543x/omap543x.o:
+	make -C drivers/ti/omap543x omap543x.o
 
-memory/memory.a:
-	make -C memory memory.a
+memory/memory.o:
+	make -C memory memory.o
 
-chardevice/chardevice.a:
-	make -C chardevice chardevice.a
+chardevice/chardevice.o:
+	make -C chardevice chardevice.o
 
-arch/$(ARCH)/arch.a:
-	make -C arch/$(ARCH) arch.a
+arch/$(ARCH)/arch.o:
+	make -C arch/$(ARCH) arch.o
 
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<

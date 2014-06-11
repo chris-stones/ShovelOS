@@ -6,6 +6,8 @@
  ***************************************************************************/
 #pragma once
 
+#include "small_page.h"
+
 typedef unsigned int VMSAv7_pagetable_t;
 
 /* bit 1 is set on page tables. */

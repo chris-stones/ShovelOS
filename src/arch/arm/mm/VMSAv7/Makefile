@@ -2,20 +2,20 @@
 # DONT delete the .o files ( THIN archive requires them! )
 #.SECONDARY:
 
-SRC_C = chardevice.c
+SRC_C = init_page_tables.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
 #%.a : $(OBJ)
 #	$(AR) csrT $@ $(OBJ) $(LIBS) 
-
-%.o : ($OBJ)
-	$(LD) -r -o $@ ($OBJ)
 	
+vmsa.o : $(OBJ)
+	$(LD) -r -o $@ $(OBJ)
+
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
-        
-%.s.o : %.s
+
+%.S.o : %.S
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:

@@ -1,13 +1,18 @@
 
 # DONT delete the .o files ( THIN archive requires them! )
-.SECONDARY:
+#.SECONDARY:
 
 SRC_S = entry.S
 
+LIBS =  mm/$(VMSA)/vmsa.o
+
 OBJ = $(SRC_S:.S=.S.o)
 
-%.a : $(OBJ)
-	$(AR) csrT $@ $(OBJ) $(LIBS) 
+arch.o : $(OBJ) $(LIBS)
+	$(LD) -r -o $@ $(OBJ) $(LIBS)
+
+mm/$(VMSA)/vmsa.o :
+	make -C mm/$(VMSA) vmsa.o  
 	
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<

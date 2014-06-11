@@ -1,12 +1,15 @@
 # DONT delete the .o files ( THIN archive requires them! )
-.SECONDARY:
+#.SECONDARY:
 
 SRC_C = stdlib.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
-%.a : $(OBJ)
-	$(AR) csrT $@ $(OBJ) $(LIBS) 
+#%.a : $(OBJ)
+#	$(AR) csrT $@ $(OBJ) $(LIBS)
+
+stdlib.o : $(OBJ)
+	$(LD) -r -o $@ $(OBJ) 
 	
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
