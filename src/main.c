@@ -3,18 +3,31 @@
 
 #include<chardevice/chardevice.h>
 #include<memory/memory.h>
+#include<arch.h>
 
-// TODO: put me somwhere else!
-//ssize_t _debug_out( const char * string );
+extern int __BSS_BEGIN;
+extern int __BSS_END;
 
 void * setup_memory() {
+
+	// clear BSS section.
+	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
+
+	_debug_out("Initialise page tables...");
+	_debug_out("PANICK!\r\n");
 
 	init_page_tables(
 		PHYSICAL_MEMORY_BASE_ADDRESS,
 		VIRTUAL_MEMORY_BASE_ADDRESS,
 		PHYSICAL_MEMORY_LENGTH);
 
-	// TODO: enable MMU
+	_debug_out("Done\r\n");
+
+	_debug_out("Enabling MMU...");
+
+	enable_mmu();
+
+	_debug_out("Done\r\n");
 
 	{
 		/************************************************************

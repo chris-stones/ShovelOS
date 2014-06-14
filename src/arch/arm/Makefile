@@ -3,10 +3,11 @@
 #.SECONDARY:
 
 SRC_S = entry.S
+SRC_C = arm.c
 
 LIBS =  mm/$(VMSA)/vmsa.o
 
-OBJ = $(SRC_S:.S=.S.o)
+OBJ = $(SRC_S:.S=.S.o) $(SRC_C:.c=.c.o)
 
 arch.o : $(OBJ) $(LIBS)
 	$(LD) -r -o $@ $(OBJ) $(LIBS)
@@ -21,6 +22,7 @@ mm/$(VMSA)/vmsa.o :
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
+	make -C mm/$(VMSA) clean
 	rm -f *.o
 	rm -f *.a
 	rm -f $(OBJ)

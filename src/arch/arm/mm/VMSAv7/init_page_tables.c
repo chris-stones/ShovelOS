@@ -4,18 +4,16 @@
  *
  */
 
-#include<stdint.h>
-#include<memory/memory.h>
+#include <stdint.h>
+#include <memory/memory.h>
+#include <asm.h>
+#include <arch.h>
 
 #include "supersection.h"
 #include "section.h"
 #include "pagetable.h"
 #include "large_page.h"
 #include "small_page.h"
-
-// first level table
-static VMSAv7_pagetable_t * pt_root;
-
 
 /* returns a 1k aligned free physical address for use in a level 2 page table */
 static VMSAv7_smallpage_t * _get_free_l2() {
@@ -56,8 +54,10 @@ static VMSAv7_smallpage_t * _get_free_l2() {
 // Read/write in privileged node. No access to user.
 // Global mapping.
 // Executable.
-static int _init_page_tables_l2(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_length)
+static int _init_page_tables_l2(VMSAv7_pagetable_t * pt_root, size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_length)
 {
+	_debug_out(">> _init_page_tables_l2\r\n");
+
 	while( phy_mem_length ) {
 
 		VMSAv7_pagetable_t * pt =
@@ -79,6 +79,8 @@ static int _init_page_tables_l2(size_t phy_mem_base, size_t virt_mem_base, size_
 		phy_mem_length -= PAGE_SIZE;
 	}
 
+	_debug_out("<< _init_page_tables_l2\r\n");
+
 	return 0;
 }
 
@@ -96,12 +98,19 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	VMSAv7_pagetable_t * end;
 	VMSAv7_pagetable_t * itor;
 
-	pt_root = get_boot_pages( 4, GFP_KERNEL | GFP_ZERO );
+	_debug_out("_init_page_tables 0\r\n");
+
+	VMSAv7_pagetable_t * pt_root =
+		get_boot_pages( 4, GFP_KERNEL | GFP_ZERO );
+
+	_debug_out("_init_page_tables 1\r\n");
 
 	virt_mem_last = virt_mem_base + phy_mem_length - 1;
 
 	begin = pt_root + ((virt_mem_base & 0xFFF00000) >> 20);
 	end   = pt_root + ((virt_mem_last & 0xFFF00000) >> 20) + 1;
+
+	_debug_out(">> _init_page_tables loop\r\n");
 
 	// Initialise level 0 table.
 	for(itor = begin; itor != end; itor++) {
@@ -119,7 +128,11 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 			VMSAv7_PAGETABLE_SECURE);
 	}
 
-	return _init_page_tables_l2(phy_mem_base, virt_mem_base, phy_mem_length);
+	_debug_out("<< _init_page_tables loop\r\n");
+
+	_init_page_tables_l2(pt_root, phy_mem_base, virt_mem_base, phy_mem_length);
+
+	_arm_cp_write_TTRB0( (uint32_t)pt_root );
+
+	return 0;
 }
-
-

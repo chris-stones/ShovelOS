@@ -54,11 +54,45 @@ static ssize_t _write(file_itf itf, const void * vbuffer, size_t count) {
 ssize_t _debug_out( const char * string ) {
 
 	size_t len = 0;
+	ssize_t ret;
+
+	struct OMAP543X * debug_uart =
+		(struct OMAP543X *)UART3_PA_BASE_OMAP543X;
 
 	while(string[len] != '\0')
 		len++;
 
-	return __write( (struct OMAP543X *)UART3_PA_BASE_OMAP543X, string, len );
+	// TODO: Handle write of over 64 bytes!
+
+	ret = __write(debug_uart, string, len );
+
+	// flush TX FIFO
+	while( !(debug_uart->LSR & TX_SR_E ) );
+
+	return ret;
+}
+
+// Bypass the character device and just dump a debug string to the serial port.
+ssize_t _debug_out_uint( uint32_t i ) {
+
+	static const char c[] = "0123456789ABCDEF";
+
+	struct OMAP543X * debug_uart =
+		(struct OMAP543X *)UART3_PA_BASE_OMAP543X;
+
+	__write(debug_uart, c + ((i >> 28) & 0xF), 1);
+	__write(debug_uart, c + ((i >> 24) & 0xF), 1);
+	__write(debug_uart, c + ((i >> 20) & 0xF), 1);
+	__write(debug_uart, c + ((i >> 16) & 0xF), 1);
+	__write(debug_uart, c + ((i >> 12) & 0xF), 1);
+	__write(debug_uart, c + ((i >>  8) & 0xF), 1);
+	__write(debug_uart, c + ((i >>  4) & 0xF), 1);
+	__write(debug_uart, c + ((i >>  0) & 0xF), 1);
+
+	// flush TX FIFO
+	while( !(debug_uart->LSR & TX_SR_E ) );
+
+	return 1;
 }
 
 // free resources and NULL out the interface.

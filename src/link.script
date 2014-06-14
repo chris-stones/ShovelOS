@@ -31,7 +31,9 @@ SECTIONS
 	
 	.bss :
 	{
+		PROVIDE_HIDDEN (__BSS_BEGIN = .);
 		*(.bss)
+		PROVIDE_HIDDEN (__BSS_END = .);
 	}
 	
 	PROVIDE_HIDDEN (__KERNEL_END = .);
