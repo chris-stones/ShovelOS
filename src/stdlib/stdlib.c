@@ -9,3 +9,12 @@ void memset(void * _p, int _c, size_t size) {
 	while(size--)
 		*p++ = c;
 }
+
+size_t strlen(const char * const string) {
+
+	size_t s = 0;
+	while(string[s] != '\0')
+		++s;
+	return s;
+}
+

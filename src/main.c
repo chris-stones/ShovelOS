@@ -13,21 +13,12 @@ void * setup_memory() {
 	// clear BSS section.
 	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
 
-	_debug_out("Initialise page tables...");
-	_debug_out("PANICK!\r\n");
-
 	init_page_tables(
 		PHYSICAL_MEMORY_BASE_ADDRESS,
 		VIRTUAL_MEMORY_BASE_ADDRESS,
 		PHYSICAL_MEMORY_LENGTH);
 
-	_debug_out("Done\r\n");
-
-	_debug_out("Enabling MMU...");
-
 	enable_mmu();
-
-	_debug_out("Done\r\n");
 
 	{
 		/************************************************************

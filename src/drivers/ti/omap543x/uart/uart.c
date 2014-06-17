@@ -53,17 +53,14 @@ static ssize_t _write(file_itf itf, const void * vbuffer, size_t count) {
 // Bypass the character device and just dump a debug string to the serial port.
 ssize_t _debug_out( const char * string ) {
 
-	size_t len = 0;
 	ssize_t ret;
 
 	struct OMAP543X * debug_uart =
 		(struct OMAP543X *)UART3_PA_BASE_OMAP543X;
 
-	while(string[len] != '\0')
-		len++;
+	size_t len = strlen(string);
 
 	// TODO: Handle write of over 64 bytes!
-
 	ret = __write(debug_uart, string, len );
 
 	// flush TX FIFO

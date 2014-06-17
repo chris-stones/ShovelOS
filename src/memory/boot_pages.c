@@ -26,28 +26,37 @@ void * get_boot_pages(size_t pages, int flags) {
 
 	void * p = (void*)base;
 
-	_debug_out("KERNEL_END    "); _debug_out_uint((size_t)&__KERNEL_END);	_debug_out("\r\n");
-	_debug_out("KERNEL_BEGIN  "); _debug_out_uint((size_t)&__KERNEL_BEGIN);	_debug_out("\r\n");
-	_debug_out("boot pages    "); _debug_out_uint((size_t)_boot_pages);		_debug_out("\r\n");
-	_debug_out("total pages   "); _debug_out_uint((size_t)_total_pages);	_debug_out("\r\n");
-	_debug_out("p             "); _debug_out_uint((size_t)p);				_debug_out("\r\n");
+	if( ( _boot_pages + pages ) > _total_pages )
+		return NULL;
 
-	if( ( _boot_pages + pages ) > _total_pages ) {
-		_debug_out("get_boot_pages FAILED!!! \r\n");
-		for(;;);
-//		return NULL;
-	}
-
-	if(flags & GFP_ZERO) {
-		_debug_out("get_boot_pages MEMSET!!! \r\n");
+	if(flags & GFP_ZERO)
 		memset(p,0,pages * PAGE_SIZE);
-	}
 
 	_boot_pages += pages;
 
-	_debug_out("get_boot_pages RETURN!!! \r\n");
-
 	return p;
+}
+
+void * get_aligned_boot_pages(size_t alignment, size_t pages, int flags) {
+
+	size_t base;
+
+	if(_boot_pages == 0)
+		_boot_pages = ((((size_t)&__KERNEL_END) + (PAGE_SIZE-1)) - ((size_t)&__KERNEL_BEGIN)) / PAGE_SIZE;
+
+	for(;;) {
+
+		base = (PHYSICAL_MEMORY_BASE_ADDRESS + _boot_pages * PAGE_SIZE);
+
+		if( ( base & (alignment-1) ) == 0 )
+			return get_boot_pages( pages, flags);
+
+		_boot_pages++;
+
+		if((_boot_pages + pages) > _total_pages)
+			break;
+	}
+	return NULL;
 }
 
 // Disables any future allocations by get_boot_pages.

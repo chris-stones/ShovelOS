@@ -56,8 +56,6 @@ static VMSAv7_smallpage_t * _get_free_l2() {
 // Executable.
 static int _init_page_tables_l2(VMSAv7_pagetable_t * pt_root, size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_length)
 {
-	_debug_out(">> _init_page_tables_l2\r\n");
-
 	while( phy_mem_length ) {
 
 		VMSAv7_pagetable_t * pt =
@@ -79,8 +77,6 @@ static int _init_page_tables_l2(VMSAv7_pagetable_t * pt_root, size_t phy_mem_bas
 		phy_mem_length -= PAGE_SIZE;
 	}
 
-	_debug_out("<< _init_page_tables_l2\r\n");
-
 	return 0;
 }
 
@@ -98,19 +94,13 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	VMSAv7_pagetable_t * end;
 	VMSAv7_pagetable_t * itor;
 
-	_debug_out("_init_page_tables 0\r\n");
-
 	VMSAv7_pagetable_t * pt_root =
-		get_boot_pages( 4, GFP_KERNEL | GFP_ZERO );
-
-	_debug_out("_init_page_tables 1\r\n");
+		get_aligned_boot_pages( 16 * 1024, 4, GFP_KERNEL | GFP_ZERO );
 
 	virt_mem_last = virt_mem_base + phy_mem_length - 1;
 
 	begin = pt_root + ((virt_mem_base & 0xFFF00000) >> 20);
 	end   = pt_root + ((virt_mem_last & 0xFFF00000) >> 20) + 1;
-
-	_debug_out(">> _init_page_tables loop\r\n");
 
 	// Initialise level 0 table.
 	for(itor = begin; itor != end; itor++) {
@@ -127,8 +117,6 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 			VMSAv7_PAGETABLE_PRIVILEGED_EXECUTE,
 			VMSAv7_PAGETABLE_SECURE);
 	}
-
-	_debug_out("<< _init_page_tables loop\r\n");
 
 	_init_page_tables_l2(pt_root, phy_mem_base, virt_mem_base, phy_mem_length);
 
