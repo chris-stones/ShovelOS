@@ -20,6 +20,17 @@ static inline void _arm_cp_write_##name(uint32_t _register) {\
 	);\
 }
 
+// TEMPLATE for generating function to write an ignored register to an ARM CP.
+#define ARM_CP_WRITE_IGN_FUNC(name, p, opc1, CRn, CRm, opc2)\
+static inline void _arm_cp_write_ign_##name() {\
+	__asm__ __volatile__ (\
+		"mcr " #p ", " #opc1 ", %%r0, " #CRn ", " #CRm ", " #opc2 ";\n"\
+		:\
+		:\
+		:\
+	);\
+}
+
 // TEMPLATE for generating function to read from an ARM CP.
 #define ARM_CP_READ_FUNC(name, p, opc1, CRn, CRm, opc2)\
 	static inline uint32_t _arm_cp_read_##name() {\
@@ -40,6 +51,7 @@ static inline void _arm_cp_write_##name(uint32_t _register) {\
 
 #define ARM_CP_RO(name, p, opc1, CRn, CRm, opc2) ARM_CP_READ_FUNC(name, p, opc1, CRn, CRm, opc2)
 #define ARM_CP_WO(name, p, opc1, CRn, CRm, opc2) ARM_CP_WRITE_FUNC(name, p, opc1, CRn, CRm, opc2)
+#define ARM_CP_WI(name, p, opc1, CRn, CRm, opc2) ARM_CP_WRITE_IGN_FUNC(name, p, opc1, CRn, CRm, opc2)
 
 /*
  * VMSA CP15 c1 register summary, system control registers
@@ -68,4 +80,27 @@ ARM_CP_RW(HTCR,  p15, 4, c2, c0, 2) // Hyp Translation Control Register.
 ARM_CP_RW(VTCR,  p15, 4, c2, c1, 2) // Virt Translation Control Register.
 ARM_CP_RW(DACR,  p15, 0, c3, c0, 0) // Domain Access Control Register.
 
+/*
+ * VMSA CP15 c8 register summary, TLB maintenance operations
+ */
+ARM_CP_WI(TLBIALLIS,    p15, 0, c8, c3, 0);
+ARM_CP_WO(TLBIMVAIS,    p15, 0, c8, c3, 1);
+ARM_CP_WO(TLBIASIDIS,   p15, 0, c8, c3, 2);
+ARM_CP_WO(TLBIMVAAIS,   p15, 0, c8, c3, 3);
+ARM_CP_WO(ITLBIALL,     p15, 0, c8, c5, 0);
+ARM_CP_WO(ITLBIMVA,     p15, 0, c8, c5, 1);
+ARM_CP_WO(ITLBIASID,    p15, 0, c8, c5, 2);
+ARM_CP_WO(DTLBIALL,     p15, 0, c8, c6, 0);
+ARM_CP_WO(DTLBIAMVA,    p15, 0, c8, c6, 1);
+ARM_CP_WO(DTLBIASID,    p15, 0, c8, c6, 2);
+ARM_CP_WO(TLBIALL,      p15, 0, c8, c7, 0);
+ARM_CP_WO(TLBIMVA,      p15, 0, c8, c7, 1);
+ARM_CP_WO(TLBIASID,     p15, 0, c8, c7, 2);
+ARM_CP_WO(TLBIMVAA,     p15, 0, c8, c7, 3);
+ARM_CP_WO(TLBIALLHIS,   p15, 4, c8, c3, 0);
+ARM_CP_WO(TLBIMVAHIS,   p15, 4, c8, c3, 1);
+ARM_CP_WO(TLBALLNSNHIS, p15, 4, c8, c3, 4);
+ARM_CP_WO(TLBIALLH,     p15, 4, c8, c7, 0);
+ARM_CP_WO(TLBIMVAH,     p15, 4, c8, c7, 1);
+ARM_CP_WO(TLBIALLNSNH,  p15, 4, c8, c7, 4);
 

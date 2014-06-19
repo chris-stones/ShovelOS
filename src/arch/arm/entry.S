@@ -14,6 +14,18 @@ _start:
 	b  main							@ run main!!! ( note lack of link - DONT RETURN )
 
 
+@.global ___get_ttrb0
+@___get_ttrb0:
+@	mov r0, #0
+@	mrc p15, 0, r0, c2, c0, 0
+@	bx lr
+
+@.global ___set_ttrb0
+@___set_ttrb0:
+@	mcr p15, 0, r0, c2, c0, 0
+@	bx lr
+
+
 @ a tiny array that we will use for a stack before get_free_page() is setup.
 .align 8
 .__pre_gfp_stack_base:

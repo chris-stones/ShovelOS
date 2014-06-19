@@ -21,11 +21,12 @@ struct kmalloc_pool {
 //	We do this to avoid the need for multiple caches of the same size.
 struct kmalloc_pool _pools[] = {
 
-	{ NULL, GFP_KERNEL,  32, 1 },
-	{ NULL, GFP_KERNEL,  64, 1 },
-	{ NULL, GFP_KERNEL, 128, 1 },
-	{ NULL, GFP_KERNEL, 256, 1 },
-	{ NULL, GFP_KERNEL, 512, 1 },
+	{ NULL, GFP_KERNEL,   32, 1 },
+	{ NULL, GFP_KERNEL,   64, 1 },
+	{ NULL, GFP_KERNEL,  128, 1 },
+	{ NULL, GFP_KERNEL,  256, 1 },
+	{ NULL, GFP_KERNEL,  512, 1 },
+	{ NULL, GFP_KERNEL, 1024, 1 }, // NOTE: required by VSMAv7 vm_map.
 };
 
 #define SIZEOFARRAY(x)\

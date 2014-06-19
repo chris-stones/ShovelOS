@@ -1,7 +1,6 @@
 /****
  * Initialise the page-tables in a VSMAv7 Arch.
- * Called at startup with MMU disabled.
- *
+ * Called at startup with MMU disabled ( or identity mapped ).
  */
 
 #include <stdint.h>
@@ -65,7 +64,7 @@ static int _init_page_tables_l2(VMSAv7_pagetable_t * pt_root, size_t phy_mem_bas
 			(VMSAv7_smallpage_t *)(*pt & 0xfffffc00);
 
 		vmsav7_build_smallpage(
-				sp,
+				sp + ((virt_mem_base & 0xFF000) >> 12),
 				phy_mem_base,
 				VMSAv7_SMALLPAGE_MEMTYPE_SHARED_NORMAL_WRITEBACK_WRITEALLOCATE,
 				VMSAv7_SMALLPAGE_ACCESS_PRIVILEGED_FULL,

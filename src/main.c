@@ -3,6 +3,7 @@
 
 #include<chardevice/chardevice.h>
 #include<memory/memory.h>
+#include<memory/vm/vm.h>
 #include<arch.h>
 
 extern int __BSS_BEGIN;
@@ -17,8 +18,6 @@ void * setup_memory() {
 		PHYSICAL_MEMORY_BASE_ADDRESS,
 		VIRTUAL_MEMORY_BASE_ADDRESS,
 		PHYSICAL_MEMORY_LENGTH);
-
-	enable_mmu();
 
 	{
 		/************************************************************
@@ -37,6 +36,11 @@ void * setup_memory() {
 	mem_cache_setup();
 
 	kmalloc_setup();
+
+	// HACK
+	vm_map(0x48020000,0x48020000,4096, MMU_DEVICE, GFP_KERNEL);
+
+	enable_mmu();
 
 	// return a bigger stack! we can retire the tiny boot-stack.
 	return get_free_page( GFP_KERNEL );

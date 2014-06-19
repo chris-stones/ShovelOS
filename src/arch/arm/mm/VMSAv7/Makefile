@@ -2,7 +2,8 @@
 # DONT delete the .o files ( THIN archive requires them! )
 #.SECONDARY:
 
-SRC_C = init_page_tables.c
+SRC_C = init_page_tables.c \
+		page_tables.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
