@@ -54,6 +54,36 @@ static inline void _arm_cp_write_ign_##name() {\
 #define ARM_CP_WI(name, p, opc1, CRn, CRm, opc2) ARM_CP_WRITE_IGN_FUNC(name, p, opc1, CRn, CRm, opc2)
 
 /*
+ * VMSA CP15 c0 register summary, identification registers
+ */
+ARM_CP_RO(MIDR,		p15, 0, c0, c0, 0) // MIDR, Main ID Register
+ARM_CP_RO(CTR,		p15, 0, c0, c0, 1) // CTR, Cache Type Register
+ARM_CP_RO(TCMTR,	p15, 0, c0, c0, 2) // TCMTR, TCM Type Register, details IMPLEMENTATION DEFINED
+ARM_CP_RO(TLBTR,	p15, 0, c0, c0, 3) // TLBTR, TLB Type Register, details IMPLEMENTATION DEFINED
+ARM_CP_RO(MPIDR, 	p15, 0, c0, c0, 5) // MPIDR, Multiprocessor Affinity Register
+ARM_CP_RO(REVIDR, 	p15, 0, c0, c0, 6) // REVIDR, Revision ID Register a
+ARM_CP_RO(ID_PFR0,	p15, 0, c0, c1, 0) // ID_PFR0, Processor Feature Register 0 *
+ARM_CP_RO(ID_PFR1,	p15, 0, c0, c1, 1) // ID_PFR1, Processor Feature Register 1 *
+ARM_CP_RO(ID_DFR0,	p15, 0, c0, c1, 2) // ID_DFR0, Debug Feature Register 0 *
+ARM_CP_RO(ID_AFR0,	p15, 0, c0, c1, 3) // ID_AFR0, Auxiliary Feature Register 0 *
+ARM_CP_RO(ID_MMFR0, p15, 0, c0, c1, 4) // ID_MMFR0, Memory Model Feature Register 0 *
+ARM_CP_RO(ID_MMFR1, p15, 0, c0, c1, 5) // ID_MMFR1, Memory Model Feature Register 1 *
+ARM_CP_RO(ID_MMFR2, p15, 0, c0, c1, 6) // ID_MMFR2, Memory Model Feature Register 2 *
+ARM_CP_RO(ID_MMFR3, p15, 0, c0, c1, 7) // ID_MMFR3, Memory Model Feature Register 3 *
+ARM_CP_RO(ID_ISAR0, p15, 0, c0, c2, 0) // ID_ISAR0, ISA Feature Register 0 *
+ARM_CP_RO(ID_ISAR1, p15, 0, c0, c2, 1) // ID_ISAR1, ISA Feature Register 1 *
+ARM_CP_RO(ID_ISAR2, p15, 0, c0, c2, 2) // ID_ISAR2, ISA Feature Register 2 *
+ARM_CP_RO(ID_ISAR3, p15, 0, c0, c2, 3) // ID_ISAR3, ISA Feature Register 3 *
+ARM_CP_RO(ID_ISAR4, p15, 0, c0, c2, 4) // ID_ISAR4, ISA Feature Register 4 *
+ARM_CP_RO(ID_ISAR5, p15, 0, c0, c2, 5) // ID_ISAR5, ISA Feature Register 5 *
+ARM_CP_RO(CCSIDR,	p15, 1, c0, c0, 0) // CCSIDR, Cache Size ID Registers
+ARM_CP_RO(CLIDR,	p15, 1, c0, c0, 1) // CLIDR, Cache Level ID Register
+ARM_CP_RO(AIDR,		p15, 1, c0, c0, 7) // AIDR, Auxiliary ID Register IMPLEMENTATION DEFINED
+ARM_CP_RW(CSSELR,	p15, 2, c0, c0, 0) // CSSELR, Cache Size Selection Register
+ARM_CP_RW(VPIDR,	p15, 4, c0, c0, 0) // VPIDR, Virtualization Processor ID Register ‡
+ARM_CP_RW(VMPIDR,	p15, 4, c0, c0, 5) // VMPIDR, Virtualization Multiprocessor ID Register
+
+/*
  * VMSA CP15 c1 register summary, system control registers
  */
 ARM_CP_RW(SCTLR,  p15, 0, c1, c0, 0) // System Control Register
@@ -75,7 +105,7 @@ ARM_CP_RW(HACR,   p15, 4, c1, c1, 7) // Hyp Aux Config Register
  */
 ARM_CP_RW(TTRB0, p15, 0, c2, c0, 0) // Translation Table Base Register0.
 ARM_CP_RW(TTRB1, p15, 0, c2, c0, 1) // Translation Table Base Register1.
-ARM_CP_RW(TTRCR, p15, 0, c2, c0, 2) // Translation Table Base Control Register.
+ARM_CP_RW(TTBCR, p15, 0, c2, c0, 2) // Translation Table Base Control Register.
 ARM_CP_RW(HTCR,  p15, 4, c2, c0, 2) // Hyp Translation Control Register.
 ARM_CP_RW(VTCR,  p15, 4, c2, c1, 2) // Virt Translation Control Register.
 ARM_CP_RW(DACR,  p15, 0, c3, c0, 0) // Domain Access Control Register.
