@@ -15,12 +15,17 @@ static size_t _boot_pages = 0;
 static const size_t _total_pages =
 	PHYSICAL_MEMORY_LENGTH / PAGE_SIZE;
 
+static void __check_boot_pages_initialised() {
+
+	if(_boot_pages == 0)
+		_boot_pages = ((((size_t)&__KERNEL_END) + (PAGE_SIZE-1)) - ((size_t)&__KERNEL_BEGIN)) / PAGE_SIZE;
+}
+
 void * get_boot_pages(size_t pages, int flags) {
 
 	size_t base;
 
-	if(_boot_pages == 0)
-		_boot_pages = ((((size_t)&__KERNEL_END) + (PAGE_SIZE-1)) - ((size_t)&__KERNEL_BEGIN)) / PAGE_SIZE;
+	__check_boot_pages_initialised();
 
 	base = (PHYSICAL_MEMORY_BASE_ADDRESS + _boot_pages * PAGE_SIZE);
 
@@ -41,8 +46,7 @@ void * get_aligned_boot_pages(size_t alignment, size_t pages, int flags) {
 
 	size_t base;
 
-	if(_boot_pages == 0)
-		_boot_pages = ((((size_t)&__KERNEL_END) + (PAGE_SIZE-1)) - ((size_t)&__KERNEL_BEGIN)) / PAGE_SIZE;
+	__check_boot_pages_initialised();
 
 	for(;;) {
 
@@ -62,6 +66,8 @@ void * get_aligned_boot_pages(size_t alignment, size_t pages, int flags) {
 // Disables any future allocations by get_boot_pages.
 //	Returns the number of pages allocated during startup.
 size_t end_boot_pages() {
+
+	__check_boot_pages_initialised();
 
 	size_t bp = _boot_pages;
 
