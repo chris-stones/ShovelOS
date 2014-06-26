@@ -110,6 +110,40 @@ ARM_CP_RW(HTCR,  p15, 4, c2, c0, 2) // Hyp Translation Control Register.
 ARM_CP_RW(VTCR,  p15, 4, c2, c1, 2) // Virt Translation Control Register.
 ARM_CP_RW(DACR,  p15, 0, c3, c0, 0) // Domain Access Control Register.
 
+
+/*
+ * VMSA CP15 c7 register summary, Cache maintenance, address translation, and other functions.
+ */
+ARM_CP_WO(_UNPREDICTABLE_WFE, 	p15, 0, c7,  c0, 4)
+ARM_CP_WO(ICIALLUIS, 			p15, 0, c7,  c1, 0)
+ARM_CP_WO(BPIALLIS, 			p15, 0, c7,  c1, 6)
+ARM_CP_RW(PAR, 					p15, 0, c7,  c4, 0)
+ARM_CP_WO(ICIALLU, 				p15, 0, c7,  c5, 0)
+ARM_CP_WO(ICIMVAU, 				p15, 0, c7,  c5, 1)
+ARM_CP_WO(CP15ISB,				p15, 0, c7,  c5, 4)
+ARM_CP_WI(BPIALL, 				p15, 0, c7,  c5, 6) // Branch predictor - Invalidate All.
+ARM_CP_WO(BPIMVA, 				p15, 0, c7,  c5, 7)
+ARM_CP_WO(DCIMVAC, 				p15, 0, c7,  c6, 1)
+ARM_CP_WO(DCISW, 				p15, 0, c7,  c6, 2)
+ARM_CP_WO(ATS1CPR, 				p15, 0, c7,  c8, 0)
+ARM_CP_WO(ATS1CPW, 				p15, 0, c7,  c8, 1)
+ARM_CP_WO(ATS1CUR, 				p15, 0, c7,  c8, 2)
+ARM_CP_WO(ATS1CUW, 				p15, 0, c7,  c8, 3)
+ARM_CP_WO(ATS12NSOPR,			p15, 0, c7,  c8, 4)
+ARM_CP_WO(ATS12NSOPW, 			p15, 0, c7,  c8, 5)
+ARM_CP_WO(ATS12NSOUR, 			p15, 0, c7,  c8, 6)
+ARM_CP_WO(ATS12NSOUW,			p15, 0, c7,  c8, 7)
+ARM_CP_WO(DCCMVAC, 				p15, 0, c7, c10, 1)
+ARM_CP_WO(DCCSW, 				p15, 0, c7, c10, 2)
+ARM_CP_WO(CP15DSB, 				p15, 0, c7, c10, 4)
+ARM_CP_WO(CP15DBM, 				p15, 0, c7, c10, 5)
+ARM_CP_WO(DCCMVAU, 				p15, 0, c7, c11, 1)
+ARM_CP_WO(_UNPREDICTABLE_PFI, 	p15, 0, c7, c13, 1)
+ARM_CP_WO(DCCIMVAC, 			p15, 0, c7, c14, 1)
+ARM_CP_WO(DCCISW, 				p15, 0, c7, c14, 2)
+ARM_CP_WO(ATS1HR, 				p15, 4, c7,  c8, 0)
+ARM_CP_WO(ATS1HW, 				p15, 4, c7,  c8, 1)
+
 /*
  * VMSA CP15 c8 register summary, TLB maintenance operations
  */
@@ -123,7 +157,7 @@ ARM_CP_WO(ITLBIASID,    p15, 0, c8, c5, 2);
 ARM_CP_WO(DTLBIALL,     p15, 0, c8, c6, 0);
 ARM_CP_WO(DTLBIAMVA,    p15, 0, c8, c6, 1);
 ARM_CP_WO(DTLBIASID,    p15, 0, c8, c6, 2);
-ARM_CP_WO(TLBIALL,      p15, 0, c8, c7, 0);
+ARM_CP_WI(TLBIALL,      p15, 0, c8, c7, 0);	// Invalidate entire unified TLB
 ARM_CP_WO(TLBIMVA,      p15, 0, c8, c7, 1);
 ARM_CP_WO(TLBIASID,     p15, 0, c8, c7, 2);
 ARM_CP_WO(TLBIMVAA,     p15, 0, c8, c7, 3);
