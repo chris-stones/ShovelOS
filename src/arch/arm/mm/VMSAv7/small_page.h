@@ -9,7 +9,7 @@
 
 typedef unsigned int VMSAv7_smallpage_t;
 
-/* bit 1 is set on large pages. */
+/* bit 1 is set on small pages. */
 #define VMSAv7_SMALLPAGE_BITS (1<< 1)
 
 /* convert a 32bit physical address into the base address components of a large page. */

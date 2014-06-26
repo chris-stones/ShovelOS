@@ -41,6 +41,14 @@ static VMSAv7_smallpage_access_permission_enum_t _get_access(int mmu_flags) {
 	return VMSAv7_SMALLPAGE_ACCESS_PRIVILEGED_FULL;
 }
 
+static VMSAv7_smallpage_execute_never_t _get_execute(int mmu_flags) {
+
+	if( mmu_flags & MMU_DEVICE )
+			return VMSAv7_SMALLPAGE_EXECUTENEVER;
+
+	return VMSAv7_SMALLPAGE_EXECUTE;
+}
+
 static void _vmsav7_build_pagetable(
 		VMSAv7_pagetable_t * 	pt,
 		VMSAv7_smallpage_t * 	virt_addr,
@@ -66,7 +74,7 @@ static void _vmsav7_build_smallpage(
 		_get_memtype(mmu_flags),
 		_get_access(mmu_flags),
 		VMSAv7_SMALLPAGE_GLOBAL,
-		VMSAv7_SMALLPAGE_EXECUTE);
+		_get_execute(mmu_flags));
 }
 
 int vm_map(size_t virt, size_t phy, size_t size, int mmu_flags, int gfp_flags) {

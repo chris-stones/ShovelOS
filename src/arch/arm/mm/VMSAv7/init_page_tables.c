@@ -121,5 +121,11 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 
 	_arm_cp_write_TTRB0( (uint32_t)pt_root );
 
+	uint32_t old_TTBRC = _arm_cp_read_TTBCR();
+
+	_debug_out("old_TTBRC = "); _debug_out_uint(old_TTBRC); _debug_out("\r\n");
+
+	_arm_cp_write_TTBCR(0);
+
 	return 0;
 }
