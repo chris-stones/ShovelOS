@@ -32,6 +32,7 @@
 #include <stdint.h>
 #else
 #include "page.h"
+#include <arch.h>
 #endif
 
 #include "memory.h"
@@ -327,7 +328,6 @@ int get_free_page_setup(
 	uint8_t * free_base;
 	struct buddy * buddy0;
 	size_t pages = size / PAGE_SIZE;
-
 	_total_memory = pages * PAGE_SIZE;
 
 #if defined(GFP_USERLAND)
