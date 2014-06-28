@@ -11,13 +11,8 @@ extern int __BSS_END;
 
 void * setup_memory() {
 
-	_debug_out("memset BSS... ");
-
 	// clear BSS section.
 	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
-
-	_debug_out("DONE\r\n");
-
 
 	{
 		/************************************************************
@@ -26,8 +21,6 @@ void * setup_memory() {
 		size_t boot_pages =
 			end_boot_pages();
 
-		_debug_out("A\r\n");
-
 		get_free_page_setup(
 			VIRTUAL_MEMORY_BASE_ADDRESS,
 			PHYSICAL_MEMORY_BASE_ADDRESS,
@@ -35,17 +28,9 @@ void * setup_memory() {
 			PHYSICAL_MEMORY_LENGTH);
 	}
 
-	_debug_out("B\r\n");
-
 	mem_cache_setup();
 
-	_debug_out("C\r\n");
-
 	kmalloc_setup();
-
-	_debug_out("D\r\n");
-
-	_debug_out("E\r\n");
 
 	// return a bigger stack! we can retire the tiny boot-stack.
 	return get_free_page( GFP_KERNEL );

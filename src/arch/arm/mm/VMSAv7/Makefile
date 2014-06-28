@@ -3,7 +3,8 @@
 #.SECONDARY:
 
 SRC_C = init_page_tables.c \
-		page_tables.c
+		page_tables.c \
+		cache.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
