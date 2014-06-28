@@ -140,6 +140,11 @@ void dcache_clean_invalidate() {
 	dcache_do_all(DCACHE_CLEAN_INVALIDATE);
 }
 
+void icache_invalidate() {
+
+	_arm_cp_write_ign_ICIALLU();
+}
+
 /*
 void probe_clidr() {
 
