@@ -5,7 +5,7 @@
 SRC_S = entry.S
 SRC_C = arm.c
 
-LIBS =  mm/$(VMSA)/vmsa.o
+LIBS =  mm/$(VMSA)/vmsa.o gic/gic.o
 
 OBJ = $(SRC_S:.S=.S.o) $(SRC_C:.c=.c.o)
 

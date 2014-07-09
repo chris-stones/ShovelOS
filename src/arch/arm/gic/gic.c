@@ -71,7 +71,7 @@ struct CPU_INTERFACE {
 	/*0x1000*/       uint32_t GICC_DIR;				// WO - Deactivate Interrupt Register
 };
 
-struct GIT_DISTRIBUTOR * gic_get_cpu_interface() {
+struct GIT_DISTRIBUTOR * gic_get_distributor() {
 
 	uint32_t addr = _peripheral_base() + DISTRIBUTOR_OFFSET;
 
