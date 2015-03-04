@@ -1,16 +1,22 @@
 
-SRC_C = chardevice.c
+# DONT delete the .o files ( THIN archive requires them! )
+#.SECONDARY:
+
+SRC_C = gic.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
-%.o : $(OBJ)
+gic.o : $(OBJ)
 	$(LD) -r -o $@ $(OBJ)
 	
 %.c.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
         
-%.s.o : %.s
+%.S.o : %.S
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
 	rm -f *.o
+	rm -f *.a
+	rm -f $(OBJ)
+

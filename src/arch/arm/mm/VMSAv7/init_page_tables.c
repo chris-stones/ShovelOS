@@ -50,7 +50,7 @@ static VMSAv7_smallpage_t * _get_free_l2() {
 }
 
 // Normal memory ( Shared, cache-able and buffer-able )
-// Read/write in privileged node. No access to user.
+// Read/write in privileged mode. No access to user.
 // Global mapping.
 // Executable.
 static int _init_page_tables_l2(VMSAv7_pagetable_t * pt_root, size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_length)
@@ -119,6 +119,8 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 
 	_init_page_tables_l2(pt_root, phy_mem_base, virt_mem_base, phy_mem_length);
 
+	dcache_clean();
+
 	_arm_cp_write_TTRB0( (uint32_t)pt_root );
 
 	uint32_t old_TTBRC = _arm_cp_read_TTBCR();
@@ -126,6 +128,8 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	_debug_out("old_TTBRC = "); _debug_out_uint(old_TTBRC); _debug_out("\r\n");
 
 	_arm_cp_write_TTBCR(0);
+
+	dcache_invalidate();
 
 	return 0;
 }

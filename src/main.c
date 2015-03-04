@@ -14,6 +14,11 @@ void * setup_memory() {
 	// clear BSS section.
 	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
 
+	init_page_tables(
+		PHYSICAL_MEMORY_BASE_ADDRESS,
+		VIRTUAL_MEMORY_BASE_ADDRESS,
+		PHYSICAL_MEMORY_LENGTH);
+
 	{
 		/************************************************************
 		 * retire get_boot_pages() and setup main memory management.

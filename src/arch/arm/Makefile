@@ -25,5 +25,3 @@ clean:
 	make -C mm/$(VMSA) clean
 	rm -f *.o
 	rm -f *.a
-	rm -f $(OBJ)
-
