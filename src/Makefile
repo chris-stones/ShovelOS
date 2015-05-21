@@ -16,10 +16,13 @@ SRC_C = main.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
+#SOC_LIBS = drivers/ti/omap543x/omap543x.o
+SOC_LIBS = drivers/ti/omap36xx/omap36xx.o
+
 LIBS =  arch/$(ARCH)/arch.o \
 		chardevice/chardevice.o \
 		stdlib/stdlib.o \
-		drivers/ti/omap543x/omap543x.o \
+		$(SOC_LIBS) \
 		memory/memory.o 
 
 kernel.bin : kernel.elf
@@ -33,6 +36,9 @@ stdlib/stdlib.o:
 
 drivers/ti/omap543x/omap543x.o:
 	make -C drivers/ti/omap543x omap543x.o
+
+drivers/ti/omap36xx/omap36xx.o:
+	make -C drivers/ti/omap36xx omap36xx.o
 
 memory/memory.o:
 	make -C memory memory.o
@@ -52,6 +58,7 @@ arch/$(ARCH)/arch.o:
 clean:
 	make -C arch/$(ARCH) clean
 	make -C drivers/ti/omap543x clean
+	make -C drivers/ti/omap36xx clean
 	make -C memory clean
 	make -C chardevice clean
 	make -C stdlib clean
