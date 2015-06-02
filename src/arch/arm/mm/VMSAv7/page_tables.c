@@ -7,6 +7,7 @@
 #include <memory/vm/vm.h>
 #include <coprocessor_asm.h>
 #include <stdint.h>
+#include <asm.h>
 #include <arch.h>
 
 #include "supersection.h"
@@ -81,7 +82,7 @@ int vm_map(size_t virt, size_t phy, size_t size, int mmu_flags, int gfp_flags) {
 
 	VMSAv7_pagetable_t * pt_root;
 
-	uint32_t ttrb0 = _arm_cp_read_TTRB0();
+	uint32_t ttrb0 = _arm_cp_read_TTBR0();
 
 	pt_root = (VMSAv7_pagetable_t *)(ttrb0 & ~(0x4000-1));
 
@@ -93,10 +94,11 @@ int vm_map(size_t virt, size_t phy, size_t size, int mmu_flags, int gfp_flags) {
 		pt = pt_root + ((virt & 0xFFF00000) >> 20);
 		sp = (VMSAv7_smallpage_t *)(*pt & 0xfffffc00);
 
-		if(!sp) {
+		if(!sp)
 			sp = kmalloc( 1024, gfp_flags | GFP_ZERO );
-			_debug_out("vm_map kmalloc "); _debug_out_uint((size_t)sp); _debug_out("\r\n");
-		}
+
+		if(!sp)
+			return -1;
 
 		_vmsav7_build_smallpage(
 			sp + ((virt & 0xFF000) >> 12),
@@ -113,9 +115,19 @@ int vm_map(size_t virt, size_t phy, size_t size, int mmu_flags, int gfp_flags) {
 		size -= PAGE_SIZE;
 	}
 
-	_arm_cp_write_ign_TLBIALLIS();
+	///// FIXME: OVERKILL
+	dcache_clean(); 				// data cache clean - write out new page_tables.
+	dsb(); 							// data synchronisation barrier - ensure clean is complete.
+	icache_invalidate();			// invalidate instruction cache.
+	dcache_invalidate();			// invalidate data cache.
+	_arm_cp_write_ign_BPIALL();		// invalidate branch predictor.
+	_arm_cp_write_ign_TLBIALL();	// invalidate unified TLB.
+	_arm_cp_write_ign_ITLBIALL();	// invalidate instruction TLB.
+	_arm_cp_write_ign_DTLBIALL();	// invalidate data TLB.
+	dsb();							// data synchronisation barrier - ensure invalidate is complete.
+	isb();							// flush the instruction pipeline.
 
-	return -1;
+	return 0;
 }
 
 int vm_unmap(size_t virt, size_t size) {

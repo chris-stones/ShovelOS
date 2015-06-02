@@ -119,17 +119,25 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 
 	_init_page_tables_l2(pt_root, phy_mem_base, virt_mem_base, phy_mem_length);
 
+
 	dcache_clean();
+	dsb();
 
-	_arm_cp_write_TTRB0( (uint32_t)pt_root );
-
-	uint32_t old_TTBRC = _arm_cp_read_TTBCR();
-
-	_debug_out("old_TTBRC = "); _debug_out_uint(old_TTBRC); _debug_out("\r\n");
-
+	_arm_cp_write_TTBR0( (uint32_t)pt_root );
 	_arm_cp_write_TTBCR(0);
 
+	icache_invalidate();
 	dcache_invalidate();
+
+	// TODO: detect and use correct TLB maintenance instruction.
+	_arm_cp_write_ign_ITLBIALL(); // Invalidate instruction TLB.
+	_arm_cp_write_ign_DTLBIALL(); // Invalidate data TLB
+	_arm_cp_write_ign_TLBIALL(); // Invalidate unified TLB
+
+	_arm_cp_write_ign_BPIALL(); // Invalidate branch predictor.
+
+	dsb();
+	isb();
 
 	return 0;
 }

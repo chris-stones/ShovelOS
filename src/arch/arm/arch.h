@@ -13,5 +13,3 @@ void dcache_clean();
 void dcache_invalidate();
 void dcache_clean_invalidate();
 void icache_invalidate();
-
-void * __debug_pt_root;
