@@ -66,9 +66,9 @@ void main() {
 
 	// echo inputs back to sender
 	for(;;) {
-		uint8_t c[4];
+		uint8_t c;
 		size_t s;
-		if( ( s = (*serial)->read(serial, &c, 4) ) > 0 )
+		if( ( s = (*serial)->read(serial, &c, 1) ) > 0 )
 			(*serial)->write(serial, &c, s);
 	}
 
