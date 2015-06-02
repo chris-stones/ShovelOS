@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <memory/memory.h>
+#include <memory/vm/vm.h>
 #include <chardevice/chardevice.h>
 #include <file/file.h>
 
@@ -96,6 +97,9 @@ static int _close(file_itf *itf) {
 		struct context * context =
 			STRUCT_BASE(struct context, file_interface, *itf);
 
+		// TODO: virtual address?
+		vm_unmap((size_t)context->regs, PAGE_SIZE);
+
 		kfree( context );
 
 		*itf = NULL;
@@ -148,6 +152,10 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 
 	// OMAP36XX has 4 UARTS. ( 0..3 )
 	if(uart >= ( sizeof(_uart_base) / sizeof(_uart_base[0]) ) )
+		return -1;
+
+	// TODO: different virtual address?
+	if(0 != vm_map(_uart_base[uart], _uart_base[uart], PAGE_SIZE, MMU_DEVICE, GFP_KERNEL ))
 		return -1;
 
 	ctx = kmalloc( sizeof(struct context), GFP_KERNEL | GFP_ZERO );
