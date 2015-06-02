@@ -11,18 +11,25 @@
 
 #include "regs.h"
 
+typedef enum {
+	_NONBLOCK = 1<<0,
+} flags_enum_t;
+
 struct context {
 
 	CHARD_INTERFACE(struct file, file_interface);
 
 	struct OMAP36XX * regs;
+
+	int flags;
 };
 
 /*
  * write up to 'count' bytes to the UART.
  * returns the number of bytes written.
+ *  will not block, may not write all bytes.
  */
-static ssize_t __write(struct OMAP36XX * regs, const void * vbuffer, size_t count) {
+static ssize_t __write_non_blocking(struct OMAP36XX * regs, const void * vbuffer, size_t count) {
 
 	const uint8_t * p = (const uint8_t*)vbuffer;
 
@@ -39,12 +46,42 @@ static ssize_t __write(struct OMAP36XX * regs, const void * vbuffer, size_t coun
 	return (size_t)p - (size_t)vbuffer;
 }
 
+/*
+ * write 'count' bytes to the UART.
+ * returns the number of bytes written.
+ * may block, will write all bytes.
+ */
+static ssize_t __write_blocking(struct OMAP36XX * regs, const void * vbuffer, size_t count) {
+
+	const uint8_t * p = (const uint8_t*)vbuffer;
+
+	while(count) {
+
+		if(!(regs->SSR & TX_FIFO_FULL )) {
+
+			regs->THR = (uint32_t)*p++;
+
+			--count;
+		}
+	}
+
+	return (size_t)p - (size_t)vbuffer;
+}
+
+/*
+ * write up to 'count' bytes to the UART.
+ * returns the number of bytes written.
+ * may block.
+ */
 static ssize_t _write(file_itf itf, const void * vbuffer, size_t count) {
 
 	struct context * context =
 			STRUCT_BASE(struct context, file_interface, itf);
 
-	return __write(context->regs, vbuffer, count);
+	if(context->flags & _NONBLOCK)
+		return __write_non_blocking(context->regs, vbuffer, count);
+
+	return __write_blocking(context->regs, vbuffer, count);
 }
 
 // Bypass the character device and just dump a debug string to the serial port.
@@ -57,8 +94,7 @@ ssize_t _debug_out( const char * string ) {
 
 	size_t len = strlen(string);
 
-	// TODO: Handle write of over 64 bytes!
-	ret = __write(debug_uart, string, len );
+	ret = __write_blocking(debug_uart, string, len );
 
 	// flush TX FIFO
 	while( !(debug_uart->LSR & TX_SR_E ) );
@@ -74,14 +110,14 @@ ssize_t _debug_out_uint( uint32_t i ) {
 	struct OMAP36XX * debug_uart =
 		(struct OMAP36XX *)UART3_PA_BASE_OMAP36XX;
 
-	__write(debug_uart, c + ((i >> 28) & 0xF), 1);
-	__write(debug_uart, c + ((i >> 24) & 0xF), 1);
-	__write(debug_uart, c + ((i >> 20) & 0xF), 1);
-	__write(debug_uart, c + ((i >> 16) & 0xF), 1);
-	__write(debug_uart, c + ((i >> 12) & 0xF), 1);
-	__write(debug_uart, c + ((i >>  8) & 0xF), 1);
-	__write(debug_uart, c + ((i >>  4) & 0xF), 1);
-	__write(debug_uart, c + ((i >>  0) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >> 28) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >> 24) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >> 20) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >> 16) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >> 12) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >>  8) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >>  4) & 0xF), 1);
+	__write_blocking(debug_uart, c + ((i >>  0) & 0xF), 1);
 
 	// flush TX FIFO
 	while( !(debug_uart->LSR & TX_SR_E ) );
@@ -110,15 +146,10 @@ static int _close(file_itf *itf) {
 
 /*
  * read up to 'count' bytes from the UART.
+ * wont block.
  * returns the number of bytes read.
  */
-static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
-
-	struct context * context =
-		STRUCT_BASE(struct context, file_interface, itf);
-
-	struct OMAP36XX * regs =
-			context->regs;
+static ssize_t __read_non_blocking(struct OMAP36XX * regs, void * vbuffer, size_t count) {
 
 	uint8_t * p = (uint8_t*)vbuffer;
 
@@ -133,6 +164,43 @@ static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
 	}
 
 	return (size_t)p - (size_t)vbuffer;
+}
+
+/*
+ * read 'count' bytes from the UART.
+ * may block.
+ * returns the number of bytes read.
+ */
+static ssize_t __read_blocking(struct OMAP36XX * regs, void * vbuffer, size_t count) {
+
+	uint8_t * p = (uint8_t*)vbuffer;
+
+	while(count) {
+
+		if((regs->LSR & RX_FIFO_E)!=0) {
+
+			*p++ = (volatile uint8_t)(regs->RHR);
+
+			--count;
+		}
+	}
+
+	return (size_t)p - (size_t)vbuffer;
+}
+
+/*
+ * read up to 'count' bytes from the UART.
+ * returns the number of bytes read.
+ */
+static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
+
+	struct context * context =
+		STRUCT_BASE(struct context, file_interface, itf);
+
+	if(context->flags & _NONBLOCK)
+		return __read_non_blocking(context->regs, vbuffer, count);
+
+	return __read_blocking(context->regs, vbuffer, count);
 }
 
 // Open and initialise a UART instance.
