@@ -24,10 +24,11 @@ static inline void _arm_cp_write_##name(uint32_t _register) {\
 #define ARM_CP_WRITE_IGN_FUNC(name, p, opc1, CRn, CRm, opc2)\
 static inline void _arm_cp_write_ign_##name() {\
 	__asm__ __volatile__ (\
+		"mov %%r0, #0;\n"\
 		"mcr " #p ", " #opc1 ", %%r0, " #CRn ", " #CRm ", " #opc2 ";\n"\
 		:\
 		:\
-		:\
+		: "r0" \
 	);\
 }
 
@@ -103,8 +104,8 @@ ARM_CP_RW(HACR,   p15, 4, c1, c1, 7) // Hyp Aux Config Register
 /*
  * VMSA CP15 c2 and c3 register summary, Memory protection and control registers
  */
-ARM_CP_RW(TTRB0, p15, 0, c2, c0, 0) // Translation Table Base Register0.
-ARM_CP_RW(TTRB1, p15, 0, c2, c0, 1) // Translation Table Base Register1.
+ARM_CP_RW(TTBR0, p15, 0, c2, c0, 0) // Translation Table Base Register0.
+ARM_CP_RW(TTBR1, p15, 0, c2, c0, 1) // Translation Table Base Register1.
 ARM_CP_RW(TTBCR, p15, 0, c2, c0, 2) // Translation Table Base Control Register.
 ARM_CP_RW(HTCR,  p15, 4, c2, c0, 2) // Hyp Translation Control Register.
 ARM_CP_RW(VTCR,  p15, 4, c2, c1, 2) // Virt Translation Control Register.
@@ -147,7 +148,7 @@ ARM_CP_WO(ATS1HW, 				p15, 4, c7,  c8, 1)
 /*
  * VMSA CP15 c8 register summary, TLB maintenance operations
  */
-ARM_CP_WI(TLBIALLIS,    p15, 0, c8, c3, 0);
+ARM_CP_WI(TLBIALLIS,    p15, 0, c8, c3, 0); // Invalidate entire Unified TLB Inner Shareable.
 ARM_CP_WO(TLBIMVAIS,    p15, 0, c8, c3, 1);
 ARM_CP_WO(TLBIASIDIS,   p15, 0, c8, c3, 2);
 ARM_CP_WO(TLBIMVAAIS,   p15, 0, c8, c3, 3);
