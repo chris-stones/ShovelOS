@@ -19,19 +19,14 @@ void * setup_memory() {
 		VIRTUAL_MEMORY_BASE_ADDRESS,
 		PHYSICAL_MEMORY_LENGTH);
 
-	{
-		/************************************************************
-		 * retire get_boot_pages() and setup main memory management.
-		 */
-		size_t boot_pages =
-			end_boot_pages();
-
-		get_free_page_setup(
-			VIRTUAL_MEMORY_BASE_ADDRESS,
-			PHYSICAL_MEMORY_BASE_ADDRESS,
-			PAGE_SIZE * boot_pages,
-			PHYSICAL_MEMORY_LENGTH);
-	}
+	/************************************************************
+	 * retire get_boot_pages() and setup main memory management.
+	 */
+	get_free_page_setup(
+		VIRTUAL_MEMORY_BASE_ADDRESS,
+		PHYSICAL_MEMORY_BASE_ADDRESS,
+		PAGE_SIZE * end_boot_pages(),
+		PHYSICAL_MEMORY_LENGTH);
 
 	mem_cache_setup();
 
