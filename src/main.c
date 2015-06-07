@@ -6,13 +6,22 @@
 #include<memory/vm/vm.h>
 #include<arch.h>
 
+#include<system_control_register.h>
+
 extern int __BSS_BEGIN;
 extern int __BSS_END;
 
-void * setup_memory() {
+void * setup_boot_pages() {
 
-	// clear BSS section.
+	// need to clear '_boot_pages' in boot_pages.c
+	// clearing the BSS section should do that!
 	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
+
+	// return a boot stack.. ( is 1 page enough!? )
+	return get_boot_pages(1, GFP_ZERO);
+}
+
+void setup_memory() {
 
 	init_page_tables(
 		PHYSICAL_MEMORY_BASE_ADDRESS,
@@ -32,8 +41,7 @@ void * setup_memory() {
 
 	kmalloc_setup();
 
-	// return a bigger stack! we can retire the tiny boot-stack.
-	return get_free_page( GFP_KERNEL );
+	//return get_free_page( GFP_KERNEL );
 }
 
 extern int __REGISTER_DRIVERS_BEGIN;
@@ -59,7 +67,8 @@ void main() {
 	register_drivers();
 
 	// Open UART3 character device.
-	chrd_open( &serial , CHRD_UART_MAJOR, CHRD_UART_MINOR_MIN+2);
+	if(0 != chrd_open( &serial , CHRD_UART_MAJOR, CHRD_UART_MINOR_MIN+2) )
+		for(;;); /* failed to open console!!! */
 
 	// write initial greeting;
 	(*serial)->write(serial, (const void*)greeting, sizeof(greeting));

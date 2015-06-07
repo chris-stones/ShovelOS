@@ -10,12 +10,10 @@
 _start:
 	ldr r0, .__pre_gfp_stack_base 	@ get address of temporary stack.
 	add r0, #pre_gpf_stacksize		@ find top address.
-	mov sp, r0						@ set as stack
-@	bl probe_clidr					@ gimme some usefull info about the cache!?
-@	bl cpu_probe					@ gimme some usefull info about the cpu!?
-@	bl disable_mmu					@ disable mmu - uboot!?
-	bl setup_memory					@ setup memory ( returns a better stack )
-	mov sp, r0						@ switch to new stack.
+	mov sp, r0						@ set as booststrap stack
+	bl setup_boot_pages				@ setup early boot allocator.
+	mov sp, r0						@ setup_boot_pages ( returns a better stack ).
+	bl setup_memory					@ setup memory
 	b  main							@ run main!!! ( note lack of link - DONT RETURN )
 
 
