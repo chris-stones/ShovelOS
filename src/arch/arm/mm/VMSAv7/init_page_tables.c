@@ -7,6 +7,7 @@
 #include <memory/memory.h>
 #include <asm.h>
 #include <arch.h>
+#include <system_control_register.h>
 
 #include "supersection.h"
 #include "section.h"
@@ -123,6 +124,13 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	dcache_clean();
 	dsb();
 
+	uint32_t sctlr = _arm_cp_read_SCTLR();
+
+	_arm_cp_write_SCTLR(sctlr & ~SCTLR_M); // DISABLE MMU
+
+	dsb();
+	isb();
+
 	_arm_cp_write_TTBR0( (uint32_t)pt_root );
 	_arm_cp_write_TTBCR(0);
 
@@ -133,8 +141,12 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	_arm_cp_write_ign_ITLBIALL(); // Invalidate instruction TLB.
 	_arm_cp_write_ign_DTLBIALL(); // Invalidate data TLB
 	_arm_cp_write_ign_TLBIALL(); // Invalidate unified TLB
-
 	_arm_cp_write_ign_BPIALL(); // Invalidate branch predictor.
+
+	dsb();
+	isb();
+
+	_arm_cp_write_SCTLR(sctlr | SCTLR_M | SCTLR_C | SCTLR_Z | SCTLR_I); // Enable MMU, Data Cache, Branch predictor, Instruction Cache
 
 	dsb();
 	isb();
