@@ -18,7 +18,9 @@ void * setup_boot_pages() {
 	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
 
 	// return a boot stack.. ( is 1 page enough!? )
-	return get_boot_pages(1, GFP_ZERO);
+	size_t boot_stack_pages = 1;
+	size_t new_stack_base = (size_t)get_boot_pages(boot_stack_pages, GFP_ZERO);
+	return (void*)(new_stack_base + PAGE_SIZE *  boot_stack_pages);
 }
 
 void setup_memory() {
