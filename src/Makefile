@@ -23,6 +23,7 @@ SOC_LIBS = drivers/ti/omap36xx/omap36xx.o
 LIBS =  arch/$(ARCH)/arch.o \
 		chardevice/chardevice.o \
 		stdlib/stdlib.o \
+		console/console.o \
 		$(SOC_LIBS) \
 		memory/memory.o 
 
@@ -46,6 +47,9 @@ memory/memory.o:
 
 chardevice/chardevice.o:
 	make -C chardevice chardevice.o
+	
+console/console.o:
+	make -C console console.o
 
 arch/$(ARCH)/arch.o:
 	make -C arch/$(ARCH) arch.o
@@ -63,6 +67,7 @@ clean:
 	make -C memory clean
 	make -C chardevice clean
 	make -C stdlib clean
+	make -C console clean
 	rm -f *.elf
 	rm -f *.bin
 	rm -f *.a

@@ -5,8 +5,7 @@
 #include<memory/memory.h>
 #include<memory/vm/vm.h>
 #include<arch.h>
-
-#include<system_control_register.h>
+#include<console/console.h>
 
 extern int __BSS_BEGIN;
 extern int __BSS_END;
@@ -72,8 +71,11 @@ void main() {
 	if(0 != chrd_open( &serial , CHRD_UART_MAJOR, CHRD_UART_MINOR_MIN+2) )
 		for(;;); /* failed to open console!!! */
 
+	setup_console(serial);
+
 	// write initial greeting;
-	(*serial)->write(serial, (const void*)greeting, sizeof(greeting));
+	//(*serial)->write(serial, (const void*)greeting, sizeof(greeting));
+	kprintf("%s", greeting);
 
 	// echo inputs back to sender
 	for(;;) {
