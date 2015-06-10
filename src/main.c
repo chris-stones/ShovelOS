@@ -1,7 +1,6 @@
 
 #include<config.h>
 
-#include<chardevice/chardevice.h>
 #include<memory/memory.h>
 #include<memory/vm/vm.h>
 #include<arch.h>
@@ -63,30 +62,22 @@ void main() {
 
 	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
 
-	file_itf serial;
-
 	register_drivers();
+	console_setup();
 
-	// Open UART3 character device.
-	if(0 != chrd_open( &serial , CHRD_UART_MAJOR, CHRD_UART_MINOR_MIN+2) )
-		for(;;); /* failed to open console!!! */
-
-	setup_console(serial);
-
-	// write initial greeting;
-	//(*serial)->write(serial, (const void*)greeting, sizeof(greeting));
 	kprintf("%s", greeting);
 
 	// echo inputs back to sender
 	for(;;) {
+		file_itf serial;
 		uint8_t c;
 		size_t s;
-		if( ( s = (*serial)->read(serial, &c, 1) ) > 0 )
-			(*serial)->write(serial, &c, s);
+		if((serial = console_file()))
+			if( ( s = (*serial)->read(serial, &c, 1) ) > 0 )
+				(*serial)->write(serial, &c, s);
 	}
 
-	// close file.
-	(*serial)->close(&serial);
+	console_teardown();
 
 	for(;;);
 }

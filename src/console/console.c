@@ -1,18 +1,24 @@
 #include <console/console.h>
+#include <chardevice/chardevice.h>
 #include <file/file.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
 static file_itf _console_file = 0;
 
-void setup_console(file_itf console_file) {
+void console_setup() {
 
-	_console_file = console_file;
+	chrd_open( &_console_file, CHRD_SERIAL_CONSOLE_MAJOR, CHRD_SERIAL_CONSOLE_MINOR);
 }
 
-void close_console() {
+void console_teardown() {
 
 	_console_file = 0;
+}
+
+file_itf console_file() {
+
+	return _console_file;
 }
 
 int32_t kprintf(const char * format, ...) {
