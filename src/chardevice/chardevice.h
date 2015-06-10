@@ -39,6 +39,9 @@ int chrd_uninstall( chrd_major_t major, chrd_minor_t minor );
 #define CHRD_UART_MINOR_MIN 0
 #define CHRD_UART_MINOR_MAX 5
 
+#define CHRD_SERIAL_CONSOLE_MAJOR 3
+#define CHRD_SERIAL_CONSOLE_MINOR 0
+
 //constructor
 #define ATTRIBUTE_REGISTER_DRIVER __attribute__ ((section (".register_drivers")))
 
