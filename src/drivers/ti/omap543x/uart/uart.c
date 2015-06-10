@@ -214,6 +214,13 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 		UART5_PA_BASE_OMAP543X, UART6_PA_BASE_OMAP543X,
 	};
 
+	if(CHRD_SERIAL_CONSOLE_MAJOR == major && CHRD_SERIAL_CONSOLE_MINOR == minor) {
+
+		// serial console is on UART3.
+		major = CHRD_UART_MAJOR;
+		minor = CHRD_UART_MINOR_MIN+2;
+	}
+
 	uint32_t uart = minor - CHRD_UART_MINOR_MIN;
 
 	// OMAP543X has 6 UARTS. ( 0..5 )
@@ -250,11 +257,16 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 // install drivers.
 static int ___install___() {
 
+	// This driver handles UART and serial console character devices.
+
 	int i;
 	int e = 0;
 	for(i=CHRD_UART_MINOR_MIN; i<=CHRD_UART_MINOR_MAX; i++)
 		if( chrd_install( &_chrd_open, CHRD_UART_MAJOR, i ) != 0 )
 			e = -1;
+
+	if( chrd_install( &_chrd_open, CHRD_SERIAL_CONSOLE_MAJOR, CHRD_SERIAL_CONSOLE_MINOR ) != 0 )
+		e = -1;
 
 	return e;
 }
