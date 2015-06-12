@@ -28,6 +28,20 @@ uint8_t isdigit(char c) {
 	return isnum(c);
 }
 
+uint8_t isspace(char c) {
+	switch(c) {
+	default:
+		return 0;
+	case ' ':
+	case '\f':
+	case '\n':
+	case '\r':
+	case '\t':
+	case '\v':
+		return 1;
+	}
+}
+
 static uint64_t declen(const char *str) {
 
         uint64_t ret=0;

@@ -69,12 +69,9 @@ void main() {
 
 	// echo inputs back to sender
 	for(;;) {
-		file_itf serial;
-		uint8_t c;
-		size_t s;
-		if((serial = console_file()))
-			if( ( s = (*serial)->read(serial, &c, 1) ) > 0 )
-				(*serial)->write(serial, &c, s);
+		char buffer[64];
+		if(kgets(buffer, sizeof buffer) != 0)
+			kprintf("you typed \'%s\'", buffer);
 	}
 
 	console_teardown();

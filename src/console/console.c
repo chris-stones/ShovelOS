@@ -34,3 +34,10 @@ int32_t kprintf(const char * format, ...) {
 	return r;
 }
 
+char * kgets(char * s, size_t size) {
+
+	if(_console_file)
+		return fgets(s,size,_console_file);
+
+	return 0;
+}

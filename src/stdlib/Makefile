@@ -1,7 +1,7 @@
 # DONT delete the .o files ( THIN archive requires them! )
 #.SECONDARY:
 
-SRC_C = stdlib.c fprintf.c
+SRC_C = stdlib.c fprintf.c fgets.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
