@@ -13,6 +13,7 @@
 
 typedef enum {
 	_NONBLOCK = 1<<0,
+	_CONSOLE = 1<<1,
 } flags_enum_t;
 
 struct context {
@@ -149,16 +150,25 @@ static int _close(file_itf *itf) {
  * wont block.
  * returns the number of bytes read.
  */
-static ssize_t __read_non_blocking(struct OMAP36XX * regs, void * vbuffer, size_t count) {
+static ssize_t __read_non_blocking(struct context * context, void * vbuffer, size_t count) {
 
 	uint8_t * p = (uint8_t*)vbuffer;
 
 	while(count) {
 
-		if((regs->LSR & RX_FIFO_E)==0)
+		if((context->regs->LSR & RX_FIFO_E)==0)
 			break;
 
-		*p++ = (volatile uint8_t)(regs->RHR);
+		char c = (volatile uint8_t)(context->regs->RHR);
+
+		if(context->flags & _CONSOLE) {
+			// echo input characters back down the console.
+			if(c=='\r')
+				c = '\n';
+			__write_non_blocking(context->regs, &c, 1);
+		}
+
+		*p++ = c;
 
 		--count;
 	}
@@ -171,15 +181,24 @@ static ssize_t __read_non_blocking(struct OMAP36XX * regs, void * vbuffer, size_
  * may block.
  * returns the number of bytes read.
  */
-static ssize_t __read_blocking(struct OMAP36XX * regs, void * vbuffer, size_t count) {
+static ssize_t __read_blocking(struct context * context, void * vbuffer, size_t count) {
 
 	uint8_t * p = (uint8_t*)vbuffer;
 
 	while(count) {
 
-		if((regs->LSR & RX_FIFO_E)!=0) {
+		if((context->regs->LSR & RX_FIFO_E)!=0) {
 
-			*p++ = (volatile uint8_t)(regs->RHR);
+			char c = (volatile uint8_t)(context->regs->RHR);
+
+			if(context->flags & _CONSOLE) {
+				// echo input characters back down the console.
+				if(c=='\r')
+					c = '\n';
+				__write_blocking(context->regs, &c, 1);
+			}
+
+			*p++ = c;
 
 			--count;
 		}
@@ -198,9 +217,9 @@ static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
 		STRUCT_BASE(struct context, file_interface, itf);
 
 	if(context->flags & _NONBLOCK)
-		return __read_non_blocking(context->regs, vbuffer, count);
+		return __read_non_blocking(context, vbuffer, count);
 
-	return __read_blocking(context->regs, vbuffer, count);
+	return __read_blocking(context, vbuffer, count);
 }
 
 // Open and initialise a UART instance.
@@ -210,6 +229,7 @@ static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
 static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 
 	struct context *ctx;
+	int is_console=0;
 
 	static const size_t _uart_base[] = {
 		UART1_PA_BASE_OMAP36XX,	UART2_PA_BASE_OMAP36XX,
@@ -221,6 +241,7 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 		// serial console is on UART3.
 		major = CHRD_UART_MAJOR;
 		minor = CHRD_UART_MINOR_MIN+2;
+		is_console = 1;
 	}
 
 	uint32_t uart = minor - CHRD_UART_MINOR_MIN;
@@ -237,6 +258,9 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 
 	if(!ctx)
 		return -1;
+
+	if(is_console)
+		ctx->flags |= _CONSOLE;
 
 	// initialise instance pointers.
 	CHARD_INIT_INTERFACE( ctx, file_interface );
