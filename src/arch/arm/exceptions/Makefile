@@ -2,7 +2,7 @@
 # DONT delete the .o files ( THIN archive requires them! )
 #.SECONDARY:
 
-SRC_C = gic.c
+SRC_C = gic.c exceptions.c
 
 OBJ = $(SRC_C:.c=.c.o)
 

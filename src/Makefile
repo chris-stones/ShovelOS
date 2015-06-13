@@ -3,8 +3,8 @@
 export KERNEL_ROOT := $(shell pwd)
 export ARCH_ROOT := $(KERNEL_ROOT)/arch/$(ARCH)
 export STDLIB := $(KERNEL_ROOT)/stdlib
-#export CFLAGS := -I$(KERNEL_ROOT) -I$(ARCH_ROOT) -I$(STDLIB) -ggdb3 -mtune=cortex-a8 -mcpu=cortex-a8 -marm -Wall -Werror -std=c99 -Os -mno-unaligned-access -ffreestanding -nostdinc -nostdlib
-export CFLAGS := -I$(KERNEL_ROOT) -I$(ARCH_ROOT) -I$(STDLIB) -ggdb3 -mtune=cortex-a8 -mcpu=cortex-a8 -marm -Wall -Werror -std=c99 -O0 -mno-unaligned-access -ffreestanding -nostdinc -nostdlib
+export CFLAGS := -I$(KERNEL_ROOT) -I$(ARCH_ROOT) -I$(STDLIB) -ggdb3 -mtune=cortex-a8 -mcpu=cortex-a8 -marm -Wall -Werror -std=c99 -Os -mno-unaligned-access -ffreestanding -nostdinc -nostdlib
+#export CFLAGS := -I$(KERNEL_ROOT) -I$(ARCH_ROOT) -I$(STDLIB) -ggdb3 -mtune=cortex-a8 -mcpu=cortex-a8 -marm -Wall -Werror -std=c99 -O0 -mno-unaligned-access -ffreestanding -nostdinc -nostdlib
 
 export CC := $(CROSS_COMPILE)gcc
 export AS := $(CROSS_COMPILE)as

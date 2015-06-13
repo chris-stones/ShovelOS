@@ -14,8 +14,10 @@ _start:
 	bl setup_boot_pages				@ setup early boot allocator.
 	mov sp, r0						@ setup_boot_pages ( returns a better stack ).
 	bl setup_memory					@ setup memory
-	b  main							@ run main!!! ( note lack of link - DONT RETURN )
 
+	@ TODO: SETUP STACKS FOR OTHER CPU MODES.
+
+	b  main							@ run main!!! ( note lack of link - DONT RETURN )
 
 @ a tiny array that we will use for a stack before get_free_page() is setup.
 .align 8
@@ -23,3 +25,17 @@ _start:
 	.word __pre_gfp_stack
 	.comm __pre_gfp_stack, pre_gpf_stacksize
 
+@ exception vector.
+.text
+.align 4
+.global __EXCEPTION_VECTOR_BASE
+__EXCEPTION_VECTOR_BASE:
+	nop @ RESET
+	nop @ UNDEFINED INSTRUCTION
+	nop @ SUPERVISOR CALL
+	nop @ PREFETCH ABORT
+	nop @ DATA ABORT
+	nop @ NOT USED
+	nop @ IRQ
+	nop @ FIQ
+	b __EXCEPTION_VECTOR_BASE

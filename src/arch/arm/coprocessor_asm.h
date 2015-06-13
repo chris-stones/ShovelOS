@@ -173,4 +173,5 @@ ARM_CP_WO(TLBIALLNSNH,  p15, 4, c8, c7, 4);
  * IMPLEMETATION DEFINED REGISTERS ( p15 c15 )
  */
 ARM_CP_RO(CBAR,			p15, 4,c15, c0, 0); // Configuration Base Address Register.
+ARM_CP_RW(VBAR,			p15, 0,c12, c0, 0); // Vector Base address Register.
 

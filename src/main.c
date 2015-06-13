@@ -5,6 +5,7 @@
 #include<memory/vm/vm.h>
 #include<arch.h>
 #include<console/console.h>
+#include<exceptions/exceptions.h>
 
 extern int __BSS_BEGIN;
 extern int __BSS_END;
@@ -19,6 +20,13 @@ void * setup_boot_pages() {
 	size_t boot_stack_pages = 1;
 	size_t new_stack_base = (size_t)get_boot_pages(boot_stack_pages, GFP_ZERO);
 	return (void*)(new_stack_base + PAGE_SIZE *  boot_stack_pages);
+}
+
+void * setup_exception_stack() {
+
+	size_t pages = 1;
+	size_t stack_base  = get_free_pages( pages, GFP_KERNEL );
+	return (void*)(stack_base + PAGE_SIZE * pages);
 }
 
 void setup_memory() {
@@ -62,6 +70,7 @@ void main() {
 
 	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
 
+	exceptions_setup();
 	register_drivers();
 	console_setup();
 
