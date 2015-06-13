@@ -22,10 +22,10 @@ void * setup_boot_pages() {
 	return (void*)(new_stack_base + PAGE_SIZE *  boot_stack_pages);
 }
 
-void * setup_exception_stack() {
+void * get_exception_stack() {
 
 	size_t pages = 1;
-	size_t stack_base  = get_free_pages( pages, GFP_KERNEL );
+	size_t stack_base  = (size_t)get_free_pages( pages, GFP_KERNEL );
 	return (void*)(stack_base + PAGE_SIZE * pages);
 }
 
