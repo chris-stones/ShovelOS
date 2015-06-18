@@ -1,4 +1,5 @@
 
+#include <console/console.h>
 #include <system_control_register.h>
 #include <coprocessor_asm.h>
 #include <asm.h>
@@ -19,5 +20,41 @@ void exceptions_setup() {
 
 
 	dsb();
+}
+
+void __attribute__ ((interrupt ("IRQ"))) _arm_isr_IRQ() {
+
+	kprintf("IRQ");
+	for(;;);
+}
+
+void __attribute__ ((interrupt ("FIQ"))) _arm_isr_FIQ() {
+
+	kprintf("FIQ");
+	for(;;);
+}
+
+void __attribute__ ((interrupt ("SWI"))) _arm_isr_SVC() {
+
+	kprintf("SVC");
+	for(;;);
+}
+
+void __attribute__ ((interrupt ("ABORT"))) _arm_isr_PREFETCH_ABORT() {
+
+	kprintf("PREFETCH ABORT");
+	for(;;);
+}
+
+void __attribute__ ((interrupt ("ABORT"))) _arm_isr_DATA_ABORT() {
+
+	kprintf("DATA ABORT");
+	for(;;);
+}
+
+void __attribute__ ((interrupt ("UNDEF"))) _arm_isr_UNDEFINED() {
+
+	kprintf("UNDEFINED INSTRUCTION");
+	for(;;);
 }
 

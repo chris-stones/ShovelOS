@@ -61,15 +61,15 @@ _start:
 
 @ exception vector.
 .text
-.align 4
+.align 8
 .global __EXCEPTION_VECTOR_BASE
 __EXCEPTION_VECTOR_BASE:
-	nop @ RESET
-	nop @ UNDEFINED INSTRUCTION
-	nop @ SUPERVISOR CALL
-	nop @ PREFETCH ABORT
-	nop @ DATA ABORT
-	nop @ NOT USED
-	nop @ IRQ
-	nop @ FIQ
-	b __EXCEPTION_VECTOR_BASE
+	b __EXCEPTION_VECTOR_BASE      @ RESET
+	b _arm_isr_UNDEFINED           @ UNDEFINED INSTRUCTION
+	b _arm_isr_SVC                 @ SUPERVISOR CALL
+	b _arm_isr_PREFETCH_ABORT      @ PREFETCH ABORT
+	b _arm_isr_DATA_ABORT          @ DATA ABORT
+	b __EXCEPTION_VECTOR_BASE      @ NOT USED
+	b _arm_isr_IRQ                 @ IRQ
+	b _arm_isr_IRQ                 @ FIQ
+
