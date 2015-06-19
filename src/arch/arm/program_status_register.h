@@ -26,7 +26,7 @@
 typedef enum program_status_register_mode {
 
   PSR_MODE_usr = 16,  // User
-  PSR_MODE_fiq = 17,  // FUQ
+  PSR_MODE_fiq = 17,  // FIQ
   PSR_MODE_irq = 18,  // IRQ
   PSR_MODE_svc = 19,  // Supervisor
   PSR_MODE_mon = 22,  // Monitor ( Secure Only )

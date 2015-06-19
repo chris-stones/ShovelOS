@@ -66,6 +66,11 @@ static void register_drivers() {
 		(**itor)();
 }
 
+static void dosvc() {
+
+	__asm__ __volatile__ ("svc 0xabcdef");
+}
+
 void main() {
 
 	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
@@ -75,6 +80,8 @@ void main() {
 	console_setup();
 
 	kprintf("%s", greeting);
+
+	dosvc();
 
 	// echo inputs back to sender
 	for(;;) {

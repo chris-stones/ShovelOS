@@ -24,37 +24,36 @@ void exceptions_setup() {
 
 void __attribute__ ((interrupt ("IRQ"))) _arm_isr_IRQ() {
 
-	kprintf("IRQ");
+	kprintf("IRQ\n");
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("FIQ"))) _arm_isr_FIQ() {
 
-	kprintf("FIQ");
+	kprintf("FIQ\n");
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("SWI"))) _arm_isr_SVC() {
 
-	kprintf("SVC");
-	for(;;);
+	kprintf("SVC\n");
 }
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_PREFETCH_ABORT() {
 
-	kprintf("PREFETCH ABORT");
+	kprintf("PREFETCH ABORT\n");
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_DATA_ABORT() {
 
-	kprintf("DATA ABORT");
+	kprintf("DATA ABORT\n");
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("UNDEF"))) _arm_isr_UNDEFINED() {
 
-	kprintf("UNDEFINED INSTRUCTION");
+	kprintf("UNDEFINED INSTRUCTION\n");
 	for(;;);
 }
 

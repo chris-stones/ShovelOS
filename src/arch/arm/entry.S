@@ -6,6 +6,12 @@
 .section .start_text				@ put this function at the start of .text!
 .global _start
 _start:
+
+	mrs r0,   cpsr       @ read CSPR
+	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
+	orr r0,   r0, #31    @ set System mode.
+	msr cpsr, r0         @ switch to System mode.
+
 	ldr r0, .__pre_gfp_stack_base 	@ get address of temporary stack.
 	add r0, #pre_gpf_stacksize		@ find top address.
 	mov sp, r0						@ set as booststrap stack
@@ -15,43 +21,51 @@ _start:
 
 	@ Allocate stacks for exception CPU modes.
 	bl  get_exception_stack
-	mov r1, r0         @ get stack for FIQ
+	mov r4, r0         @ get stack for FIQ
 	bl  get_exception_stack
-	mov r2, r0         @ get stack for IRQ
+	mov r5, r0         @ get stack for IRQ
 	bl  get_exception_stack
-	mov r3, r0         @ get stack for ABORT
+	mov r6, r0         @ get stack for ABORT
 	bl  get_exception_stack
-	mov r4, r0         @ get stack for UNDEFINED
+	mov r7, r0         @ get stack for UNDEFINED
+	bl  get_exception_stack
+	mov r8, r0         @ get stack for Supervisor
+
+_DEBUG_GOT_STACKS:
 
 	@ Set stacks on other CPU modes.
 	mrs r0,   cpsr
 
-	and r0,   r0, #0x1f  @ clear CPSR.M
-	orr r0,   r0, #17  @ set FIQ mode.
-	msr cpsr, r0       @ switch to FIQ mode.
-	mov sp,   r1       @ set FIQ stack.
+	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
+	orr r0,   r0, #17    @ set FIQ mode.
+	msr cpsr, r0         @ switch to FIQ mode.
+	mov sp,   r4         @ set FIQ stack.
 
-	and r0,   r0, #0x1f  @ clear CPSR.M
-	orr r0,   r0, #18  @ set IRQ mode.
-	msr cpsr, r0       @ switch to IRQ mode.
-	mov sp,   r2       @ set IRQ stack.
+	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
+	orr r0,   r0, #18    @ set IRQ mode.
+	msr cpsr, r0         @ switch to IRQ mode.
+	mov sp,   r5         @ set IRQ stack.
 
-	and r0,   r0, #0x1f  @ clear CPSR.M
-	orr r0,   r0, #23  @ set ABORT mode.
-	msr cpsr, r0       @ switch to ABORT mode.
-	mov sp,   r3       @ set ABORT stack.
+	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
+	orr r0,   r0, #23    @ set ABORT mode.
+	msr cpsr, r0         @ switch to ABORT mode.
+	mov sp,   r6         @ set ABORT stack.
 
-	and r0,   r0, #0x1f  @ clear CPSR.M
-	orr r0,   r0, #27  @ set UNDEFINED mode.
-	msr cpsr, r0       @ switch to UNDEFINED mode.
-	mov sp,   r4       @ set UNDEFINED stack.
+	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
+	orr r0,   r0, #27    @ set UNDEFINED mode.
+	msr cpsr, r0         @ switch to UNDEFINED mode.
+	mov sp,   r7         @ set UNDEFINED stack.
 
-	@ return to supervisor mode ( RESET ) and enter main.
-	and r0,   r0, #0x1f  @ clear CPSR.M
-	orr r0,   r0, #19  @ set SUPERVISOR mode.
-	msr cpsr, r0       @ switch to SUPERVISOR mode.
+	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
+	orr r0,   r0, #19    @ set Supervisor mode.
+	msr cpsr, r0         @ switch to Supervisor mode.
+	mov sp,   r8         @ set Supervisor stack.
 
-	b  main							@ run main!!! ( note lack of link - DONT RETURN )
+	@ return to System mode and enter main.
+	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
+	orr r0,   r0, #31    @ set SUPERVISOR mode.
+	msr cpsr, r0         @ switch to SUPERVISOR mode.
+	b  main              @ run main!!!
 
 @ a tiny array that we will use for a stack before get_free_page() is setup.
 .align 8
