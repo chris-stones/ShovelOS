@@ -40,6 +40,7 @@
 static size_t _phy_base;
 static size_t _page_offset;
 static size_t _total_memory;
+static size_t _total_allocated;
 
 struct order {
 
@@ -270,6 +271,8 @@ void * get_free_pages(size_t pages, int flags) {
 	if( flags & GFP_ZERO )
 		memset(p, 0, pages * PAGE_SIZE);
 
+	_total_allocated += pages;
+
 	return p;
 }
 
@@ -285,6 +288,8 @@ void * get_free_page(int flags) {
 void free_pages(void * addr, size_t pages) {
 
 	if(addr) {
+
+		_total_allocated -= pages; // TODO: double-free!?
 
 		size_t block = ((size_t)((addr - _page_offset) - _phy_base)) / PAGE_SIZE;
 
@@ -329,6 +334,7 @@ int get_free_page_setup(
 	struct buddy * buddy0;
 	size_t pages = size / PAGE_SIZE;
 	_total_memory = pages * PAGE_SIZE;
+	_total_allocated = 0;
 
 #if defined(GFP_USERLAND)
 	posix_memalign((void**)&virtual_base, PAGE_SIZE, _total_memory);
@@ -388,6 +394,11 @@ int get_free_page_setup(
 	normal_buddy = buddy0;
 
 	return 0;
+}
+
+size_t get_total_pages_allocated() {
+
+	return _total_allocated;
 }
 
 #if defined(GFP_USERLAND_DEBUG)

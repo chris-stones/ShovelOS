@@ -31,8 +31,6 @@ _start:
 	bl  get_exception_stack
 	mov r8, r0         @ get stack for Supervisor
 
-_DEBUG_GOT_STACKS:
-
 	@ Set stacks on other CPU modes.
 	mrs r0,   cpsr
 

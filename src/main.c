@@ -66,11 +66,6 @@ static void register_drivers() {
 		(**itor)();
 }
 
-static void dosvc() {
-
-	__asm__ __volatile__ ("svc 0xabcdef");
-}
-
 void main() {
 
 	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
@@ -81,7 +76,7 @@ void main() {
 
 	kprintf("%s", greeting);
 
-	dosvc();
+	kprintf("Allocated %d pages (%d bytes)\n", get_total_pages_allocated(), get_total_pages_allocated() * PAGE_SIZE);
 
 	// echo inputs back to sender
 	for(;;) {

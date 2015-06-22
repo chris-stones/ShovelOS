@@ -30,3 +30,5 @@ void free_pages(void * addr, size_t pages);
 //	this is the same as free_pages(addr,1)
 void free_page(void * addr);
 
+// how many pages have been allocated.
+size_t get_total_pages_allocated();
