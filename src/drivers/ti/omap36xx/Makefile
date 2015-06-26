@@ -1,7 +1,7 @@
 # DONT delete the .o files ( THIN archive requires them! )
 #.SECONDARY:
 
-SRC_C = uart/uart.c
+SRC_C = uart/uart.c timer/timer.c
 
 OBJ = $(SRC_C:.c=.c.o)
 
