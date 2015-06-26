@@ -22,6 +22,7 @@ SOC_LIBS = drivers/ti/omap36xx/omap36xx.o
 
 LIBS =  arch/$(ARCH)/arch.o \
 		chardevice/chardevice.o \
+		timer/timer.o \
 		stdlib/stdlib.o \
 		console/console.o \
 		$(SOC_LIBS) \
@@ -47,7 +48,10 @@ memory/memory.o:
 
 chardevice/chardevice.o:
 	make -C chardevice chardevice.o
-	
+
+timer/timer.o:
+	make -C timer timer.o
+
 console/console.o:
 	make -C console console.o
 
@@ -66,6 +70,7 @@ clean:
 	make -C drivers/ti/omap36xx clean
 	make -C memory clean
 	make -C chardevice clean
+	make -C timer clean
 	make -C stdlib clean
 	make -C console clean
 	rm -f *.elf
