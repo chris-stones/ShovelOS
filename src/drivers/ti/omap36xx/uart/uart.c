@@ -3,6 +3,7 @@
  * Implements 'file' interface.
  */
 
+#include <drivers/drivers.h>
 #include <stdint.h>
 #include <memory/memory.h>
 #include <memory/vm/vm.h>
@@ -18,7 +19,7 @@ typedef enum {
 
 struct context {
 
-	CHARD_INTERFACE(struct file, file_interface);
+	DRIVER_INTERFACE(struct file, file_interface);
 
 	struct OMAP36XX * regs;
 
@@ -263,7 +264,7 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 		ctx->flags |= _CONSOLE;
 
 	// initialise instance pointers.
-	CHARD_INIT_INTERFACE( ctx, file_interface );
+	DRIVER_INIT_INTERFACE( ctx, file_interface );
 
 	// initialise function pointers.
 	ctx->file_interface->close 		= &_close;
@@ -297,5 +298,5 @@ static int ___install___() {
 }
 
 // put pointer to installer function somewhere we can find it.
-const chrd_drv_install_func_ptr __omap36xx_uart_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
+const driver_install_func_ptr __omap36xx_uart_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
 
