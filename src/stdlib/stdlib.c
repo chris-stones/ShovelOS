@@ -67,15 +67,16 @@ sint64_t atoq(const char * str) {
         sint32_t ret    = 0;
         uint8_t negflag = 0;
         uint16_t power  = 1;
+        int started     = 0;
 
         for(const char *c = str + declen(str)-1; c>=str; c--, power*=10)
                 switch(*c) {
                         default:
                                 return negflag ? -ret : ret;
                         case '-':
-                                if(negflag)
-                                        return 0;
-                                negflag = 0;
+                                if(negflag || started)
+                                        return 0; // error
+                                negflag = 1;
                                 break;
 
                         case '0':
@@ -88,8 +89,9 @@ sint64_t atoq(const char * str) {
                         case '7':
                         case '8':
                         case '9':
-                                ret += power * ((uint64_t)(*c - '0'));
-                                break;
+                        	started = 1;
+                            ret += power * ((uint64_t)(*c - '0'));
+                            break;
                 }
 
         return negflag ? -ret : ret;

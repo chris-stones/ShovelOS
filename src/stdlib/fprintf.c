@@ -177,6 +177,7 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 					break;
 				case '-':
 					leftalign=1;
+					format++;
 					break;
 				case '*':
 					pad = va_arg(va,int32_t);
@@ -229,7 +230,7 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 				int32_t arg = va_arg(va,int32_t);
 				l += _padn(file, arg, 10, pad, zlead,  leftalign);
 				l += _putd(file, arg);
-				l += _padn(file, arg, 10, pad, zlead,  leftalign);
+				l += _padn(file, arg, 10, pad, zlead, !leftalign);
 				break;
 			}
 			case 'x':
@@ -237,7 +238,7 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 				uint32_t arg = va_arg(va,uint32_t);
 				l += _padn(file, arg, 16, pad, zlead,  leftalign);
 				l += _putx(file, arg);
-				l += _padn(file, arg, 16, pad, zlead,  leftalign);
+				l += _padn(file, arg, 16, pad, zlead, !leftalign);
 				break;
 			}
 			case 'X':
@@ -245,7 +246,7 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 				uint32_t arg = va_arg(va,uint32_t);
 				l += _padn(file, arg, 16, pad, zlead,  leftalign);
 				l += _putX(file, arg);
-				l += _padn(file, arg, 16, pad, zlead,  leftalign);
+				l += _padn(file, arg, 16, pad, zlead, !leftalign);
 				break;
 			}
 			case 's':
@@ -263,11 +264,12 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 							err=1;
 							break;
 						case 'l':
+						case 'd':
 						{
 							int64_t arg = va_arg(va, int64_t);
 							l += _padn(file, arg, 10, pad, zlead,  leftalign);
 							l += _putll(file,arg);
-							l += _padn(file, arg, 10, pad, zlead,  leftalign);
+							l += _padn(file, arg, 10, pad, zlead, !leftalign);
 							break;
 						}
 						case 'u':
@@ -275,7 +277,7 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 							uint64_t arg = va_arg(va, uint64_t);
 							l += _padn(file, arg, 10, pad, zlead,  leftalign);
 							l += _putlu(file,arg);
-							l += _padn(file, arg, 10, pad, zlead,  leftalign);
+							l += _padn(file, arg, 10, pad, zlead, !leftalign);
 							break;
 						}
 						case 'x':
@@ -283,7 +285,7 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 							uint64_t arg = va_arg(va, uint64_t);
 							l += _padn(file, arg, 16, pad, zlead,  leftalign);
 							l += _putlx(file,arg);
-							l += _padn(file, arg, 16, pad, zlead,  leftalign);
+							l += _padn(file, arg, 16, pad, zlead, !leftalign);
 							break;
 						}
 						case 'X':
@@ -291,7 +293,7 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 							uint64_t arg = va_arg(va, uint64_t);
 							l += _padn(file, arg, 16, pad, zlead,  leftalign);
 							l += _putlX(file,arg);
-							l += _padn(file, arg, 16, pad, zlead,  leftalign);
+							l += _padn(file, arg, 16, pad, zlead, !leftalign);
 							break;
 						}
 					}
