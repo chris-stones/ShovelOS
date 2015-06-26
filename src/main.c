@@ -6,6 +6,7 @@
 #include<arch.h>
 #include<console/console.h>
 #include<exceptions/exceptions.h>
+#include<timer/timer.h>
 
 extern int __BSS_BEGIN;
 extern int __BSS_END;
@@ -77,6 +78,18 @@ void main() {
 	kprintf("%s", greeting);
 
 	kprintf("Allocated %d pages (%d bytes)\n", get_total_pages_allocated(), get_total_pages_allocated() * PAGE_SIZE);
+
+	{
+		timer_itf timer;
+		if(timer_open(&timer, 0)==0) {
+
+			for(;;) {
+				uint64_t t64 = (*timer)->read64(timer);
+				kprintf("0x%016lX\r\n",t64);
+			}
+		}
+		(*timer)->close(&timer);
+	}
 
 	// echo inputs back to sender
 	for(;;) {
