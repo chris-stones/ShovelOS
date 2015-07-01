@@ -13,6 +13,9 @@
 			16.3 General purpose Timers Registers Manual.
 */
 
+// TODO: WRONG!!
+#define GPTIMER_BASE_FREQ (32000) /* 32khz */
+
 #define GPTIMER1_PA_BASE_OMAP36XX  0x48318000
 #define GPTIMER2_PA_BASE_OMAP36XX  0x49032000
 #define GPTIMER3_PA_BASE_OMAP36XX  0x49034000
@@ -52,3 +55,80 @@ struct OMAP36XX_GPTIMER {
 	volatile       uint32_t TOWR;      // 0x058 Holds the number of masked overflow interrupts.
 };
 
+// TSICR flags.
+enum TSICR {
+	POSTED = (1<<2), // posted access mode.
+	SFT    = (1<<1), // reset software functional registers.
+};
+
+// TWPS flags
+enum TWPS {
+	W_PEND_TOWR = (1<<9),
+	W_PEND_TOCR = (1<<8),
+	W_PEND_TCVR = (1<<7),
+	W_PEND_TNIR = (1<<6),
+	W_PEND_TPIR = (1<<5),
+	W_PEND_TMAR = (1<<4),
+	W_PEND_TTGR = (1<<3),
+	W_PEND_TLDR = (1<<2),
+	W_PEND_TCRR = (1<<1),
+	W_PEND_TCLR = (1<<0),
+};
+
+#define WAIT_FOR_PENDING(timer, reg) \
+	if(timer->TSICR & POSTED) \
+			while(timer->TWPS & W_PEND_##reg) \
+				{ /* PAUSE? */; }
+
+
+#define TCLR_PTV_SHIFT   (2)
+#define TCLR_MAKE_PTV(x) (x<<TCLR_PTV_SHIFT)
+#define TCLR_PTV_MASK    (7<<TCLR_PTV_SHIFT)
+#define TCLR_GET_PTV(x)  ((x & PTV_MASK) >> TCLR_PTV_SHIFT)
+
+#define TCLR_TCM_SHIFT   (8)
+#define TCLR_MAKE_TCM(x) (x<<TCLR_TCM_SHIFT)
+#define TCLR_TCM_MASK    (3<<TCLR_TCM_SHIFT)
+#define TCLR_GET_TCM(x)  ((x & TCLR_TCM_MASK) >> TCLR_TCM_SHIFT)
+
+#define TCLR_TRG_SHIFT   (10)
+#define TCLR_MAKE_TRG(x) (x<<TCLR_TRG_SHIFT)
+#define TCLR_TRG_MASK    (3<<TCLR_TRG_SHIFT)
+#define TCLR_GET_TRG(x)  ((x & TCLR_TRG_MASK) >> TCLR_TRG_SHIFT)
+
+
+enum TCLR {
+
+	GPO_CFG   = (1<<14),
+	CAPT_MODE = (1<<13),
+	PT        = (1<<12),
+
+	TRG_MASK  = TCLR_TRG_MASK,
+	TRG_0     = TCLR_MAKE_TRG(0),
+	TRG_1     = TCLR_MAKE_TRG(1),
+	TRG_2     = TCLR_MAKE_TRG(2),
+	TRG_3     = TCLR_MAKE_TRG(3),
+
+	TCM_MASK  = TCLR_TCM_MASK,
+	TCM_0     = TCLR_MAKE_TCM(0),
+	TCM_1     = TCLR_MAKE_TCM(1),
+	TCM_2     = TCLR_MAKE_TCM(2),
+	TCM_3     = TCLR_MAKE_TCM(3),
+
+	SCPWM     = (1<<7),
+	CE        = (1<<6),
+	PRE       = (1<<5),
+
+	PTV_MASK  = TCLR_PTV_MASK,
+	PTV_0     = TCLR_MAKE_PTV(0),
+	PTV_1     = TCLR_MAKE_PTV(1),
+	PTV_2     = TCLR_MAKE_PTV(2),
+	PTV_3     = TCLR_MAKE_PTV(3),
+	PTV_4     = TCLR_MAKE_PTV(4),
+	PTV_5     = TCLR_MAKE_PTV(5),
+	PTV_6     = TCLR_MAKE_PTV(6),
+	PTV_7     = TCLR_MAKE_PTV(7),
+
+	AR        = (1<<1),
+	ST        = (1<<0),
+};

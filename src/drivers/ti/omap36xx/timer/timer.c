@@ -4,6 +4,7 @@
 #include <memory/memory.h>
 #include <memory/vm/vm.h>
 #include <timer/timer.h>
+#include <console/console.h>
 
 #include "regs.h"
 
@@ -14,6 +15,59 @@ struct context {
 	// private data.
 	struct OMAP36XX_GPTIMER * regs;
 };
+
+/* static */ uint32_t _get_divisor(struct OMAP36XX_GPTIMER * timer) {
+
+	WAIT_FOR_PENDING(timer, TCLR);
+
+	if(timer->TCLR & PRE)
+		return 2 << TCLR_GET_PTV(timer->TCLR);
+	return 1;
+}
+
+static int _set_divisor(struct OMAP36XX_GPTIMER * timer, uint32_t divisor) {
+
+	WAIT_FOR_PENDING(timer, TCLR);
+
+	uint32_t ptv=0;
+	switch(divisor) {
+	default:
+		return -1;
+	case 1:
+		timer->TCLR = (timer->TCLR & (~PRE));
+		return 0;
+	case 256:
+		++ptv;
+		// no break;
+	case 128:
+		++ptv;
+		// no break;
+	case 64:
+		++ptv;
+		// no break;
+	case 32:
+		++ptv;
+		// no break;
+	case 16:
+		++ptv;
+		// no break;
+	case 8:
+		++ptv;
+		// no break;
+	case 4:
+		++ptv;
+		// no break;
+	case 2:
+		break;
+	}
+
+	timer->TCLR =
+		(timer->TCLR & (~PTV_MASK)) |
+		TCLR_MAKE_PTV(ptv)          |
+		PRE                         ;
+
+	return 0;
+}
 
 static uint64_t _read64(timer_itf itf) {
 
@@ -81,6 +135,17 @@ static int _open(timer_itf *itf, int index) {
 
 	// initialise private data.
 	ctx->regs = (struct OMAP36XX_GPTIMER *)_timer_base[index]; // TODO: Virtual Address.
+
+	// switch to POSTED mode..
+	//	don't stall on writes, but require software to wait
+	//	for previous write operations before access.
+	ctx->regs->TSICR |= POSTED;
+
+	_set_divisor(ctx->regs, 1);
+
+	ctx->regs->TCLR |= ST; // start the timer.
+	ctx->regs->TLDR  =  0; // set counter reset value.
+	ctx->regs->TTGR  =  0; // reset the counter to TLDR.
 
 	// return desired interface.
 	*itf = (timer_itf)&(ctx->timer_interface);
