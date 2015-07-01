@@ -13,8 +13,15 @@
 			16.3 General purpose Timers Registers Manual.
 */
 
-// TODO: WRONG!!
-#define GPTIMER_BASE_FREQ (32000) /* 32khz */
+#define SYNCTIMER_32KHZ_PA_BASE_OMAP36XX 0x48320000
+
+struct OMAP36XX_SYNCTIMER {
+	volatile const uint32_t REG_32KSYNCNT_REV;
+	volatile       uint32_t REG_32KSYNCNT_SYSCONFIG;
+	volatile const uint32_t _reserved0;
+	volatile const uint32_t _reserved1;
+	volatile const uint32_t REG_32KSYNCNT_CR;
+};
 
 #define GPTIMER1_PA_BASE_OMAP36XX  0x48318000
 #define GPTIMER2_PA_BASE_OMAP36XX  0x49032000
