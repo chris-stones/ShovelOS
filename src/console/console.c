@@ -41,3 +41,11 @@ char * kgets(char * s, size_t size) {
 
 	return 0;
 }
+
+char kgetchar() {
+
+	char c[2] = {0,0};
+	if(kgets(c, 2))
+		return c[0];
+	return 0;
+}
