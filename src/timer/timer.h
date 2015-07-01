@@ -13,6 +13,9 @@ struct timer {
 
 	// read raw timer information.
 	uint64_t (*read64)(timer_itf self);
+	uint32_t (*read32)(timer_itf self);
+
+	uint32_t (*getfreq)(timer_itf self);
 
 	// close the device.
 	int (*close)(timer_itf *self);

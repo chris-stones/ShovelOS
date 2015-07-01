@@ -83,13 +83,15 @@ void main() {
 		timer_itf timer;
 		if(timer_open(&timer, 0)==0) {
 
+			uint32_t freq = (*timer)->getfreq(timer);
+
 			for(;;) {
 				kprintf("%s", "press return...");
-				uint32_t t0 = (uint32_t)(*timer)->read64(timer);
+				uint32_t t0 = (*timer)->read32(timer);
 				kgetchar();
-				uint32_t t1 = (uint32_t)(*timer)->read64(timer);
+				uint32_t t1 = (*timer)->read32(timer);
 
-				uint32_t ms = (t1-t0) / 32; // assuming 32khz omap36xx! assuming no-wrap around!
+				uint32_t ms = ((t1-t0) * 10) / (freq/100);
 				kprintf("you took %d.%03d seconds to press return\n", ms/1000, ms%1000);
 			}
 		}

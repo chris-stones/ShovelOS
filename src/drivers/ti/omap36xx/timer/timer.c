@@ -14,6 +14,8 @@ struct context {
 
 	// private data.
 	struct OMAP36XX_GPTIMER * regs;
+
+	uint32_t freq;
 };
 
 /* static */ uint32_t _get_divisor(struct OMAP36XX_GPTIMER * timer) {
@@ -69,12 +71,25 @@ static int _set_divisor(struct OMAP36XX_GPTIMER * timer, uint32_t divisor) {
 	return 0;
 }
 
-static uint64_t _read64(timer_itf itf) {
+static uint32_t _getfreq(timer_itf itf) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, timer_interface, itf);
+
+	return ctx->freq;
+}
+
+static uint32_t _read32(timer_itf itf) {
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, timer_interface, itf);
 
 	return ctx->regs->TCRR;
+}
+
+static uint64_t _read64(timer_itf itf) {
+
+	return _read32(itf);
 }
 
 // free resources and NULL out the interface.
@@ -94,6 +109,55 @@ static int _close(timer_itf *itf) {
 		return 0;
 	}
 	return -1;
+}
+
+static int _calibrate(timer_itf itf) {
+
+	struct context * ctx =
+			STRUCT_BASE(struct context, timer_interface, itf);
+
+	if(0 != vm_map(SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL ))
+		return -1;
+
+	struct OMAP36XX_SYNCTIMER * sync = (struct OMAP36XX_SYNCTIMER*)SYNCTIMER_32KHZ_PA_BASE_OMAP36XX;
+
+	const uint32_t ticks_32khz = 3200;
+
+//	kprintf("calibrating timer...");
+
+	uint32_t beg_32khz  = sync->REG_32KSYNCNT_CR;
+	uint32_t beg_timer  = ctx->regs->TCRR;
+	uint32_t cur_32khz;
+	uint32_t cur_timer;
+
+	uint32_t target_32khz = beg_32khz + ticks_32khz;
+	uint32_t actual_32khz_ticks;
+	uint32_t actual_timer_ticks;
+
+	if(target_32khz > beg_32khz) {
+		do {
+			cur_32khz = sync->REG_32KSYNCNT_CR;
+			cur_timer = ctx->regs->TCRR;
+		} while(sync->REG_32KSYNCNT_CR < target_32khz);
+		actual_32khz_ticks = cur_32khz - beg_32khz;
+	}
+	else {
+		// 32khz will wrap around!
+		do {
+			cur_32khz = sync->REG_32KSYNCNT_CR;
+			cur_timer = ctx->regs->TCRR;
+		} while(sync->REG_32KSYNCNT_CR < target_32khz || sync->REG_32KSYNCNT_CR >= beg_32khz);
+		actual_32khz_ticks = cur_32khz + (0xffffffff - beg_32khz);
+	}
+	actual_timer_ticks = cur_timer - beg_timer;
+
+	ctx->freq = 32000 * (actual_timer_ticks / actual_32khz_ticks);
+
+//	kprintf("%dHz (%d/%d)\n", ctx->freq, actual_timer_ticks, actual_32khz_ticks);
+
+	vm_unmap(SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, PAGE_SIZE);
+
+	return 0;
 }
 
 static int _open(timer_itf *itf, int index) {
@@ -132,6 +196,8 @@ static int _open(timer_itf *itf, int index) {
 	// initialise function pointers.
 	ctx->timer_interface->close = &_close;
 	ctx->timer_interface->read64 = &_read64;
+	ctx->timer_interface->read32 = &_read32;
+	ctx->timer_interface->getfreq = &_getfreq;
 
 	// initialise private data.
 	ctx->regs = (struct OMAP36XX_GPTIMER *)_timer_base[index]; // TODO: Virtual Address.
@@ -146,6 +212,9 @@ static int _open(timer_itf *itf, int index) {
 	ctx->regs->TCLR |= ST; // start the timer.
 	ctx->regs->TLDR  =  0; // set counter reset value.
 	ctx->regs->TTGR  =  0; // reset the counter to TLDR.
+
+	if(0 != _calibrate((timer_itf)&ctx->timer_interface))
+		return -1; // TODO: LEAK
 
 	// return desired interface.
 	*itf = (timer_itf)&(ctx->timer_interface);
