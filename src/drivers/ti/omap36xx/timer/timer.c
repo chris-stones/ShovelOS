@@ -18,7 +18,8 @@ struct context {
 	uint32_t freq;
 };
 
-/* static */ uint32_t _get_divisor(struct OMAP36XX_GPTIMER * timer) {
+/*
+static uint32_t _get_divisor(struct OMAP36XX_GPTIMER * timer) {
 
 	WAIT_FOR_PENDING(timer, TCLR);
 
@@ -26,6 +27,7 @@ struct context {
 		return 2 << TCLR_GET_PTV(timer->TCLR);
 	return 1;
 }
+*/
 
 static int _set_divisor(struct OMAP36XX_GPTIMER * timer, uint32_t divisor) {
 
@@ -111,10 +113,48 @@ static int _close(timer_itf *itf) {
 	return -1;
 }
 
+static int _oneshot(timer_itf itf, const struct timespec * timespec) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, timer_interface, itf);
+
+	uint64_t ns_per_tick = 1000000000ULL / (uint64_t)ctx->freq;
+	uint64_t ns = (uint64_t)timespec->seconds * 1000000000ULL + (uint64_t)timespec->nanoseconds;
+	uint64_t ticks = ns / ns_per_tick;
+
+	if(ticks > 0xFFFFFFFF)
+		return -1;
+
+	if(ticks <= 10)
+		ticks = 11; // interrupts take 10 clock cycles to enable.
+
+	WAIT_FOR_PENDING(ctx->regs, TCLR);
+	ctx->regs->TCLR &=                          ~ST; // stop the timer.
+	WAIT_FOR_PENDING_MULTIPLE(ctx->regs, W_PEND_TLDR | W_PEND_TTGR | W_PEND_TCLR);
+	ctx->regs->TLDR  =           0xffffffff - ticks; // set counter reset value.
+	ctx->regs->TTGR  =                            0; // reset the counter to TLDR.
+	ctx->regs->TIER  =                   OVF_IT_ENA; // enable only overflow interrupts.
+
+	// clear auto-reload, set trigger overflow and start the timer.
+	ctx->regs->TCLR  = (ctx->regs->TCLR & ~(AR | TRG_MASK)) | ST | TRG_OVR;
+
+	return 0;
+}
+
+static int _debug_dump(timer_itf itf) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, timer_interface, itf);
+
+	kprintf("timer TISR %x\n", ctx->regs->TISR);
+
+	return 0;
+}
+
 static int _calibrate(timer_itf itf) {
 
 	struct context * ctx =
-			STRUCT_BASE(struct context, timer_interface, itf);
+		STRUCT_BASE(struct context, timer_interface, itf);
 
 	if(0 != vm_map(SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL ))
 		return -1;
@@ -123,7 +163,12 @@ static int _calibrate(timer_itf itf) {
 
 	const uint32_t ticks_32khz = 3200;
 
-//	kprintf("calibrating timer...");
+	// wait for timer to settle...
+	for(int settle=0;settle<32; settle++) {
+		uint32_t _32  = sync->REG_32KSYNCNT_CR;
+		while(_32 == sync->REG_32KSYNCNT_CR)
+			/* PAUSE */;
+	}
 
 	uint32_t beg_32khz  = sync->REG_32KSYNCNT_CR;
 	uint32_t beg_timer  = ctx->regs->TCRR;
@@ -151,9 +196,9 @@ static int _calibrate(timer_itf itf) {
 	}
 	actual_timer_ticks = cur_timer - beg_timer;
 
-	ctx->freq = 32000 * (actual_timer_ticks / actual_32khz_ticks);
+	ctx->freq = (uint32_t)((32768ULL * (uint64_t)actual_timer_ticks) / (uint64_t)actual_32khz_ticks);
 
-//	kprintf("%dHz (%d/%d)\n", ctx->freq, actual_timer_ticks, actual_32khz_ticks);
+	//kprintf("timer calibrated: %dHz (%d/%d)\n", ctx->freq, actual_timer_ticks, actual_32khz_ticks);
 
 	vm_unmap(SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, PAGE_SIZE);
 
@@ -198,6 +243,8 @@ static int _open(timer_itf *itf, int index) {
 	ctx->timer_interface->read64 = &_read64;
 	ctx->timer_interface->read32 = &_read32;
 	ctx->timer_interface->getfreq = &_getfreq;
+	ctx->timer_interface->oneshot = &_oneshot;
+	ctx->timer_interface->debug_dump = &_debug_dump;
 
 	// initialise private data.
 	ctx->regs = (struct OMAP36XX_GPTIMER *)_timer_base[index]; // TODO: Virtual Address.
@@ -212,6 +259,7 @@ static int _open(timer_itf *itf, int index) {
 	ctx->regs->TCLR |= ST; // start the timer.
 	ctx->regs->TLDR  =  0; // set counter reset value.
 	ctx->regs->TTGR  =  0; // reset the counter to TLDR.
+	WAIT_FOR_PENDING(ctx->regs, ALL);
 
 	if(0 != _calibrate((timer_itf)&ctx->timer_interface))
 		return -1; // TODO: LEAK

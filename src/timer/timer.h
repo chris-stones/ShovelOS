@@ -5,6 +5,11 @@
 
 #define TIMERS_MAX 16 // max timers to support
 
+struct timespec {
+	uint32_t seconds;
+	uint32_t nanoseconds;
+};
+
 struct timer;
 
 typedef const struct timer * const * timer_itf;
@@ -16,6 +21,10 @@ struct timer {
 	uint32_t (*read32)(timer_itf self);
 
 	uint32_t (*getfreq)(timer_itf self);
+
+	int (*oneshot)(timer_itf self, const struct timespec * timespec);
+
+	int (*debug_dump)(timer_itf self);
 
 	// close the device.
 	int (*close)(timer_itf *self);
