@@ -62,6 +62,13 @@ struct OMAP36XX_GPTIMER {
 	volatile       uint32_t TOWR;      // 0x058 Holds the number of masked overflow interrupts.
 };
 
+// TIER flags.
+enum TIER {
+	MAT_IT_ENA  = (1<<0), // enable match interrupt.
+	OVF_IT_ENA  = (1<<1), // enable overflow interrupt.
+	TCAR_IT_ENA = (1<<2), // enable capture interrupt.
+};
+
 // TSICR flags.
 enum TSICR {
 	POSTED = (1<<2), // posted access mode.
@@ -80,6 +87,8 @@ enum TWPS {
 	W_PEND_TLDR = (1<<2),
 	W_PEND_TCRR = (1<<1),
 	W_PEND_TCLR = (1<<0),
+
+	W_PEND_ALL = 0x3FF
 };
 
 #define WAIT_FOR_PENDING(timer, reg) \
@@ -87,6 +96,10 @@ enum TWPS {
 			while(timer->TWPS & W_PEND_##reg) \
 				{ /* PAUSE? */; }
 
+#define WAIT_FOR_PENDING_MULTIPLE(timer, flags) \
+	if(timer->TSICR & POSTED) \
+			while(timer->TWPS & (flags)) \
+				{ /* PAUSE? */; }
 
 #define TCLR_PTV_SHIFT   (2)
 #define TCLR_MAKE_PTV(x) (x<<TCLR_PTV_SHIFT)
@@ -110,11 +123,11 @@ enum TCLR {
 	CAPT_MODE = (1<<13),
 	PT        = (1<<12),
 
-	TRG_MASK  = TCLR_TRG_MASK,
-	TRG_0     = TCLR_MAKE_TRG(0),
-	TRG_1     = TCLR_MAKE_TRG(1),
-	TRG_2     = TCLR_MAKE_TRG(2),
-	TRG_3     = TCLR_MAKE_TRG(3),
+	TRG_MASK       = TCLR_TRG_MASK,
+	TRG_NONE       = TCLR_MAKE_TRG(0),
+	TRG_OVR        = TCLR_MAKE_TRG(1),
+	TRG_OVR_MATCH  = TCLR_MAKE_TRG(2),
+//	TRG_3     = TCLR_MAKE_TRG(3),
 
 	TCM_MASK  = TCLR_TCM_MASK,
 	TCM_0     = TCLR_MAKE_TCM(0),
