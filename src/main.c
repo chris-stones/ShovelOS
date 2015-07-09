@@ -7,6 +7,7 @@
 #include<console/console.h>
 #include<exceptions/exceptions.h>
 #include<timer/timer.h>
+#include<interrupt_controller/controller.h>
 
 extern int __BSS_BEGIN;
 extern int __BSS_END;
@@ -83,17 +84,40 @@ void main() {
 		timer_itf timer;
 		if(timer_open(&timer, 0)==0) {
 
-			uint32_t freq = (*timer)->getfreq(timer);
+			interrupt_controller_itf intc;
+			if(interrupt_controller_open(&intc) == 0) {
+
+				for(int i=0;i<96;i++) {
+					(*intc)->register_handler(intc, i, (interrupt_func_t)1 );
+					(*intc)->unmask(intc, i);
+				}
+
+				kprintf("unmasked irq 37\n");
+			}
+
+			struct timespec ts;
+			ts.seconds = 5;
+			ts.nanoseconds = 500000000;
+			(*timer)->oneshot(timer, &ts);
+
+			kprintf("timer0->oneshot(5 seconds);\n");
+
+			(*intc)->debug_dump(intc);
+			(*timer)->debug_dump(timer);
 
 			for(;;) {
-				kprintf("%s", "press return...");
-				uint32_t t0 = (*timer)->read32(timer);
-				kgetchar();
-				uint32_t t1 = (*timer)->read32(timer);
-
-				uint32_t ms = ((t1-t0) * 10) / (freq/100);
-				kprintf("you took %d.%03d seconds to press return\n", ms/1000, ms%1000);
+				uint32_t time = (*timer)->read32(timer);
+//				kprintf("0x%08x\n", time );
+				if(!time) {
+					kprintf("DONE\n");
+					for(;;) {
+						(*intc)->debug_dump(intc);
+						(*timer)->debug_dump(timer);
+						kgetchar();
+					}
+				}
 			}
+
 		}
 		(*timer)->close(&timer);
 	}
