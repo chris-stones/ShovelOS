@@ -61,8 +61,8 @@ _start:
 
 	@ return to System mode and enter main.
 	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #31    @ set SUPERVISOR mode.
-	msr cpsr, r0         @ switch to SUPERVISOR mode.
+	orr r0,   r0, #31    @ set SYSTEM mode.
+	msr cpsr, r0         @ switch to SYSTEM mode.
 	b  main              @ run main!!!
 
 @ a tiny array that we will use for a stack before get_free_page() is setup.
