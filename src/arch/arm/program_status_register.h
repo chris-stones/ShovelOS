@@ -58,3 +58,28 @@ static inline uint32_t _arm_cpsr_read() {
 	return _register;
 }
 
+static inline uint32_t _arm_disable_interrupts() {
+
+	uint32_t cpsr = _arm_cpsr_read();
+
+	_arm_cpsr_write(cpsr | PSR_I(1) | PSR_F(1) );
+
+	return cpsr & (PSR_I(1) | PSR_F(1));
+}
+
+static inline uint32_t _arm_enable_interrupts() {
+
+	uint32_t cpsr = _arm_cpsr_read();
+
+	_arm_cpsr_write(cpsr & ~(PSR_I(1) | PSR_F(1)));
+
+	return cpsr & (PSR_I(1) | PSR_F(1));
+}
+
+static inline void _arm_restore_interrupts(uint32_t flags) {
+
+	uint32_t cpsr = _arm_cpsr_read();
+
+	_arm_cpsr_write(cpsr | flags );
+}
+
