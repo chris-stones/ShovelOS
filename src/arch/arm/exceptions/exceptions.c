@@ -1,6 +1,7 @@
 
 #include <console/console.h>
 #include <system_control_register.h>
+#include <program_status_register.h>
 #include <coprocessor_asm.h>
 #include <asm.h>
 
@@ -18,6 +19,7 @@ void exceptions_setup() {
 	         sctlr &= ~SCTLR_VE; // clear SCTLR.VE ( deprecated, RAZ/WI ).
 	_arm_cp_write_SCTLR(sctlr);
 
+	_arm_enable_interrupts();
 
 	dsb();
 }
