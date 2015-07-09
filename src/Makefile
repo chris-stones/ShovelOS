@@ -21,6 +21,7 @@ OBJ = $(SRC_C:.c=.c.o)
 SOC_LIBS = drivers/ti/omap36xx/omap36xx.o
 
 LIBS =  arch/$(ARCH)/arch.o \
+		interrupt_controller/interrupt_controller.o \
 		chardevice/chardevice.o \
 		timer/timer.o \
 		stdlib/stdlib.o \
@@ -46,6 +47,9 @@ drivers/ti/omap36xx/omap36xx.o:
 memory/memory.o:
 	make -C memory memory.o
 
+interrupt_controller/interrupt_controller.o:
+	make -C interrupt_controller interrupt_controller.o
+
 chardevice/chardevice.o:
 	make -C chardevice chardevice.o
 
@@ -70,6 +74,7 @@ clean:
 	make -C drivers/ti/omap36xx clean
 	make -C memory clean
 	make -C chardevice clean
+	make -C interrupt_controller clean
 	make -C timer clean
 	make -C stdlib clean
 	make -C console clean
