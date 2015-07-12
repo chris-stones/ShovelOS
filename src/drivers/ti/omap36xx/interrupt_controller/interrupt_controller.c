@@ -52,7 +52,7 @@ static int _mask(interrupt_controller_itf itf, irq_t irq) {
 		struct context * ctx =
 			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
 
-		ctx->regs->n[irq/32].INTCPS_MIR_SETn = irq % 32;
+		ctx->regs->n[irq/32].INTCPS_MIR_SETn = 1 << (irq % 32);
 
 		return 0;
 	}
@@ -66,7 +66,7 @@ static int _unmask(interrupt_controller_itf itf, irq_t irq) {
 		struct context * ctx =
 			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
 
-		ctx->regs->n[irq/32].INTCPS_MIR_CLEARn = irq % 32;
+		ctx->regs->n[irq/32].INTCPS_MIR_CLEARn = 1 << (irq % 32);
 
 		return 0;
 	}
