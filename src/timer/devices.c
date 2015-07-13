@@ -3,7 +3,7 @@
 
 static timer_open_func_t _timers[TIMERS_MAX]; // = {0, };
 
-int timer_open(timer_itf *self, int index) {
+int timer_open(timer_itf *self, irq_itf * irq, int index) {
 
 	timer_open_func_t func;
 
@@ -11,7 +11,7 @@ int timer_open(timer_itf *self, int index) {
 		return -1;
 
 	if((func = _timers[index]))
-		return func(self, index);
+		return func(self, irq, index);
 
 	return -1;
 }

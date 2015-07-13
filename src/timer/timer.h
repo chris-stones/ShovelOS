@@ -2,6 +2,7 @@
 #pragma once
 
 #include<stdint.h>
+#include<drivers/drivers.h>
 
 #define TIMERS_MAX 16 // max timers to support
 
@@ -30,9 +31,9 @@ struct timer {
 	int (*close)(timer_itf *self);
 };
 
-int timer_open(timer_itf *self, int index);
+int timer_open(timer_itf *timer, irq_itf *irq, int index);
 
-typedef int(*timer_open_func_t)(timer_itf *self, int index);
+typedef int(*timer_open_func_t)(timer_itf *self, irq_itf * irq, int index);
 
 int timer_install  (timer_open_func_t open_func, int index);
 int timer_uninstall(int index);

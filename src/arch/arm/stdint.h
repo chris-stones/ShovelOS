@@ -30,3 +30,5 @@ typedef unsigned long long int phy_addr40_t;
 
 typedef void*        		phy_ptr_t;
 
+typedef uint32_t irq_t;
+

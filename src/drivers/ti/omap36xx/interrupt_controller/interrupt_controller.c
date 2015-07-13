@@ -5,6 +5,7 @@
 #include <memory/vm/vm.h>
 #include <interrupt_controller/controller.h>
 #include <console/console.h>
+#include <asm.h>
 
 #include "regs.h"
 
@@ -16,22 +17,24 @@ struct context {
 	//private data.
 	struct OMAP36XX_MPU_INTC_BASE * regs;
 
-	interrupt_func_t interrupt_functions[INTERRUPTS_MAX];
+	irq_itf interrupt_functions[INTERRUPTS_MAX];
 };
 
-static int _register_handler(interrupt_controller_itf itf, irq_t irq, interrupt_func_t func) {
+static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
 
-	int e = !func || (irq >= INTERRUPTS_MAX);
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
+
+	int e = (irq_num >= INTERRUPTS_MAX);
 
 	if(!e) {
 
 		struct context * ctx =
 			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
 
-		if(!ctx->interrupt_functions[irq]) {
-			ctx->interrupt_functions[irq] = func;
+		if(!ctx->interrupt_functions[irq_num]) {
+			ctx->interrupt_functions[irq_num] = i_irq;
 
-			ctx->regs->INTCPS_ILRm[irq] = 0; // priority 0 (highest), route to IRQ ( not FIQ )
+			ctx->regs->INTCPS_ILRm[irq_num] = 0; // priority 0 (highest), route to IRQ ( not FIQ )
 		}
 		else
 			e = -1;
@@ -40,71 +43,63 @@ static int _register_handler(interrupt_controller_itf itf, irq_t irq, interrupt_
 	return e;
 }
 
-static int _deassert(interrupt_controller_itf itf, irq_t irq) {
+static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
 
-	return -1;
-}
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
 
-static int _mask(interrupt_controller_itf itf, irq_t irq) {
-
-	if(irq < INTERRUPTS_MAX) {
+	if(irq_num < INTERRUPTS_MAX) {
 
 		struct context * ctx =
 			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
 
-		ctx->regs->n[irq/32].INTCPS_MIR_SETn = 1 << (irq % 32);
+		ctx->regs->n[irq_num/32].INTCPS_MIR_SETn = 1 << (irq_num % 32);
 
 		return 0;
 	}
 	return -1;
 }
 
-static int _unmask(interrupt_controller_itf itf, irq_t irq) {
+static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
 
-	if(irq < INTERRUPTS_MAX) {
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
+
+	if(irq_num < INTERRUPTS_MAX) {
 
 		struct context * ctx =
 			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
 
-		ctx->regs->n[irq/32].INTCPS_MIR_CLEARn = 1 << (irq % 32);
+		ctx->regs->n[irq_num/32].INTCPS_MIR_CLEARn = 1 << (irq_num % 32);
 
 		return 0;
 	}
 	return -1;
 }
 
-static int _call_handler(interrupt_controller_itf itf) {
+static int __arm_IRQ(interrupt_controller_itf itf) {
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, interrupt_controller_interface, itf);
 
-	irq_t irq = 0; // TODO:
-	uint32_t spurious = 0; // TODO:
+	irq_t irq = ctx->regs->INTCPS_SIR_IRQ;
+	uint32_t spurious = irq & ~((1<<7)-1);
 
 	if(spurious || irq>=INTERRUPTS_MAX)
 		return -1;
 
-	interrupt_func_t func = ctx->interrupt_functions[irq];
+	irq_itf func = ctx->interrupt_functions[irq];
 
 	int e = 0;
 	if(func)
-		e = func(irq);
+		e = (*func)->IRQ(func);
 
-	if(0 != _deassert(itf, irq))
-		e = -1;
+	ctx->regs->INTCPS_CONTROL = 1; // DONE - allow next IRQ.
+
+	dsb();
 
 	return e;
 }
 
 static int _debug_dump(interrupt_controller_itf itf) {
-
-	struct context * ctx =
-		STRUCT_BASE(struct context, interrupt_controller_interface, itf);
-
-	kprintf("IRQ PENDING %08X %08X %08X\n",
-		ctx->regs->n[0].INTCPS_PENDING_IRQn,
-		ctx->regs->n[1].INTCPS_PENDING_IRQn,
-		ctx->regs->n[2].INTCPS_PENDING_IRQn);
 
 	return 0;
 }
@@ -124,16 +119,14 @@ static int _open(interrupt_controller_itf * itf) {
 
 	ctx->interrupt_controller_interface->register_handler =
 		&_register_handler;
-	ctx->interrupt_controller_interface->deassert =
-		&_deassert;
 	ctx->interrupt_controller_interface->mask =
 		&_mask;
 	ctx->interrupt_controller_interface->unmask =
 		&_unmask;
-	ctx->interrupt_controller_interface->call_handler =
-		&_call_handler;
 	ctx->interrupt_controller_interface->debug_dump =
 		&_debug_dump;
+	ctx->interrupt_controller_interface->_arm_IRQ =
+		&__arm_IRQ;
 
 	ctx->regs = (struct OMAP36XX_MPU_INTC_BASE *)MPU_INTC_PA_BASE_OMAP36XX;
 

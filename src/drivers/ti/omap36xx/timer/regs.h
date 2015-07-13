@@ -23,6 +23,8 @@ struct OMAP36XX_SYNCTIMER {
 	volatile const uint32_t REG_32KSYNCNT_CR;
 };
 
+#define GPTIMER_IRQ_BASE_OMAP36XX  37
+
 #define GPTIMER1_PA_BASE_OMAP36XX  0x48318000
 #define GPTIMER2_PA_BASE_OMAP36XX  0x49032000
 #define GPTIMER3_PA_BASE_OMAP36XX  0x49034000
@@ -60,6 +62,13 @@ struct OMAP36XX_GPTIMER {
 	volatile       uint32_t TCVR;      // 0x050 1ms Tick Generation.
 	volatile       uint32_t TOCR;      // 0x054 Used to mask the tick interrupt for a selected number of ticks.
 	volatile       uint32_t TOWR;      // 0x058 Holds the number of masked overflow interrupts.
+};
+
+// TISR flags
+enum TISR{
+	MAT_IT_FLAG  = (1<<0),
+	OVF_IT_FLAG  = (1<<1),
+	TCAR_IT_FLAG = (1<<2),
 };
 
 // TIER flags.

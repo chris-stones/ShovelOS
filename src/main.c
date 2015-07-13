@@ -82,17 +82,15 @@ void main() {
 
 	{
 		timer_itf timer;
-		if(timer_open(&timer, 0)==0) {
+		irq_itf irq;
+
+		if(timer_open(&timer, &irq, 0)==0) {
 
 			interrupt_controller_itf intc;
 			if(interrupt_controller_open(&intc) == 0) {
 
-				for(int i=0;i<96;i++) {
-					(*intc)->register_handler(intc, i, (interrupt_func_t)1 );
-					(*intc)->unmask(intc, i);
-				}
-
-				kprintf("unmasked irq 37\n");
+				(*intc)->register_handler(intc, irq);
+				(*intc)->unmask(intc, irq);
 			}
 
 			struct timespec ts;
@@ -106,16 +104,9 @@ void main() {
 			(*timer)->debug_dump(timer);
 
 			for(;;) {
-				uint32_t time = (*timer)->read32(timer);
-//				kprintf("0x%08x\n", time );
-				if(!time) {
-					kprintf("DONE\n");
-					for(;;) {
-						(*intc)->debug_dump(intc);
-						(*timer)->debug_dump(timer);
-						kgetchar();
-					}
-				}
+				char string[32];
+				kgets(string, sizeof string);
+				kprintf("\n");
 			}
 
 		}

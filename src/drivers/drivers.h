@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 // driver module constructor.
 #define ATTRIBUTE_REGISTER_DRIVER __attribute__ ((section (".register_drivers")))
 
@@ -16,3 +18,14 @@
 	context->name = &(context->__##name##_inst)
 
 typedef int (*driver_install_func_ptr)();
+
+struct irq;
+
+typedef const struct irq * const * irq_itf;
+
+struct irq {
+
+	int   (*IRQ)(irq_itf self);
+	irq_t (*get_irq_number)(irq_itf self);
+};
+

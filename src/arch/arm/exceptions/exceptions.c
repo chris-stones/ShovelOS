@@ -4,6 +4,7 @@
 #include <program_status_register.h>
 #include <coprocessor_asm.h>
 #include <asm.h>
+#include <interrupt_controller/controller.h>
 
 extern int __EXCEPTION_VECTOR_BASE;
 
@@ -26,8 +27,9 @@ void exceptions_setup() {
 
 void __attribute__ ((interrupt ("IRQ"))) _arm_isr_IRQ() {
 
-	kprintf("IRQ\n");
-	for(;;);
+	interrupt_controller_itf itf = 0;
+	if(0 == interrupt_controller(&itf))
+		(*itf)->_arm_IRQ(itf);
 }
 
 void __attribute__ ((interrupt ("FIQ"))) _arm_isr_FIQ() {

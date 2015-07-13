@@ -2,12 +2,28 @@
 #include "controller.h"
 
 static interrupt_controller_open_func_t _open_func = 0;
+static interrupt_controller_itf _itf = 0;
+
 
 int interrupt_controller_open(interrupt_controller_itf *self) {
 
-	if(_open_func)
-		return _open_func(self);
+	if(_open_func) {
+		int i = _open_func(self);
+		if(i==0) {
+			_itf = *self;
+			return i;
+		}
+	}
 
+	return -1;
+}
+
+int interrupt_controller(interrupt_controller_itf *self) {
+
+	if(_itf) {
+		*self = _itf;
+		return 0;
+	}
 	return -1;
 }
 

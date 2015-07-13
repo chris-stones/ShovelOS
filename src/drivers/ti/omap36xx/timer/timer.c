@@ -11,11 +11,14 @@
 struct context {
 
 	DRIVER_INTERFACE(struct timer, timer_interface); // implements TIMER interface.
+	DRIVER_INTERFACE(struct irq,   irq_interface);   // implements IRQ interface.
 
 	// private data.
 	struct OMAP36XX_GPTIMER * regs;
 
 	uint32_t freq;
+
+	irq_t irq_number;
 };
 
 /*
@@ -143,10 +146,32 @@ static int _oneshot(timer_itf itf, const struct timespec * timespec) {
 
 static int _debug_dump(timer_itf itf) {
 
-	struct context * ctx =
-		STRUCT_BASE(struct context, timer_interface, itf);
+	return 0;
+}
 
-	kprintf("timer TISR %x\n", ctx->regs->TISR);
+static irq_t _get_irq_number(irq_itf itf) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, irq_interface, itf);
+
+	return ctx->irq_number;
+}
+
+static int _IRQ(irq_itf itf) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, irq_interface, itf);
+
+	kprintf("timer.c _IRQ\n");
+
+	ctx->regs->TISR = OVF_IT_FLAG; // clear interrupt status register.
+
+	//// DEBUG - RESTART ////////
+	struct timespec ts;
+	ts.seconds = 5;
+	ts.nanoseconds = 500000000;
+	_oneshot((timer_itf)&(ctx->timer_interface), &ts);
+	/////////////////////////////
 
 	return 0;
 }
@@ -205,7 +230,10 @@ static int _calibrate(timer_itf itf) {
 	return 0;
 }
 
-static int _open(timer_itf *itf, int index) {
+static int _open(
+		timer_itf *i_timer,
+		irq_itf *i_irq,
+		int index) {
 
 	struct context *ctx;
 
@@ -237,8 +265,9 @@ static int _open(timer_itf *itf, int index) {
 
 	// initialise instance pointers.
 	DRIVER_INIT_INTERFACE( ctx, timer_interface );
+	DRIVER_INIT_INTERFACE( ctx, irq_interface );
 
-	// initialise function pointers.
+	// initialise function pointers for timer interface.
 	ctx->timer_interface->close = &_close;
 	ctx->timer_interface->read64 = &_read64;
 	ctx->timer_interface->read32 = &_read32;
@@ -246,8 +275,15 @@ static int _open(timer_itf *itf, int index) {
 	ctx->timer_interface->oneshot = &_oneshot;
 	ctx->timer_interface->debug_dump = &_debug_dump;
 
+	// initialise function pointers for IRQ interface.
+	ctx->irq_interface->IRQ = &_IRQ;
+	ctx->irq_interface->get_irq_number = &_get_irq_number;
+
 	// initialise private data.
 	ctx->regs = (struct OMAP36XX_GPTIMER *)_timer_base[index]; // TODO: Virtual Address.
+
+	// initialise IRQ number.
+	ctx->irq_number = GPTIMER_IRQ_BASE_OMAP36XX + index;
 
 	// switch to POSTED mode..
 	//	don't stall on writes, but require software to wait
@@ -261,11 +297,13 @@ static int _open(timer_itf *itf, int index) {
 	ctx->regs->TTGR  =  0; // reset the counter to TLDR.
 	WAIT_FOR_PENDING(ctx->regs, ALL);
 
-	if(0 != _calibrate((timer_itf)&ctx->timer_interface))
+	if(0 != _calibrate((timer_itf)&(ctx->timer_interface)))
 		return -1; // TODO: LEAK
 
 	// return desired interface.
-	*itf = (timer_itf)&(ctx->timer_interface);
+	*i_timer = (timer_itf)&(ctx->timer_interface);
+	if(i_irq)
+		*i_irq = (irq_itf)&(ctx->irq_interface);
 
 	return 0;
 }
