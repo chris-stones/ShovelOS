@@ -1,8 +1,6 @@
 
-#include "system_control_register.h"
-#include "program_status_register.h"
-#include "coprocessor_asm.h"
 
+#include "asm.h"
 #include <arch.h>
 
 #include "mm/VMSAv7/supersection.h"

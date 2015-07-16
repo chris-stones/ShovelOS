@@ -1,8 +1,5 @@
 
 #include <console/console.h>
-#include <system_control_register.h>
-#include <program_status_register.h>
-#include <coprocessor_asm.h>
 #include <asm.h>
 #include <interrupt_controller/controller.h>
 
@@ -23,6 +20,24 @@ void exceptions_setup() {
 	_arm_enable_interrupts();
 
 	dsb();
+}
+
+int in_interrupt() {
+
+	switch(_arm_cpsr_read() & PSR_MODE_MASK) {
+	case PSR_MODE_fiq:  // FIQ
+	case PSR_MODE_irq:  // IRQ
+	case PSR_MODE_abt:  // Abort
+	case PSR_MODE_und:  // Undefined
+	case PSR_MODE_svc:  // Supervisor
+		return 1;
+	default:
+	case PSR_MODE_usr:  // User
+	case PSR_MODE_mon:  // Monitor ( Secure Only )
+	case PSR_MODE_hyp:  // Hyp ( Non-Secure Only )
+	case PSR_MODE_sys:  // System
+		return 0;
+	}
 }
 
 void __attribute__ ((interrupt ("IRQ"))) _arm_isr_IRQ() {

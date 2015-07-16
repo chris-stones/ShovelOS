@@ -5,7 +5,7 @@
 SRC_S = entry.S
 SRC_C = arm.c
 
-LIBS =  mm/$(VMSA)/vmsa.o exceptions/exceptions.o
+LIBS =  mm/$(VMSA)/vmsa.o exceptions/exceptions.o concurrency/spinlock.o
 
 OBJ = $(SRC_S:.S=.S.o) $(SRC_C:.c=.c.o)
 
@@ -24,5 +24,6 @@ mm/$(VMSA)/vmsa.o :
 clean:
 	make -C mm/$(VMSA) clean
 	make -C exceptions clean
+	make -C concurrency clean
 	rm -f *.o
 	rm -f *.a

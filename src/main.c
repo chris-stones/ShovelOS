@@ -8,6 +8,7 @@
 #include<exceptions/exceptions.h>
 #include<timer/timer.h>
 #include<interrupt_controller/controller.h>
+#include<concurrency/spinlock.h>
 
 extern int __BSS_BEGIN;
 extern int __BSS_END;
@@ -100,13 +101,23 @@ void main() {
 
 			kprintf("timer0->oneshot(5 seconds);\n");
 
-			(*intc)->debug_dump(intc);
-			(*timer)->debug_dump(timer);
+			int phase = 1;
+			spinlock_t lock = SPINLOCK_UNLOCKED;
 
 			for(;;) {
-				char string[32];
-				kgets(string, sizeof string);
-				kprintf("\n");
+
+				char string[2];
+				kgets(string,2);
+
+				if(phase&1) {
+					spinlock_lock_irqsave(&lock);
+					kprintf("LOCKED\n");
+				}
+				else {
+					spinlock_unlock_irqrestore(&lock);
+					kprintf("UNLOCKED\n");
+				}
+				phase = ~phase;
 			}
 
 		}

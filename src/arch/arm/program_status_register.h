@@ -35,6 +35,8 @@ typedef enum program_status_register_mode {
   PSR_MODE_und = 27,  // Undefined
   PSR_MODE_sys = 31,  // System
   
+  PSR_MODE_MASK = (1<<5)-1,
+
 } program_status_register_enum_t;
 
 
@@ -63,6 +65,8 @@ static inline uint32_t _arm_disable_interrupts() {
 	uint32_t cpsr = _arm_cpsr_read();
 
 	_arm_cpsr_write(cpsr | PSR_I(1) | PSR_F(1) );
+	dsb();
+	isb();
 
 	return cpsr & (PSR_I(1) | PSR_F(1));
 }
@@ -80,6 +84,6 @@ static inline void _arm_restore_interrupts(uint32_t flags) {
 
 	uint32_t cpsr = _arm_cpsr_read();
 
-	_arm_cpsr_write(cpsr | flags );
+	_arm_cpsr_write( (cpsr & ~(PSR_I(1) | PSR_F(1))) | flags);
 }
 
