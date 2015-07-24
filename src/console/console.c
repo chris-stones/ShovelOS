@@ -1,3 +1,5 @@
+
+#include <interrupt_controller/controller.h>
 #include <console/console.h>
 #include <chardevice/chardevice.h>
 #include <file/file.h>
@@ -5,10 +7,19 @@
 #include <stdarg.h>
 
 static file_itf _console_file = 0;
+static irq_itf _console_irq = 0;
 
 void console_setup() {
 
-	chrd_open( &_console_file, CHRD_SERIAL_CONSOLE_MAJOR, CHRD_SERIAL_CONSOLE_MINOR);
+	if(0 == chrd_open( &_console_file, &_console_irq, CHRD_SERIAL_CONSOLE_MAJOR, CHRD_SERIAL_CONSOLE_MINOR)) {
+
+		interrupt_controller_itf intc;
+		if(_console_irq && (interrupt_controller(&intc) == 0)) {
+
+			(*intc)->register_handler(intc, _console_irq);
+			(*intc)->unmask(intc, _console_irq);
+		}
+	}
 }
 
 void console_teardown() {

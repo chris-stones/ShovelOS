@@ -1,5 +1,5 @@
 
-SRC_C = chardevice.c
+SRC_C = devices.c
 
 OBJ = $(SRC_C:.c=.c.o)
 

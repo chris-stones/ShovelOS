@@ -7,9 +7,9 @@
 #define CHRD_MINOR_MAX 15
 
 // Open a block-device.
-int chrd_open(file_itf *self, chrd_major_t major, chrd_minor_t minor);
+int chrd_open(file_itf *self, irq_itf * irq, chrd_major_t major, chrd_minor_t minor);
 
-typedef int(*chrdev_open_func_t)(file_itf *self, chrd_major_t major, chrd_minor_t minor);
+typedef int(*chrdev_open_func_t)(file_itf *self, irq_itf *irq, chrd_major_t major, chrd_minor_t minor);
 
 int chrd_install  ( chrdev_open_func_t, chrd_major_t major, chrd_minor_t minor );
 int chrd_uninstall( chrd_major_t major, chrd_minor_t minor );

@@ -9,6 +9,10 @@
 #include <memory/vm/vm.h>
 #include <chardevice/chardevice.h>
 #include <file/file.h>
+#include <drivers/lib/uart_buffer.h>
+#include <concurrency/spinlock.h>
+
+#include <console/console.h>
 
 #include "regs.h"
 
@@ -19,112 +23,58 @@ typedef enum {
 
 struct context {
 
-	DRIVER_INTERFACE(struct file, file_interface);
+	DRIVER_INTERFACE(struct file, file_interface); // implements FILE interface.
+	DRIVER_INTERFACE(struct irq,  irq_interface);  // implements IRQ interface.
+
+	spinlock_t spinlock;
 
 	struct OMAP36XX * regs;
+	struct uart_buffer read_buffer;
+	struct uart_buffer write_buffer;
 
 	int flags;
+	int irq_number;
 };
 
-/*
- * write up to 'count' bytes to the UART.
- * returns the number of bytes written.
- *  will not block, may not write all bytes.
- */
-static ssize_t __write_non_blocking(struct OMAP36XX * regs, const void * vbuffer, size_t count) {
-
-	const uint8_t * p = (const uint8_t*)vbuffer;
-
-	while(count) {
-
-		if( regs->SSR & TX_FIFO_FULL )
-			break;
-
-		regs->THR = (uint32_t)*p++;
-
-		--count;
-	}
-
-	return (size_t)p - (size_t)vbuffer;
-}
-
-/*
- * write 'count' bytes to the UART.
- * returns the number of bytes written.
- * may block, will write all bytes.
- */
-static ssize_t __write_blocking(struct OMAP36XX * regs, const void * vbuffer, size_t count) {
-
-	const uint8_t * p = (const uint8_t*)vbuffer;
-
-	while(count) {
-
-		if(!(regs->SSR & TX_FIFO_FULL )) {
-
-			regs->THR = (uint32_t)*p++;
-
-			--count;
-		}
-	}
-
-	return (size_t)p - (size_t)vbuffer;
-}
 
 /*
  * write up to 'count' bytes to the UART.
  * returns the number of bytes written.
  * may block.
  */
-static ssize_t _write(file_itf itf, const void * vbuffer, size_t count) {
+static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 
-	struct context * context =
+	struct context * ctx =
 			STRUCT_BASE(struct context, file_interface, itf);
 
-	if(context->flags & _NONBLOCK)
-		return __write_non_blocking(context->regs, vbuffer, count);
+	uint8_t * vbuffer = (uint8_t *)_vbuffer;
 
-	return __write_blocking(context->regs, vbuffer, count);
-}
+	while(count) {
 
-// Bypass the character device and just dump a debug string to the serial port.
-ssize_t _debug_out( const char * string ) {
+		spinlock_lock_irqsave(&ctx->spinlock);
 
-	ssize_t ret;
+		// ENABLE TRANSMIT INTERRUPTS - WE HAVE DATA TO TRANSMIT!
+		ctx->regs->IER = (ctx->regs->IER) | THR_IT;
 
-	struct OMAP36XX * debug_uart =
-		(struct OMAP36XX *)UART3_PA_BASE_OMAP36XX;
+		while(count) {
 
-	size_t len = strlen(string);
+			if(uart_buffer_putb(&ctx->write_buffer, *vbuffer) == UART_BUFFER_PUT_SUCCESS) {
+				vbuffer++;
+				count--;
+			}
+			else
+				break;
+		}
+		spinlock_unlock_irqrestore(&ctx->spinlock);
 
-	ret = __write_blocking(debug_uart, string, len );
+		if(count && !(ctx->flags & _NONBLOCK)) {
+			// TODO: SLEEP.
+		}
+		else
+			break;
+	}
 
-	// flush TX FIFO
-	while( !(debug_uart->LSR & TX_SR_E ) );
-
-	return ret;
-}
-
-// Bypass the character device and just dump a debug string to the serial port.
-ssize_t _debug_out_uint( uint32_t i ) {
-
-	static const char c[] = "0123456789ABCDEF";
-
-	struct OMAP36XX * debug_uart =
-		(struct OMAP36XX *)UART3_PA_BASE_OMAP36XX;
-
-	__write_blocking(debug_uart, c + ((i >> 28) & 0xF), 1);
-	__write_blocking(debug_uart, c + ((i >> 24) & 0xF), 1);
-	__write_blocking(debug_uart, c + ((i >> 20) & 0xF), 1);
-	__write_blocking(debug_uart, c + ((i >> 16) & 0xF), 1);
-	__write_blocking(debug_uart, c + ((i >> 12) & 0xF), 1);
-	__write_blocking(debug_uart, c + ((i >>  8) & 0xF), 1);
-	__write_blocking(debug_uart, c + ((i >>  4) & 0xF), 1);
-	__write_blocking(debug_uart, c + ((i >>  0) & 0xF), 1);
-
-	// flush TX FIFO
-	while( !(debug_uart->LSR & TX_SR_E ) );
-
-	return 1;
+	return (size_t)vbuffer - (size_t)_vbuffer;
 }
 
 // free resources and NULL out the interface.
@@ -148,86 +98,112 @@ static int _close(file_itf *itf) {
 
 /*
  * read up to 'count' bytes from the UART.
- * wont block.
  * returns the number of bytes read.
  */
-static ssize_t __read_non_blocking(struct context * context, void * vbuffer, size_t count) {
+static ssize_t _read(file_itf itf, void * _vbuffer, size_t count) {
 
-	uint8_t * p = (uint8_t*)vbuffer;
-
-	while(count) {
-
-		if((context->regs->LSR & RX_FIFO_E)==0)
-			break;
-
-		char c = (volatile uint8_t)(context->regs->RHR);
-
-		if(context->flags & _CONSOLE) {
-			// echo input characters back down the console.
-			if(c=='\r')
-				c = '\n';
-			__write_non_blocking(context->regs, &c, 1);
-		}
-
-		*p++ = c;
-
-		--count;
-	}
-
-	return (size_t)p - (size_t)vbuffer;
-}
-
-/*
- * read 'count' bytes from the UART.
- * may block.
- * returns the number of bytes read.
- */
-static ssize_t __read_blocking(struct context * context, void * vbuffer, size_t count) {
-
-	uint8_t * p = (uint8_t*)vbuffer;
-
-	while(count) {
-
-		if((context->regs->LSR & RX_FIFO_E)!=0) {
-
-			char c = (volatile uint8_t)(context->regs->RHR);
-
-			if(context->flags & _CONSOLE) {
-				// echo input characters back down the console.
-				if(c=='\r')
-					c = '\n';
-				__write_blocking(context->regs, &c, 1);
-			}
-
-			*p++ = c;
-
-			--count;
-		}
-	}
-
-	return (size_t)p - (size_t)vbuffer;
-}
-
-/*
- * read up to 'count' bytes from the UART.
- * returns the number of bytes read.
- */
-static ssize_t _read(file_itf itf, void * vbuffer, size_t count) {
-
-	struct context * context =
+	struct context * ctx =
 		STRUCT_BASE(struct context, file_interface, itf);
 
-	if(context->flags & _NONBLOCK)
-		return __read_non_blocking(context, vbuffer, count);
+	uint8_t byte;
+	uint8_t *vbuffer = (uint8_t*)_vbuffer;
 
-	return __read_blocking(context, vbuffer, count);
+	for(;;) {
+		spinlock_lock_irqsave(&ctx->spinlock);
+		while(count) {
+			if(uart_buffer_getb( &ctx->read_buffer, &byte) == UART_BUFFER_GET_SUCCESS) {
+				*vbuffer++ = byte;
+				--count;
+			}
+			else
+				break;
+		}
+		spinlock_unlock_irqrestore(&ctx->spinlock);
+
+		if(count && !(ctx->flags & _NONBLOCK)) {
+			// TODO: SLEEP.
+		}
+		else
+			break;
+	}
+
+	return (size_t)vbuffer - (size_t)_vbuffer;
+}
+
+static irq_t _get_irq_number(irq_itf itf) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, irq_interface, itf);
+
+	return ctx->irq_number;
+}
+
+static int _IRQ(irq_itf itf) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, irq_interface, itf);
+
+	spinlock_lock_irqsave(&ctx->spinlock);
+
+	switch(ctx->regs->IIR & IT_TYPE_MASK) {
+	case IT_TYPE_THR:
+	{
+		uint8_t b;
+		while(!(ctx->regs->SSR & TX_FIFO_FULL)) {
+			if(uart_buffer_getb(&ctx->write_buffer, &b) == UART_BUFFER_GET_SUCCESS)
+				ctx->regs->THR = (uint32_t)b;
+			else {
+				// DISABLE TRANSMIT INTERRUPTS - WE HAVE NO DATA TO TRANSMIT!
+				ctx->regs->IER = (ctx->regs->IER) & (~THR_IT);
+				break;
+			}
+		}
+		break;
+	}
+	case IT_TYPE_RHR:
+	{
+		int err=0;
+		while(!err && (ctx->regs->LSR & RX_FIFO_E)!=0)
+			if(uart_buffer_putb(&ctx->read_buffer,(volatile uint8_t)(ctx->regs->RHR)) != UART_BUFFER_PUT_SUCCESS)
+				err = 1;
+
+		/*** TODO: HANDLE ERROR - LOST BYTES!! ***/
+		break;
+	}
+	default:
+		break;
+	}
+
+	spinlock_unlock_irqrestore(&ctx->spinlock);
+
+	return 0;
+}
+
+static void _configure_fifo_interrrupt_mode(file_itf itf) {
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, file_interface, itf);
+
+	ctx->regs->FCR =
+		FIFO_EN |
+		MK_TX_FIFO_TRIG(0) |
+		MK_RX_FIFO_TRIG(0) ;
+	ctx->regs->SCR = 0;
+	ctx->regs->TLR =
+			MK_TX_FIFO_TRIG_DMA(0) |
+			MK_RX_FIFO_TRIG_DMA(0) ;
+	ctx->regs->IER = RHR_IT /* | THR_IT */;
 }
 
 // Open and initialise a UART instance.
 //	This is the drivers main entry point.
 //	All other access to the driver will be via the interface
 //	function pointers set in this function.
-static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
+static int _chrd_open(
+	file_itf *ifile,
+	irq_itf *iirq,
+	chrd_major_t major,
+	chrd_minor_t minor) {
 
 	struct context *ctx;
 	int is_console=0;
@@ -235,6 +211,11 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 	static const size_t _uart_base[] = {
 		UART1_PA_BASE_OMAP36XX,	UART2_PA_BASE_OMAP36XX,
 		UART3_PA_BASE_OMAP36XX, UART4_PA_BASE_OMAP36XX
+	};
+
+	static const int irq_numbers[] = {
+		72, 73,
+		74, 80
 	};
 
 	if(CHRD_SERIAL_CONSOLE_MAJOR == major && CHRD_SERIAL_CONSOLE_MINOR == minor) {
@@ -260,22 +241,48 @@ static int _chrd_open(file_itf *itf, chrd_major_t major, chrd_minor_t minor) {
 	if(!ctx)
 		return -1;
 
+	spinlock_init(&ctx->spinlock);
+
+	if(0 != uart_buffer_create(&ctx->read_buffer, PAGE_SIZE)) {
+		kfree(ctx);
+		return -1;
+	}
+
+	if(0 != uart_buffer_create(&ctx->write_buffer, PAGE_SIZE)) {
+		uart_buffer_destroy(&ctx->read_buffer);
+		kfree(ctx);
+		return -1;
+	}
+
 	if(is_console)
 		ctx->flags |= _CONSOLE;
 
 	// initialise instance pointers.
 	DRIVER_INIT_INTERFACE( ctx, file_interface );
+	DRIVER_INIT_INTERFACE( ctx, irq_interface  );
 
-	// initialise function pointers.
+	// initialise function pointers for FILE interface.
 	ctx->file_interface->close 		= &_close;
 	ctx->file_interface->read 		= &_read;
 	ctx->file_interface->write 		= &_write;
 
+	// initialise function pointers for IRQ interface.
+	ctx->irq_interface->IRQ = &_IRQ;
+	ctx->irq_interface->get_irq_number = &_get_irq_number;
+
 	// initialise private data.
 	ctx->regs = (struct OMAP36XX *)_uart_base[uart]; // TODO: Virtual Address.
 
-	// return desired interface.
-	*itf = (file_itf)&(ctx->file_interface);
+	// initialise IRQ number.
+	ctx->irq_number = irq_numbers[uart];
+
+	// FIFO interrupt mode.
+	_configure_fifo_interrrupt_mode((file_itf)&(ctx->file_interface));
+
+	// return desired interfaces.
+	*ifile = (file_itf)&(ctx->file_interface);
+	if(iirq)
+		*iirq  = (irq_itf )&(ctx->irq_interface);
 
 	return 0;
 }
@@ -299,4 +306,3 @@ static int ___install___() {
 
 // put pointer to installer function somewhere we can find it.
 const driver_install_func_ptr __omap36xx_uart_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
-

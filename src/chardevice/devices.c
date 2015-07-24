@@ -30,14 +30,14 @@ int chrd_uninstall( chrd_major_t major, chrd_minor_t minor ) {
 	return chrd_install(NULL, major, minor);
 }
 
-int chrd_open(file_itf *self, chrd_major_t major, chrd_minor_t minor)
+int chrd_open(file_itf *self, irq_itf *irq, chrd_major_t major, chrd_minor_t minor)
 {
 	chrdev_open_func_t open_func;
 	if(_bcheck(major,minor))
 		return -1;
 
 	if((open_func = _chrdev_drivers[major][minor]))
-		return (*open_func)(self, major, minor);
+		return (*open_func)(self, irq, major, minor);
 
 	return -1;
 }

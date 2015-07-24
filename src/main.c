@@ -75,6 +75,7 @@ void main() {
 
 	exceptions_setup();
 	register_drivers();
+	interrupt_controller_open(0);
 	console_setup();
 
 	kprintf("%s", greeting);
@@ -88,7 +89,7 @@ void main() {
 		if(timer_open(&timer, &irq, 0)==0) {
 
 			interrupt_controller_itf intc;
-			if(interrupt_controller_open(&intc) == 0) {
+			if(interrupt_controller(&intc) == 0) {
 
 				(*intc)->register_handler(intc, irq);
 				(*intc)->unmask(intc, irq);
@@ -101,23 +102,11 @@ void main() {
 
 			kprintf("timer0->oneshot(5 seconds);\n");
 
-			int phase = 1;
-			spinlock_t lock = SPINLOCK_UNLOCKED;
-
 			for(;;) {
 
-				char string[2];
-				kgets(string,2);
-
-				if(phase&1) {
-					spinlock_lock_irqsave(&lock);
-					kprintf("LOCKED\n");
-				}
-				else {
-					spinlock_unlock_irqrestore(&lock);
-					kprintf("UNLOCKED\n");
-				}
-				phase = ~phase;
+				char string[16];
+				kgets(string,sizeof string);
+				kprintf("GETS %s\n", string);
 			}
 
 		}
