@@ -83,5 +83,5 @@ __EXCEPTION_VECTOR_BASE:
 	b _arm_isr_DATA_ABORT          @ DATA ABORT
 	b __EXCEPTION_VECTOR_BASE      @ NOT USED
 	b _arm_isr_IRQ                 @ IRQ
-	b _arm_isr_IRQ                 @ FIQ
+	b _arm_isr_FIQ                 @ FIQ
 
