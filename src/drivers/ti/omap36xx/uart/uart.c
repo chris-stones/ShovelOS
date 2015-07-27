@@ -145,9 +145,10 @@ static int _IRQ(irq_itf itf) {
 
 	spinlock_lock_irqsave(&ctx->spinlock);
 
-	switch(ctx->regs->IIR & IT_TYPE_MASK) {
-	case IT_TYPE_THR:
-	{
+	uint32_t IIR = ctx->regs->IIR;
+
+	if((IIR & IT_TYPE_MASK) == IT_TYPE_THR) {
+
 		uint8_t b;
 		while(!(ctx->regs->SSR & TX_FIFO_FULL)) {
 			if(uart_buffer_getb(&ctx->write_buffer, &b) == UART_BUFFER_GET_SUCCESS)
@@ -158,20 +159,18 @@ static int _IRQ(irq_itf itf) {
 				break;
 			}
 		}
-		break;
 	}
-	case IT_TYPE_RHR:
-	{
+
+	if((IIR & IT_TYPE_MASK) == IT_TYPE_RHR) {
+
+		//kprintf("IT_TYPE_RHR\n");
+
 		int err=0;
 		while(!err && (ctx->regs->LSR & RX_FIFO_E)!=0)
 			if(uart_buffer_putb(&ctx->read_buffer,(volatile uint8_t)(ctx->regs->RHR)) != UART_BUFFER_PUT_SUCCESS)
 				err = 1;
 
 		/*** TODO: HANDLE ERROR - LOST BYTES!! ***/
-		break;
-	}
-	default:
-		break;
 	}
 
 	spinlock_unlock_irqrestore(&ctx->spinlock);
