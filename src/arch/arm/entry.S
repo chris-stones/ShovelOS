@@ -7,11 +7,6 @@
 .global _start
 _start:
 
-	mrs r0,   cpsr       @ read CSPR
-	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #19    @ set Supervisor mode.
-	msr cpsr, r0         @ switch to Supervisor mode.
-
 	ldr r0, .__pre_gfp_stack_base 	@ get address of temporary stack.
 	add r0, #pre_gpf_stacksize		@ find top address.
 	mov sp, r0						@ set as booststrap stack
@@ -32,37 +27,22 @@ _start:
 	mov r8, r0         @ get stack for Supervisor
 
 	@ Set stacks on other CPU modes.
-	mrs r0,   cpsr
-
-	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #17    @ set FIQ mode.
-	msr cpsr, r0         @ switch to FIQ mode.
+	cps #17
 	mov sp,   r4         @ set FIQ stack.
 
-	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #18    @ set IRQ mode.
-	msr cpsr, r0         @ switch to IRQ mode.
+	cps #18
 	mov sp,   r5         @ set IRQ stack.
 
-	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #23    @ set ABORT mode.
-	msr cpsr, r0         @ switch to ABORT mode.
+	cps #23
 	mov sp,   r6         @ set ABORT stack.
 
-	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #27    @ set UNDEFINED mode.
-	msr cpsr, r0         @ switch to UNDEFINED mode.
+	cps #27
 	mov sp,   r7         @ set UNDEFINED stack.
 
-	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #19    @ set Supervisor mode.
-	msr cpsr, r0         @ switch to Supervisor mode.
+	cps #19
 	mov sp,   r8         @ set Supervisor stack.
 
-	@ return to Supervisor mode and enter main.
-	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #19    @ set Supervisor mode.
-	msr cpsr, r0         @ switch to Supervisor mode.
+	@ run kernel main in supervisor mode
 	b  main              @ run main!!!
 
 @ a tiny array that we will use for a stack before get_free_page() is setup.
