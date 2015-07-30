@@ -9,8 +9,8 @@ _start:
 
 	mrs r0,   cpsr       @ read CSPR
 	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #31    @ set System mode.
-	msr cpsr, r0         @ switch to System mode.
+	orr r0,   r0, #19    @ set Supervisor mode.
+	msr cpsr, r0         @ switch to Supervisor mode.
 
 	ldr r0, .__pre_gfp_stack_base 	@ get address of temporary stack.
 	add r0, #pre_gpf_stacksize		@ find top address.
@@ -59,10 +59,10 @@ _start:
 	msr cpsr, r0         @ switch to Supervisor mode.
 	mov sp,   r8         @ set Supervisor stack.
 
-	@ return to System mode and enter main.
+	@ return to Supervisor mode and enter main.
 	and r0,   r0, #0xFFFFFFE0  @ clear CPSR.M
-	orr r0,   r0, #31    @ set SYSTEM mode.
-	msr cpsr, r0         @ switch to SYSTEM mode.
+	orr r0,   r0, #19    @ set Supervisor mode.
+	msr cpsr, r0         @ switch to Supervisor mode.
 	b  main              @ run main!!!
 
 @ a tiny array that we will use for a stack before get_free_page() is setup.
