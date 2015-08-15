@@ -1,6 +1,10 @@
 
 #pragma once
 
+#if defined(HAVE_CONFIG_H)
+#include <config.h>
+#endif
+
 #include <stdint.h>
 
 // driver module constructor.

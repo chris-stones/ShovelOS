@@ -21,6 +21,10 @@
  *					etc etc etc.
  */
 
+#if defined(HAVE_CONFIG_H)
+#include <config.h>
+#endif
+
 #if defined(GFP_USERLAND_DEBUG) && !defined(GFP_USERLAND)
 #define GFP_USERLAND
 #endif

@@ -3,6 +3,10 @@
  * Called at startup with MMU disabled ( or identity mapped ).
  */
 
+#if defined(HAVE_CONFIG_H)
+#include <config.h>
+#endif
+
 #include <stdint.h>
 #include <memory/memory.h>
 #include <asm.h>
