@@ -40,8 +40,7 @@ int in_interrupt() {
 	}
 }
 
-void __attribute__ ((interrupt ("IRQ"))) _arm_isr_IRQ() {
-
+void _arm_call_interrupt_controller_IRQ() {
 	interrupt_controller_itf itf = 0;
 	if(0 == interrupt_controller(&itf))
 		(*itf)->_arm_IRQ(itf);

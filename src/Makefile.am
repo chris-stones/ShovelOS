@@ -67,7 +67,9 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/system_control_register.h \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \
-  arch/arm/concurrency/spinlock.h
+  arch/arm/concurrency/spinlock.h \
+  arch/arm/context/context.S
+
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
   arch/arm/mm/VMSAv7/page_tables.c \
