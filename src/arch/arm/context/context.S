@@ -16,7 +16,7 @@ _arm_get_SPSR_MODE_SP_and_LR:
     mov R0,    SP                    @ R0 = SP
     mov R1,    LR                    @ R1 = LR
     msr CPSR,  R2                    @ switch to original CPSR
-	mov PC,    LR                    @ return banked LR.
+    mov PC,    LR                    @ return banked LR.
 
 .arm
 .text
@@ -37,15 +37,15 @@ _arm_set_SPSR_MODE_SP_and_LR:
 .global _my_IRQ_handler
 _my_IRQ_handler:
 
-	push {R0-R12}                     @ push R0..R12 on the stack.
-	mov  R4, LR                       @ R4 = address of instruction after interrupted instruction.
+    push {R0-R12}                     @ push R0..R12 on the stack.
+    mov  R4, LR                       @ R4 = address of instruction after interrupted instruction.
 
-	bl _arm_get_SPSR_MODE_SP_and_LR
-	push {R0, R1}                     @ push interrupted SP and LR onto the stack.
-	push {R4}                         @ push interrupted PC onto the stack.
+    bl _arm_get_SPSR_MODE_SP_and_LR
+    push {R0, R1}                     @ push interrupted SP and LR onto the stack.
+    push {R4}                         @ push interrupted PC onto the stack.
 
-	mrs  R0, SPSR                     @ push interrupted CPSR onto the stack.
-	push {R0}
+    mrs  R0, SPSR                     @ push interrupted CPSR onto the stack.
+    push {R0}
 
     mov R0, SP
                                       @ TODO: TASK SWITCH BY MANIPULATING STACK HERE.
