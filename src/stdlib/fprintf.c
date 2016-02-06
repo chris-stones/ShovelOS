@@ -233,6 +233,17 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 				l += _padn(file, arg, 10, pad, zlead, !leftalign);
 				break;
 			}
+			case 'p':
+			{
+				if(sizeof(void*) == 8) {
+					uint64_t arg = va_arg(va, uint64_t);
+					l += _padn(file, arg, 16, pad, zlead,  leftalign);
+					l += _putlx(file,arg);
+					l += _padn(file, arg, 16, pad, zlead, !leftalign);
+					break;
+				}
+			}
+			// no break - 32bit pointers can be handled by %x.
 			case 'x':
 			{
 				uint32_t arg = va_arg(va,uint32_t);
