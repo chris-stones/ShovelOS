@@ -9,6 +9,7 @@
 #include<timer/timer.h>
 #include<interrupt_controller/controller.h>
 #include<concurrency/spinlock.h>
+#include<concurrency/kthread.h>
 
 extern int __BSS_BEGIN;
 extern int __BSS_END;
@@ -51,8 +52,6 @@ void setup_memory() {
 	mem_cache_setup();
 
 	kmalloc_setup();
-
-	//return get_free_page( GFP_KERNEL );
 }
 
 extern int __REGISTER_DRIVERS_BEGIN;
@@ -69,6 +68,13 @@ static void register_drivers() {
 		(**itor)();
 }
 
+void * kthread_main(void * args) {
+
+	kprintf("running kthread_main with args %p\n",args);
+	for(;;);
+	return NULL;
+}
+
 void main() {
 
 	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
@@ -77,10 +83,19 @@ void main() {
 	register_drivers();
 	interrupt_controller_open(0);
 	console_setup();
+	kthread_init();
 
 	kprintf("%s", greeting);
-
 	kprintf("Allocated %d pages (%d bytes)\n", get_total_pages_allocated(), get_total_pages_allocated() * PAGE_SIZE);
+
+
+	{
+		//int err;
+		kthread_t thread0 = NULL;
+		kthread_t thread1 = NULL;
+		kthread_create(&thread0, GFP_KERNEL, &kthread_main, (void*)0xDECAFBAD );
+		kthread_create(&thread1, GFP_KERNEL, &kthread_main, (void*)0xB16B00B5 );
+	}
 
 	{
 		timer_itf timer;

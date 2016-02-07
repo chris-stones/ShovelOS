@@ -1,6 +1,6 @@
 
 #pragma once
-
+/*
 struct _arm_context {
 
 	// Low registers.
@@ -26,13 +26,13 @@ struct _arm_context {
 	};
 
 	union {
-		/* always banked */
+		// always banked
 		uint32_t r13;
 		uint32_t sp;
 	};
 
 	union {
-		/* always banked */
+		// always banked
 		uint32_t r14;
 		uint32_t lr;
 	};
@@ -44,5 +44,5 @@ struct _arm_context {
 
 	uint32_t cpsr;
 };
-
+*/
 

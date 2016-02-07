@@ -37,6 +37,7 @@ _arm_set_SPSR_MODE_SP_and_LR:
 .global _my_IRQ_handler
 _my_IRQ_handler:
 
+	@ build a struct kthread on the stack, pass it to _arm_irq_task_switch. See kthread.c
     push {R0-R12}                     @ push R0..R12 on the stack.
     mov  R4, LR                       @ R4 = address of instruction after interrupted instruction.
 
@@ -48,10 +49,12 @@ _my_IRQ_handler:
     push {R0}
 
     mov R0, SP
-                                      @ TODO: TASK SWITCH BY MANIPULATING STACK HERE.
+
+    bl _arm_irq_task_switch           @ set task to return to.
+
     pop {R0}
     msr SPSR, R0                      @ set SPSR to the CPSR of the task we are about to wake.
-    pop {R4}                          @ set LR to the PC of the taks we are about to wake up.
+    pop {R4}                          @ set LR to the PC of the task we are about to wake up.
     pop {R0, R1}
     bl _arm_set_SPSR_MODE_SP_and_LR   @ set LR and SP of interrupted task.
 

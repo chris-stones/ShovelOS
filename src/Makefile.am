@@ -68,6 +68,7 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \
   arch/arm/concurrency/spinlock.h \
+  arch/arm/concurrency/kthread.c \
   arch/arm/context/context.S
 
 

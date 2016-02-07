@@ -2,6 +2,7 @@
 #include <console/console.h>
 #include <asm.h>
 #include <interrupt_controller/controller.h>
+#include <arch.h>
 
 extern int __EXCEPTION_VECTOR_BASE;
 
@@ -49,6 +50,7 @@ void _arm_call_interrupt_controller_IRQ() {
 void __attribute__ ((interrupt ("FIQ"))) _arm_isr_FIQ() {
 
 	kprintf("FIQ\n");
+	_BREAK();
 	for(;;);
 }
 
@@ -60,18 +62,19 @@ void __attribute__ ((interrupt ("SWI"))) _arm_isr_SVC() {
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_PREFETCH_ABORT() {
 
 	kprintf("PREFETCH ABORT\n");
+	_BREAK();
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_DATA_ABORT() {
 
-	kprintf("DATA ABORT\n");
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("UNDEF"))) _arm_isr_UNDEFINED() {
 
 	kprintf("UNDEFINED INSTRUCTION\n");
+	_BREAK();
 	for(;;);
 }
 

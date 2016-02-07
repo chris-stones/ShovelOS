@@ -6,6 +6,7 @@
 #include <stdarg.h>
 
 void memset(void * p, int c, size_t size);
+void memcpy(void * d, const void * s, size_t size);
 
 size_t strlen(const char * const string);
 uint8_t isdigit(char c);

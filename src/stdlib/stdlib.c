@@ -2,6 +2,14 @@
 #include "stdlib.h"
 #include <stdint.h>
 
+void memcpy(void * _d, const void * _s, size_t size) {
+
+	const uint8_t * s = (const uint8_t *)_s;
+	      uint8_t * d = (      uint8_t *)_d;
+	while(size--)
+		*d++ = *s++;
+}
+
 void memset(void * _p, int _c, size_t size) {
 
 	uint8_t * p = (uint8_t *)_p;
