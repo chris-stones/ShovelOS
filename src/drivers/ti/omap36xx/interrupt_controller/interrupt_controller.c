@@ -96,7 +96,6 @@ static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 	// TIMER0 ON OMAP36XX drives task-scheduler. //////
 	if(irq == (37+0)) { // GPTIMER_IRQ_BASE_OMAP36XX+0
 		_arm_irq_task_switch(cpu_state);
-		// TODO: restart timer for next task-switch.
 	}
 	///////////////////////////////////////////////////
 

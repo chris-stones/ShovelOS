@@ -166,13 +166,6 @@ static int _IRQ(irq_itf itf) {
 
 	ctx->regs->TISR = OVF_IT_FLAG; // clear interrupt status register.
 
-	//// DEBUG - RESTART ////////
-	struct timespec ts;
-	ts.seconds = 0;
-	ts.nanoseconds = 1000000;
-	_oneshot((timer_itf)&(ctx->timer_interface), &ts);
-	/////////////////////////////
-
 	return 0;
 }
 
