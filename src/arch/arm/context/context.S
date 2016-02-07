@@ -50,15 +50,13 @@ _my_IRQ_handler:
 
     mov R0, SP
 
-    bl _arm_irq_task_switch           @ set task to return to.
+    bl _arm_call_interrupt_controller_IRQ @ call interrupt-controller's IRQ function. ( MAY task switch by manipulating stack )
 
     pop {R0}
     msr SPSR, R0                      @ set SPSR to the CPSR of the task we are about to wake.
     pop {R4}                          @ set LR to the PC of the task we are about to wake up.
     pop {R0, R1}
     bl _arm_set_SPSR_MODE_SP_and_LR   @ set LR and SP of interrupted task.
-
-    bl _arm_call_interrupt_controller_IRQ @ call interrupt-controller's IRQ function.
 
     mov LR, R4
     pop {R0-R12}                      @ restore interrupted R0-R12.

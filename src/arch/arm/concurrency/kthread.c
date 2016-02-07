@@ -7,6 +7,8 @@
 
 #include<console/console.h>
 #include<program_status_register.h>
+#include<timer/timer.h>
+#include<interrupt_controller/controller.h>
 
 // NOTE - THIS STRUCT COUPLED TIGHTLY WITH _my_IRQ_handler in context.S
 // cpu_state must be first
@@ -43,6 +45,8 @@ struct run_queue_struct {
     spinlock_t spinlock;
     struct kthread * kthreads[32];
     int running;
+
+    timer_itf timer;
 };
 
 struct run_queue_struct *run_queue = 0;
@@ -122,18 +126,41 @@ static int run_queue_remove(struct kthread * kthread) {
 int kthread_init() {
 
 	if((run_queue = kmalloc(sizeof *run_queue, GFP_KERNEL | GFP_ZERO))) {
+
 		spinlock_init(&run_queue->spinlock);
 
 		// create an empty kthread for the boot-task!
 		run_queue->kthreads[0] =
 			kmalloc(sizeof run_queue->kthreads[0], GFP_KERNEL | GFP_ZERO);
 
-		if(run_queue->kthreads[0])
-			return 0;
+		if(run_queue->kthreads[0]) {
+			irq_itf irq;
+			if(timer_open(&run_queue->timer, &irq, 0)==0) {
 
-		kfree(run_queue);
-		run_queue = NULL;
+				interrupt_controller_itf intc;
+				if(interrupt_controller(&intc) == 0) {
+
+					(*intc)->register_handler(intc, irq);
+					(*intc)->unmask(intc, irq);
+
+					goto success;
+				}
+			}
+		}
 	}
+
+	goto err;
+
+success:
+	{
+		struct timespec ts;
+		ts.seconds = 0;
+		ts.nanoseconds = 1000000;
+		if((*run_queue->timer)->oneshot(run_queue->timer, &ts)==0)
+			return 0;
+	}
+err:
+	_BREAK();
 	return -1;
 }
 
@@ -190,30 +217,26 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
 	return 0;
 }
 
-
-
-void _arm_irq_task_switch( struct cpu_state_struct * cpu_state) {
+void _arm_irq_task_switch(void * _cpu_state) {
 
 	if(run_queue) {
 
 		struct kthread * c = run_queue_current();
 		struct kthread * n = run_queue_next();
 
-		if(!c || !n) {
-			return;
+		if(c && n && (c!=n)) {
+			struct cpu_state_struct * cpu_state = (struct cpu_state_struct *)_cpu_state;
+			memcpy(&c->cpu_state, cpu_state, sizeof(struct cpu_state_struct)); // store interrupted tasks CPU state.
+			memcpy(cpu_state, &n->cpu_state, sizeof(struct cpu_state_struct)); // replace with cpu state of next task to run.
 		}
 
-		if(c == n)	{
-			return;
-		}
-		else
-		{
-			 memcpy(&c->cpu_state, cpu_state, sizeof(struct cpu_state_struct)); // store interrupted tasks CPU state.
-
-//			 kprintf("0x%x 0x%x\n",c->cpu_state.PC,c->cpu_state.CPSR);
-//			 kprintf("0x%x 0x%x\n",n->cpu_state.PC,n->cpu_state.CPSR);
-
-			 memcpy(cpu_state, &n->cpu_state, sizeof(struct cpu_state_struct)); // replace with cpu state of next task to run.
+		// schedule next switch.
+		struct timespec ts;
+		ts.seconds = 0;
+		ts.nanoseconds = 1000000;
+		if((*run_queue->timer)->oneshot(run_queue->timer, &ts)!=0) {
+			_BREAK();
+			for(;;);
 		}
 	}
 }

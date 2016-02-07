@@ -41,10 +41,10 @@ int in_interrupt() {
 	}
 }
 
-void _arm_call_interrupt_controller_IRQ() {
+void _arm_call_interrupt_controller_IRQ(void * cpu_state) {
 	interrupt_controller_itf itf = 0;
 	if(0 == interrupt_controller(&itf))
-		(*itf)->_arm_IRQ(itf);
+		(*itf)->_arm_IRQ(itf, cpu_state);
 }
 
 void __attribute__ ((interrupt ("FIQ"))) _arm_isr_FIQ() {

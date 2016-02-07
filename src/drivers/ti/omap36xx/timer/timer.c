@@ -162,14 +162,14 @@ static int _IRQ(irq_itf itf) {
 	struct context * ctx =
 		STRUCT_BASE(struct context, irq_interface, itf);
 
-	kprintf("timer.c _IRQ\n");
+//	kprintf("timer.c _IRQ\n");
 
 	ctx->regs->TISR = OVF_IT_FLAG; // clear interrupt status register.
 
 	//// DEBUG - RESTART ////////
 	struct timespec ts;
-	ts.seconds = 5;
-	ts.nanoseconds = 500000000;
+	ts.seconds = 0;
+	ts.nanoseconds = 1000000;
 	_oneshot((timer_itf)&(ctx->timer_interface), &ts);
 	/////////////////////////////
 

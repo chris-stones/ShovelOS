@@ -6,6 +6,7 @@
 #include <interrupt_controller/controller.h>
 #include <console/console.h>
 #include <asm.h>
+#include <concurrency/kthread.h>
 
 #include "regs.h"
 
@@ -75,7 +76,7 @@ static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
 	return -1;
 }
 
-static int __arm_IRQ(interrupt_controller_itf itf) {
+static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, interrupt_controller_interface, itf);
@@ -91,6 +92,13 @@ static int __arm_IRQ(interrupt_controller_itf itf) {
 	int e = 0;
 	if(func)
 		e = (*func)->IRQ(func);
+
+	// TIMER0 ON OMAP36XX drives task-scheduler. //////
+	if(irq == (37+0)) { // GPTIMER_IRQ_BASE_OMAP36XX+0
+		_arm_irq_task_switch(cpu_state);
+		// TODO: restart timer for next task-switch.
+	}
+	///////////////////////////////////////////////////
 
 	ctx->regs->INTCPS_CONTROL = 1; // DONE - allow next IRQ.
 

@@ -68,10 +68,17 @@ static void register_drivers() {
 		(**itor)();
 }
 
-void * kthread_main(void * args) {
+void * kthread_main0(void * args) {
 
-	kprintf("running kthread_main with args %p\n",args);
-	for(;;);
+	for(;;)
+		kprintf("X");
+	return NULL;
+}
+
+void * kthread_main1(void * args) {
+
+	for(;;)
+		kprintf("O");
 	return NULL;
 }
 
@@ -87,55 +94,17 @@ void main() {
 
 	kprintf("%s", greeting);
 	kprintf("Allocated %d pages (%d bytes)\n", get_total_pages_allocated(), get_total_pages_allocated() * PAGE_SIZE);
-
+	kprintf("press any key to start writing characters in multiple threads...");
+	char c[2];
+	kgets(c, 2);
 
 	{
 		//int err;
 		kthread_t thread0 = NULL;
 		kthread_t thread1 = NULL;
-		kthread_create(&thread0, GFP_KERNEL, &kthread_main, (void*)0xDECAFBAD );
-		kthread_create(&thread1, GFP_KERNEL, &kthread_main, (void*)0xB16B00B5 );
+		kthread_create(&thread0, GFP_KERNEL, &kthread_main0, (void*)0xDECAFBAD );
+		kthread_create(&thread1, GFP_KERNEL, &kthread_main1, (void*)0xB16B00B5 );
 	}
-
-	{
-		timer_itf timer;
-		irq_itf irq;
-
-		if(timer_open(&timer, &irq, 0)==0) {
-
-			interrupt_controller_itf intc;
-			if(interrupt_controller(&intc) == 0) {
-
-				(*intc)->register_handler(intc, irq);
-				(*intc)->unmask(intc, irq);
-			}
-
-			struct timespec ts;
-			ts.seconds = 5;
-			ts.nanoseconds = 500000000;
-			(*timer)->oneshot(timer, &ts);
-
-			kprintf("timer0->oneshot(5 seconds);\n");
-
-			for(;;) {
-
-				char string[16];
-				kgets(string,sizeof string);
-				kprintf("GETS %s\n", string);
-			}
-
-		}
-		(*timer)->close(&timer);
-	}
-
-	// echo inputs back to sender
-	for(;;) {
-		char buffer[64];
-		if(kgets(buffer, sizeof buffer) != 0)
-			kprintf("you typed \'%s\'", buffer);
-	}
-
-	console_teardown();
 
 	for(;;);
 }
