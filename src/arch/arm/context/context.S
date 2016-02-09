@@ -2,6 +2,7 @@
 
 @
 @ Get the banked LR and SP from the SPSR mode.
+@   Switches to the SPSR mode and back again, so SPSR mode must be privilaged!
 @   On return R0=LR, R1=SP.
 @
 .arm
@@ -18,6 +19,37 @@ _arm_get_SPSR_MODE_SP_and_LR:
     msr CPSR,  R2                    @ switch to original CPSR
     mov PC,    LR                    @ return banked LR.
 
+@
+@ Get the banked LR and SP from the USER mode.
+@   On return R0=LR, R1=SP.
+@
+.arm
+.text
+_arm_get_USER_MODE_SP_and_LR:
+    ldmdb SP!, {SP,LR}^				@ push user-mode SP and LR onto te current mode stack.
+    stmia SP!, {R0,R1}	            @ pop user-mode SP and LR onto return registers.
+    mov PC, LR
+
+@
+@ Get the banked LR and SP from the INTERRUPTED mode. (supervisor or user)
+@   On return R0=LR, R1=SP.
+@
+.arm
+.text
+_arm_get_INT_MODE_SP_and_LR:
+    mrs R0,    SPSR                  @ store SPSR in R0
+    and R0,    R0,   #0x1F           @ SPSR mode
+    cmp R0,   #16                    @ set Z flag on uder-mode.
+    beq _arm_get_USER_MODE_SP_and_LR @ get user mode SP and LR.
+    b   _arm_get_SPSR_MODE_SP_and_LR @ get privilaged mode SP and LR.
+
+
+
+@
+@ Set the banked LR and SP for the SPSR mode.
+@   Switches to the SPSR mode and back again, so SPSR mode must be privilaged!
+@   parameters - R0=LR, R1=SP.
+@
 .arm
 .text
 _arm_set_SPSR_MODE_SP_and_LR:
@@ -34,6 +66,30 @@ _arm_set_SPSR_MODE_SP_and_LR:
     pop  {R4}                        @ restore callee preserved registers
     mov  PC,   LR                    @ return
 
+@
+@ Set the banked LR and SP for the USER mode.
+@   parameters - R0=LR, R1=SP.
+@
+.arm
+.text
+_arm_set_USER_MODE_SP_and_LR:
+	ldmdb SP!, {R0,R1}				@ push new user-mode SP and LR onto te current mode stack.
+    stmia SP!, {SP,LR}^	            @ pop user-mode SP and LR onto user-mode banked SP and LR.
+    mov PC, LR
+
+@
+@ Set the banked LR and SP for the INTERRUPTED mode.
+@   parameters - R0=LR, R1=SP.
+@
+.arm
+.text
+_arm_set_INT_MODE_SP_and_LR:
+    mrs R2,    SPSR                  @ store SPSR in R2
+    and R2,    R2,   #0x1F           @ SPSR mode
+    cmp R2,   #16                    @ set Z flag on uder-mode.
+    beq _arm_set_USER_MODE_SP_and_LR @ get user mode SP and LR.
+    b   _arm_set_SPSR_MODE_SP_and_LR @ get privilaged mode SP and LR.
+
 .global _my_IRQ_handler
 _my_IRQ_handler:
 
@@ -41,7 +97,7 @@ _my_IRQ_handler:
     push {R0-R12}                     @ push R0..R12 on the stack.
     mov  R4, LR                       @ R4 = address of instruction after interrupted instruction.
 
-    bl _arm_get_SPSR_MODE_SP_and_LR
+    bl _arm_get_INT_MODE_SP_and_LR
     push {R0, R1}                     @ push interrupted SP and LR onto the stack.
     push {R4}                         @ push interrupted PC onto the stack.
 
@@ -56,7 +112,7 @@ _my_IRQ_handler:
     msr SPSR, R0                      @ set SPSR to the CPSR of the task we are about to wake.
     pop {R4}                          @ set LR to the PC of the task we are about to wake up.
     pop {R0, R1}
-    bl _arm_set_SPSR_MODE_SP_and_LR   @ set LR and SP of interrupted task.
+    bl _arm_set_INT_MODE_SP_and_LR   @ set LR and SP of interrupted task.
 
     mov LR, R4
     pop {R0-R12}                      @ restore interrupted R0-R12.
