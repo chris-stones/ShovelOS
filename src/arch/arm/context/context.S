@@ -104,10 +104,9 @@ _my_IRQ_handler:
     mrs  R0, SPSR                     @ push interrupted CPSR onto the stack.
     push {R0}
 
-    mov R0, SP
-
+    mov R0, SP                        @ call IRQ handlere with parameter0 = pointer to interrupted CPU state.
     bl _arm_call_interrupt_controller_IRQ @ call interrupt-controller's IRQ function. ( MAY task switch by manipulating stack )
-
+___irq_wake_task_on_stack:
     pop {R0}
     msr SPSR, R0                      @ set SPSR to the CPSR of the task we are about to wake.
     pop {R4}                          @ set LR to the PC of the task we are about to wake up.
@@ -118,3 +117,32 @@ _my_IRQ_handler:
     pop {R0-R12}                      @ restore interrupted R0-R12.
     subs PC, LR, #4                   @ return to interrupted task.
 
+
+
+.global _arm_svc
+_arm_svc:
+    push {LR}
+    svc #0
+    pop {PC}
+
+_svc_yield:
+	cps #18
+    push {R0-R12}                   @ on IRQ stack, push R0-R12
+    cps #19
+    add R4, LR, #4                  @ get supervisor LR (interrupted PC+4) ( IRQ return will subtract 4! )
+    mov R0, SP                      @ get supervisor SP (interrupted SP)
+    ldr R1, [SP]                    @ get supervisor LR (interrupted LR) from supervisor stack
+    cps #18
+    push {R0,R1}                    @ push interrupted SP/LR onto IRQ stack.
+    push {R4}                       @ push interrupted PC onto IRQ stack.
+    mrs R0, SPSR
+    push {R0}                       @ push interrupted CPSR onto IRQ stack.
+    mov R0, SP
+    bl _arm_irq_task_switch         @ call task switcher - pass in cpu state on IRQ stack.
+	b ___irq_wake_task_on_stack     @ task wake-up procedure should(must) be same as IRQ
+
+.global _my_SVC_handler
+_my_SVC_handler:
+    cmp R0, #0
+    beq _svc_yield
+    movs PC, LR

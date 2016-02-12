@@ -70,15 +70,27 @@ static void register_drivers() {
 
 void * kthread_main0(void * args) {
 
-	for(;;)
+	for(;;) {
 		kprintf("X");
+		kthread_yield();
+		kprintf("Y");
+		kthread_yield();
+		kprintf("Z");
+		kthread_yield();
+	}
 	return NULL;
 }
 
 void * kthread_main1(void * args) {
 
-	for(;;)
-		kprintf("O");
+	for(;;) {
+		kprintf("1");
+		kthread_yield();
+		kprintf("2");
+		kthread_yield();
+		kprintf("3");
+		kthread_yield();
+	}
 	return NULL;
 }
 
@@ -106,6 +118,7 @@ void main() {
 		kthread_create(&thread1, GFP_KERNEL, &kthread_main1, (void*)0xB16B00B5 );
 	}
 
-	for(;;);
+	for(;;)
+		;
 }
 

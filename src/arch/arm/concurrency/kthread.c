@@ -56,8 +56,6 @@ static struct kthread * run_queue_next() {
 
 	struct kthread * next = 0;
 
-	spinlock_lock(&run_queue->spinlock);
-
 	for(;;) {
 
 		run_queue->running++;
@@ -67,8 +65,6 @@ static struct kthread * run_queue_next() {
 			break;
 	}
 
-	spinlock_unlock(&run_queue->spinlock);
-
 	return next;
 }
 
@@ -76,11 +72,7 @@ static struct kthread * run_queue_current() {
 
 	struct kthread * current = 0;
 
-	spinlock_lock(&run_queue->spinlock);
-
 	current = run_queue->kthreads[run_queue->running];
-
-	spinlock_unlock(&run_queue->spinlock);
 
 	return current;
 }
@@ -90,7 +82,6 @@ static int run_queue_add(struct kthread * kthread) {
 	int e = -1;
 
 	if(run_queue) {
-		spinlock_lock(&run_queue->spinlock);
 
 		for(int i=0;i<(sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]); i++)
 			if(!run_queue->kthreads[i]) {
@@ -98,8 +89,6 @@ static int run_queue_add(struct kthread * kthread) {
 				e = 0;
 				break;
 			}
-
-		spinlock_unlock(&run_queue->spinlock);
 	}
 
 	return e;
@@ -109,16 +98,12 @@ static int run_queue_remove(struct kthread * kthread) {
 
 	int e = -1;
 
-	spinlock_lock(&run_queue->spinlock);
-
 	for(int i=0;i<(sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]); i++)
 		if(run_queue->kthreads[i] == kthread) {
 			run_queue->kthreads[i] = 0;
 			e = 0;
 			break;
 		}
-
-	spinlock_unlock(&run_queue->spinlock);
 
 	return e;
 }
@@ -174,12 +159,16 @@ static void _free_kthread(struct kthread * t) {
 
 static void _exited_kthread() {
 
+	spinlock_lock(&run_queue->spinlock);
+
 	struct kthread * c = run_queue_current();
 
 	if(c) {
 		run_queue_remove(c);
 		_free_kthread(c);
 	}
+
+	spinlock_unlock(&run_queue->spinlock);
 
 	for(;;);
 }
@@ -208,7 +197,11 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
 			return -1;
 		}
 
-		if(run_queue_add(*thread)!=0) {
+		spinlock_lock(&run_queue->spinlock);
+		int _rqa = run_queue_add(*thread);
+		spinlock_unlock(&run_queue->spinlock);
+
+		if(_rqa!=0) {
 
 			_free_kthread(*thread);
 			return -1;
@@ -221,8 +214,12 @@ void _arm_irq_task_switch(void * _cpu_state) {
 
 	if(run_queue) {
 
+		spinlock_lock(&run_queue->spinlock);
+
 		struct kthread * c = run_queue_current();
 		struct kthread * n = run_queue_next();
+
+		spinlock_unlock(&run_queue->spinlock);
 
 		if(c && n && (c!=n)) {
 			struct cpu_state_struct * cpu_state = (struct cpu_state_struct *)_cpu_state;

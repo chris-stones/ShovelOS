@@ -56,7 +56,6 @@ void __attribute__ ((interrupt ("FIQ"))) _arm_isr_FIQ() {
 
 void __attribute__ ((interrupt ("SWI"))) _arm_isr_SVC() {
 
-	kprintf("SVC\n");
 }
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_PREFETCH_ABORT() {
