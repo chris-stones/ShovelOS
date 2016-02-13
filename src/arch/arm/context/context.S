@@ -142,7 +142,7 @@ _svc_yield:
 	b ___irq_wake_task_on_stack     @ task wake-up procedure should(must) be same as IRQ
 
 .global _my_SVC_handler
-_my_SVC_handler:
+_my_SVC_handler:                    @ TODO check SPSR mode, _svc_yield WILL NOT WORK if called from USER mode.
     cmp R0, #0
     beq _svc_yield
     movs PC, LR

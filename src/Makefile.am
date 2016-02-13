@@ -59,7 +59,12 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/arm.c \
   arch/arm/exceptions/gic.c \
   arch/arm/exceptions/exceptions.c \
+  arch/arm/concurrency/kthread.c \
+  arch/arm/concurrency/kthread.h \
+  arch/arm/concurrency/mutex.h \
+  arch/arm/concurrency/mutex.S \
   arch/arm/concurrency/spinlock.c \
+  arch/arm/concurrency/spinlock.h \
   arch/arm/arch.h \
   arch/arm/asm.h \
   arch/arm/coprocessor_asm.h \
@@ -67,8 +72,6 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/system_control_register.h \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \
-  arch/arm/concurrency/spinlock.h \
-  arch/arm/concurrency/kthread.c \
   arch/arm/context/context.S
 
 

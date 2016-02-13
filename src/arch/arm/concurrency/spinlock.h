@@ -23,7 +23,7 @@
 		spinlock_init(&object->lock);
 
 	spinlock_lock_irqsave / spinlock_unlock_irqrestore disables caller cpu's interrupts while lock is held.
-	spinlock_lock / spinlock_unlock does NOT disable interrupts.
+	spinlock_lock / spinlock_unlock MIGHT NOT disable interrupts, depending on SMP/UNICORE arch.
 
 **********/
 
