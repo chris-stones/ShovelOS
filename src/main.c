@@ -9,6 +9,7 @@
 #include<timer/timer.h>
 #include<interrupt_controller/controller.h>
 #include<concurrency/spinlock.h>
+#include<concurrency/mutex.h>
 #include<concurrency/kthread.h>
 
 extern int __BSS_BEGIN;
@@ -68,6 +69,35 @@ static void register_drivers() {
 		(**itor)();
 }
 
+
+volatile int _test_mutex_int = 0;
+volatile int _test_mutex_failed = 0;
+mutex_t _test_mutex_mutex = MUTEX_UNLOCKED;
+void * kthread_mutex_test() {
+
+	for(;;) {
+
+		mutex_lock(&_test_mutex_mutex);
+		_test_mutex_int = 0;
+		for(int i=0; i<1000; i++) {
+			if(_test_mutex_int++ != i) {
+				_test_mutex_failed = 1;
+			}
+		}
+		mutex_unlock(&_test_mutex_mutex);
+
+		if(_test_mutex_failed) {
+			kprintf("MUTEX FAILED\n");
+			for(;;);
+		}
+		else {
+			kprintf(".");
+		}
+	}
+	return NULL;
+}
+
+
 void * kthread_main0(void * args) {
 
 	for(;;) {
@@ -114,8 +144,10 @@ void main() {
 		//int err;
 		kthread_t thread0 = NULL;
 		kthread_t thread1 = NULL;
-		kthread_create(&thread0, GFP_KERNEL, &kthread_main0, (void*)0xDECAFBAD );
-		kthread_create(&thread1, GFP_KERNEL, &kthread_main1, (void*)0xB16B00B5 );
+		kthread_create(&thread0, GFP_KERNEL, &kthread_mutex_test, (void*)0xDECAFBAD );
+		kthread_create(&thread1, GFP_KERNEL, &kthread_mutex_test, (void*)0xB16B00B5 );
+
+		kthread_mutex_test();
 	}
 
 	for(;;)

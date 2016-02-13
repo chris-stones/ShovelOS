@@ -3,7 +3,7 @@
 
 typedef uint32_t mutex_t;
 #define MUTEX_UNLOCKED 0
-static inline void spinlock_init(mutex_t * lock) {
+static inline void mutex_init(mutex_t * lock) {
 
 	*lock = MUTEX_UNLOCKED;
 }
