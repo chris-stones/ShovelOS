@@ -16,7 +16,10 @@ _mutex_lock_try:
     dmb                          @ locked, memory barrier required.
     mov   PC,LR                  @ return!
 _mutex_lock_yield:
-@   svc #0                       @ (R0 == 0) - yield sys-call.
+    push {LR}                    @ svc clobbersthe LR!
+    svc #0                       @ (R0 == 0) - yield sys-call.
+    pop  {LR}
+_mutex_lock_yield_ret:
     b   _mutex_lock_try          @ on thread re-awoken, re-try to lock.
 
 .arm

@@ -92,6 +92,7 @@ _arm_set_INT_MODE_SP_and_LR:
 
 .global _my_IRQ_handler
 _my_IRQ_handler:
+    clrex                             @ invalidate any mutex lock attempts.
 
 	@ build a struct kthread on the stack, pass it to _arm_irq_task_switch. See kthread.c
     push {R0-R12}                     @ push R0..R12 on the stack.
@@ -117,8 +118,6 @@ ___irq_wake_task_on_stack:
     pop {R0-R12}                      @ restore interrupted R0-R12.
     subs PC, LR, #4                   @ return to interrupted task.
 
-
-
 .global _arm_svc
 _arm_svc:
     push {LR}
@@ -143,6 +142,7 @@ _svc_yield:
 
 .global _my_SVC_handler
 _my_SVC_handler:                    @ TODO check SPSR mode, _svc_yield WILL NOT WORK if called from USER mode.
+    clrex                           @ invalidate any mutex lock attempts.
     cmp R0, #0
     beq _svc_yield
     movs PC, LR

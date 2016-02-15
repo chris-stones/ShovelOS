@@ -80,6 +80,9 @@ void * kthread_mutex_test() {
 		mutex_lock(&_test_mutex_mutex);
 		_test_mutex_int = 0;
 		for(int i=0; i<1000; i++) {
+
+//			kthread_yield(); // REALLY stress out that mutex!
+
 			if(_test_mutex_int++ != i) {
 				_test_mutex_failed = 1;
 			}

@@ -60,9 +60,6 @@ void __attribute__ ((interrupt ("SWI"))) _arm_isr_SVC() {
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_PREFETCH_ABORT() {
 
-	kprintf("PREFETCH ABORT\n");
-	_BREAK();
-	for(;;);
 }
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_DATA_ABORT() {
