@@ -85,17 +85,13 @@ SHOV_KERN_ARM_VMSAv7_CORE = \
   arch/arm/mm/VMSAv7/supersection.h \
   arch/arm/mm/VMSAv7/small_page.h
 
-SHOV_KERN_DRIVER_OMAP36XX = \
-  drivers/ti/omap36xx/uart/uart.c \
-  drivers/ti/omap36xx/timer/timer.c \
-  drivers/ti/omap36xx/interrupt_controller/interrupt_controller.c \
-  drivers/ti/omap36xx/uart/regs.h \
-  drivers/ti/omap36xx/timer/regs.h \
-  drivers/ti/omap36xx/interrupt_controller/regs.h
-
-SHOV_KERN_DRIVER_OMAP543X = \
-  drivers/ti/omap543x/uart/uart.c \
-  drivers/ti/omap543x/uart/regs.h
+SHOV_KERN_DRIVER_OMAP = \
+  drivers/ti/omap/uart/uart.c \
+  drivers/ti/omap/timer/timer.c \
+  drivers/ti/omap/interrupt_controller/interrupt_controller.c \
+  drivers/ti/omap/uart/regs.h \
+  drivers/ti/omap/timer/regs.h \
+  drivers/ti/omap/interrupt_controller/regs.h
 
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
@@ -109,10 +105,6 @@ if CONFIG_SHOV_ARCH_IS_ARMv7A
   kernel_SOURCES += $(SHOV_KERN_ARM_VMSAv7_CORE)
 endif
 
-if CONFIG_SHOV_DRIVER_OMAP36XX
-  kernel_SOURCES += $(SHOV_KERN_DRIVER_OMAP36XX)
-endif
-
-if CONFIG_SHOV_DRIVER_OMAP543X
-  kernel_SOURCES += $(SHOV_KERN_DRIVER_OMAP543X)
+if CONFIG_SHOV_DRIVER_OMAP
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_OMAP)
 endif

@@ -3,6 +3,10 @@
  * Implements 'file' interface.
  */
 
+#if defined(HAVE_CONFIG_H)
+#include <config.h>
+#endif
+
 #include <drivers/drivers.h>
 #include <stdint.h>
 #include <memory/memory.h>
@@ -28,7 +32,7 @@ struct context {
 
 	spinlock_t spinlock;
 
-	struct OMAP36XX * regs;
+	struct UART_REGS * regs;
 	struct uart_buffer read_buffer;
 	struct uart_buffer write_buffer;
 
@@ -208,13 +212,25 @@ static int _chrd_open(
 	int is_console=0;
 
 	static const size_t _uart_base[] = {
-		UART1_PA_BASE_OMAP36XX,	UART2_PA_BASE_OMAP36XX,
-		UART3_PA_BASE_OMAP36XX, UART4_PA_BASE_OMAP36XX
+#if(TI_OMAP_MAJOR_VER == 3)
+		UART1_PA_BASE, UART2_PA_BASE,
+		UART3_PA_BASE, UART4_PA_BASE
+#endif
+#if(TI_OMAP_MAJOR_VER == 5)
+		UART1_PA_BASE, UART2_PA_BASE, UART3_PA_BASE
+		UART4_PA_BASE, UART5_PA_BASE, UART6_PA_BASE
+#endif
 	};
 
 	static const int irq_numbers[] = {
+#if(TI_OMAP_MAJOR_VER == 3)
 		72, 73,
 		74, 80
+#endif
+#if(TI_OMAP_MAJOR_VER == 5)
+		 72,  73,  74,
+		 70, 105, 106,
+#endif
 	};
 
 	if(CHRD_SERIAL_CONSOLE_MAJOR == major && CHRD_SERIAL_CONSOLE_MINOR == minor) {
@@ -227,7 +243,6 @@ static int _chrd_open(
 
 	uint32_t uart = minor - CHRD_UART_MINOR_MIN;
 
-	// OMAP36XX has 4 UARTS. ( 0..3 )
 	if(uart >= ( sizeof(_uart_base) / sizeof(_uart_base[0]) ) )
 		return -1;
 
@@ -270,7 +285,7 @@ static int _chrd_open(
 	ctx->irq_interface->get_irq_number = &_get_irq_number;
 
 	// initialise private data.
-	ctx->regs = (struct OMAP36XX *)_uart_base[uart]; // TODO: Virtual Address.
+	ctx->regs = (struct UART_REGS *)_uart_base[uart]; // TODO: Virtual Address.
 
 	// initialise IRQ number.
 	ctx->irq_number = irq_numbers[uart];

@@ -73,7 +73,7 @@ static void register_drivers() {
 volatile int _test_mutex_int = 0;
 volatile int _test_mutex_failed = 0;
 mutex_t _test_mutex_mutex = MUTEX_UNLOCKED;
-void * kthread_mutex_test() {
+void * kthread_mutex_test(void *p) {
 
 	for(;;) {
 
@@ -81,7 +81,7 @@ void * kthread_mutex_test() {
 		_test_mutex_int = 0;
 		for(int i=0; i<1000; i++) {
 
-//			kthread_yield(); // REALLY stress out that mutex!
+			//kthread_yield(); // REALLY stress out that mutex!
 
 			if(_test_mutex_int++ != i) {
 				_test_mutex_failed = 1;
@@ -94,7 +94,7 @@ void * kthread_mutex_test() {
 			for(;;);
 		}
 		else {
-			kprintf(".");
+			kprintf("%d", (int)p);
 		}
 	}
 	return NULL;
@@ -147,10 +147,10 @@ void main() {
 		//int err;
 		kthread_t thread0 = NULL;
 		kthread_t thread1 = NULL;
-		kthread_create(&thread0, GFP_KERNEL, &kthread_mutex_test, (void*)0xDECAFBAD );
-		kthread_create(&thread1, GFP_KERNEL, &kthread_mutex_test, (void*)0xB16B00B5 );
+		kthread_create(&thread0, GFP_KERNEL, &kthread_mutex_test, (void*)1);
+		kthread_create(&thread1, GFP_KERNEL, &kthread_mutex_test, (void*)2);
 
-		kthread_mutex_test();
+		kthread_mutex_test((void*)3);
 	}
 
 	for(;;)
