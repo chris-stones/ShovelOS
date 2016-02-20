@@ -6,8 +6,6 @@ kernel_CPPFLAGS = \
 
 kernel_CFLAGS = \
   -ggdb3 \
-  -mtune=cortex-a8 \
-  -mcpu=cortex-a8 \
   -marm \
   -Wall \
   -Werror \
