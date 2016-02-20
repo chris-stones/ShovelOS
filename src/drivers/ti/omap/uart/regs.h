@@ -27,6 +27,8 @@
 			23.3.6 UART/IrDA/CIR Register Manual.
 */
 
+#include"../register_macros.h"
+
 #if(TI_OMAP_MAJOR_VER == 5)
 #define UART1_PA_BASE (0x4806A000)
 #define UART2_PA_BASE (0x4806C000)
@@ -34,7 +36,6 @@
 #define UART4_PA_BASE (0x4806E000)
 #define UART5_PA_BASE (0x48066000)
 #define UART6_PA_BASE (0x48068000)
-#define UART_REG_OMAP5(x)  volatile uint32_t x
 #endif
 
 #if(TI_OMAP_MAJOR_VER == 3)
@@ -42,136 +43,126 @@
 #define UART2_PA_BASE (0x4806C000)
 #define UART3_PA_BASE (0x49020000)
 #define UART4_PA_BASE (0x49042000)
-#define UART_REG_OMAP3(x)  volatile uint32_t x
-#endif
-
-#define UART_REG_COMMON(x) volatile uint32_t x
-
-#ifndef UART_REG_OMAP3
-#define UART_REG_OMAP3(x)
-#endif
-#ifndef UART_REG_OMAP5
-#define UART_REG_OMAP5(x)
 #endif
 
 struct UART_REGS {
 
 	// 0x00
 	union {
-		UART_REG_COMMON(THR); 				/*  W 32 : 64 byte FIFO. Transmit Holding Register. */
-		UART_REG_COMMON(RHR); 				/*  R 32 : 64 byte FIFO. Receiver Holding Register. */
-		UART_REG_COMMON(DLL); 				/* RW 32 */
+		U32_RW_REG_COMMON(THR); 				/*  W 32 : 64 byte FIFO. Transmit Holding Register. */
+		U32_RW_REG_COMMON(RHR); 				/*  R 32 : 64 byte FIFO. Receiver Holding Register. */
+		U32_RW_REG_COMMON(DLL); 				/* RW 32 */
 	};
 
 	// 0x04
 	union {
-		UART_REG_COMMON(DLH);
-		UART_REG_COMMON(IER);
-		UART_REG_OMAP5(IER_IRDA); 			/* RW 32 */
-		UART_REG_OMAP5(IER_CIR); 			/* RW 32 */
+		U32_RW_REG_COMMON(DLH);
+		U32_RW_REG_COMMON(IER);
+		U32_RW_REG_OMAP5(IER_IRDA); 			/* RW 32 */
+		U32_RW_REG_OMAP5(IER_CIR); 			/* RW 32 */
 	};
 
 	// 0x08
 	union {
-		UART_REG_COMMON(IIR);
-		UART_REG_COMMON(FCR);
-		UART_REG_COMMON(EFR);
-		UART_REG_OMAP5(IIR_IRDA); 			/*  R 32 */
-		UART_REG_OMAP5(IIR_CIR); 			/*  R 32 */
+		U32_RW_REG_COMMON(IIR);
+		U32_RW_REG_COMMON(FCR);
+		U32_RW_REG_COMMON(EFR);
+		U32_RW_REG_OMAP5(IIR_IRDA); 			/*  R 32 */
+		U32_RW_REG_OMAP5(IIR_CIR); 			/*  R 32 */
 	};
 
 	// 0x0c
-	UART_REG_COMMON(LCR);
+	U32_RW_REG_COMMON(LCR);
 
 	// 0x10
 	union {
-		UART_REG_COMMON(MCR);
-		UART_REG_COMMON(XON1_ADDR1);
+		U32_RW_REG_COMMON(MCR);
+		U32_RW_REG_COMMON(XON1_ADDR1);
 	};
 
 	// 0x14
 	union {
-		UART_REG_COMMON(LSR);
+		U32_RW_REG_COMMON(LSR);
 
-		UART_REG_OMAP3(XON1_ADDR2); // is this, or the next line a typo!? should they be COMMON?
-		UART_REG_OMAP5(XON2_ADDR2);
+		U32_RW_REG_OMAP3(XON1_ADDR2); // is this, or the next line a typo!? should they be COMMON?
+		U32_RW_REG_OMAP5(XON2_ADDR2);
 
-		UART_REG_OMAP5(LSR_IRDA); 			/*  R 32 */
-		UART_REG_OMAP5(LSR_CIR); 			/*  R 32 */
+		U32_RW_REG_OMAP5(LSR_IRDA); 			/*  R 32 */
+		U32_RW_REG_OMAP5(LSR_CIR); 			/*  R 32 */
 
 	};
 
 	// 0x18
 	union {
-		UART_REG_COMMON(MSR);
-		UART_REG_COMMON(TCR);
-		UART_REG_COMMON(XOFF1);
+		U32_RW_REG_COMMON(MSR);
+		U32_RW_REG_COMMON(TCR);
+		U32_RW_REG_COMMON(XOFF1);
 	};
 
 	// 0x1c
 	union {
-		UART_REG_COMMON(SPR);
-		UART_REG_COMMON(TLR);
-		UART_REG_COMMON(XOFF2);
+		U32_RW_REG_COMMON(SPR);
+		U32_RW_REG_COMMON(TLR);
+		U32_RW_REG_COMMON(XOFF2);
 	};
 
-	UART_REG_COMMON(MDR1); // 0x20
-	UART_REG_COMMON(MDR2); // 0x24
+	U32_RW_REG_COMMON(MDR1); // 0x20
+	U32_RW_REG_COMMON(MDR2); // 0x24
 
 	// 0x28
 	union {
-		UART_REG_COMMON(SFLSR);
-		UART_REG_COMMON(TXFLL);
+		U32_RW_REG_COMMON(SFLSR);
+		U32_RW_REG_COMMON(TXFLL);
 	};
 
 	// 0x2c
 	union {
-		UART_REG_COMMON(RESUME);
-		UART_REG_COMMON(TXFHL);
+		U32_RW_REG_COMMON(RESUME);
+		U32_RW_REG_COMMON(TXFHL);
 	};
 
 	// 0x30
 	union {
-		UART_REG_COMMON(SFREGL);
-		UART_REG_COMMON(RXFLL);
+		U32_RW_REG_COMMON(SFREGL);
+		U32_RW_REG_COMMON(RXFLL);
 	};
 
 	// 0x34
 	union {
-		UART_REG_COMMON(SFREGH);
-		UART_REG_COMMON(RXFLH);
+		U32_RW_REG_COMMON(SFREGH);
+		U32_RW_REG_COMMON(RXFLH);
 	};
 
 	// 0x38
 	union {
-		UART_REG_COMMON(UASR);
-		UART_REG_COMMON(BLR);
+		U32_RW_REG_COMMON(UASR);
+		U32_RW_REG_COMMON(BLR);
 	};
 
-	UART_REG_COMMON(ACREG); // 0x3c
-	UART_REG_COMMON(SCR);   // 0x40
-	UART_REG_COMMON(SSR);   // 0x44
-	UART_REG_COMMON(EBLR);  // 0x48
-	UART_REG_COMMON(reserved0); // 0x4c
-	UART_REG_COMMON(MVR);   // 0x50
-	UART_REG_COMMON(SYSC);  // 0x54
-	UART_REG_COMMON(SYSS);  // 0x58
-	UART_REG_COMMON(WER);   // 0x5c
-	UART_REG_COMMON(CFPS);  // 0x60
-	UART_REG_COMMON(RXFIFO_LVL); // 0x64
-	UART_REG_COMMON(TXFIFO_LVL); // 0x68
-	UART_REG_COMMON(IER2);  // 0x6c
-	UART_REG_COMMON(ISR2);  // 0x70
+	U32_RW_REG_COMMON(ACREG); // 0x3c
+	U32_RW_REG_COMMON(SCR);   // 0x40
+	U32_RW_REG_COMMON(SSR);   // 0x44
+	U32_RW_REG_COMMON(EBLR);  // 0x48
+	U32_RW_REG_COMMON(reserved0); // 0x4c
+	U32_RW_REG_COMMON(MVR);   // 0x50
+	U32_RW_REG_COMMON(SYSC);  // 0x54
+	U32_RW_REG_COMMON(SYSS);  // 0x58
+	U32_RW_REG_COMMON(WER);   // 0x5c
+	U32_RW_REG_COMMON(CFPS);  // 0x60
+	U32_RW_REG_COMMON(RXFIFO_LVL); // 0x64
+	U32_RW_REG_COMMON(TXFIFO_LVL); // 0x68
+	U32_RW_REG_COMMON(IER2);  // 0x6c
+	U32_RW_REG_COMMON(ISR2);  // 0x70
 
-	UART_REG_OMAP3(reserved1);
-	UART_REG_OMAP5(FREQ_SEL); 			/* RW 32 */
+	U32_RW_REG_OMAP3(reserved1);
+	U32_RW_REG_OMAP5(FREQ_SEL); 			/* RW 32 */
 
-	UART_REG_COMMON(reserved2);
-	UART_REG_COMMON(reserved3);
+	U32_RW_REG_COMMON(reserved2);
+	U32_RW_REG_COMMON(reserved3);
 
-	UART_REG_COMMON(MDR3);
+	U32_RW_REG_COMMON(MDR3);
 
-	UART_REG_OMAP5(TX_DMA_THRESHOLD); 	/* RW 32 */
+	U32_RW_REG_OMAP5(TX_DMA_THRESHOLD); 	/* RW 32 */
 };
 
 // UART->LSR ( line status register )

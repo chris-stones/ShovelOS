@@ -23,6 +23,8 @@
 
 */
 
+#include"../register_macros.h"
+
 #if(TI_OMAP_MAJOR_VER == 3)
 #define SYNCTIMER_32KHZ_PA_BASE_OMAP 0x48320000
 #endif
@@ -31,31 +33,21 @@
 #define SYNCTIMER_32KHZ_PA_BASE_OMAP 0x4AE04000
 #endif
 
-struct OMAP_SYNCTIMER {
+struct OMAP_SYNCTIMER { /* omap3 / omap5 */
 
-#if(TI_OMAP_MAJOR_VER == 3)
-	volatile const uint32_t REG_32KSYNCNT_REV;
-	volatile       uint32_t REG_32KSYNCNT_SYSCONFIG;
-	volatile const uint32_t _reserved0;
-	volatile const uint32_t _reserved1;
-	volatile const uint32_t REG_32KSYNCNT_CR;
-#endif
-
-#if(TI_OMAP_MAJOR_VER == 5)
-	volatile const uint32_t REG_32KSYNCNT_REV;        // 0x000
-	volatile const uint32_t _reserved0;               // 0x004
-	volatile const uint32_t _reserved1;               // 0x008
-	volatile const uint32_t _reserved2;               // 0x00C
-	volatile       uint32_t REG_32KSYNCNT_SYSCONFIG;  // 0x010
-	volatile const uint32_t _reserved3;               // 0x014
-	volatile const uint32_t _reserved4;               // 0x018
-	volatile const uint32_t _reserved5;               // 0x01C
-	volatile const uint32_t _reserved6;               // 0x020
-	volatile const uint32_t _reserved7;               // 0x024
-	volatile const uint32_t _reserved8;               // 0x028
-	volatile const uint32_t _reserved9;               // 0x02C
-	volatile const uint32_t REG_32KSYNCNT_CR;         // 0x030
-#endif
+	U32_RO_REG_COMMON(REG_32KSYNCNT_REV);
+	U32_RO_REG_OMAP5(_reserved0);
+	U32_RO_REG_OMAP5(_reserved1);
+	U32_RO_REG_OMAP5(_reserved2);
+	U32_RW_REG_COMMON(REG_32KSYNCNT_SYSCONFIG);
+	U32_RO_REG_COMMON(_reserved3);
+	U32_RO_REG_COMMON(_reserved4);
+	U32_RO_REG_OMAP5(_reserved5);
+	U32_RO_REG_OMAP5(_reserved6);
+	U32_RO_REG_OMAP5(_reserved7);
+	U32_RO_REG_OMAP5(_reserved8);
+	U32_RO_REG_OMAP5(_reserved9);
+	U32_RO_REG_COMMON(REG_32KSYNCNT_CR);
 };
 
 #define GPTIMER_IRQ_BASE_OMAP  37
@@ -90,62 +82,41 @@ struct OMAP_SYNCTIMER {
 
 struct OMAP_GPTIMER {
 
-#if(TI_OMAP_MAJOR_VER == 3)
-	volatile const uint32_t TIDR;      // 0x000 ID REVISION CODE
-	volatile const uint32_t _reserved0;// 0x004
-	volatile const uint32_t _reserved1;// 0x008
-	volatile const uint32_t _reserved2;// 0x00c
-	volatile       uint32_t TIOCP_CFG; // 0x010 GP TIMER L4 INTERFACE
-	volatile const uint32_t TISTAT;    // 0x014 Status information about the module, excluding the interrupt status information.
-	volatile       uint32_t TISR;      // 0x018 Shows which interrupt events are pending inside the module.
-	volatile       uint32_t TIER;      // 0x01C Enable/Disable the interrupt events.
-	volatile       uint32_t TWER;      // 0x020 Enable/Disable the wake-up feature on specific interrupt events.
-	volatile       uint32_t TCLR;      // 0x024 Controls optional features specific to the timer functionality
-	volatile       uint32_t TCRR;      // 0x028 Holds the value of the internal counter.
-	volatile       uint32_t TLDR;      // 0x02C Holds the timer load values.
-	volatile       uint32_t TTGR;      // 0x030 Triggers a counter reload of timer by writing any value in it.
-	volatile const uint32_t TWPS;      // 0x034 Indicates if a Write-Posted is pending.
-	volatile       uint32_t TMAR;      // 0x038 Holds the value to be compared with the counter value.
-	volatile const uint32_t TCAR1;     // 0x03C Holds the first captured value of the counter register
-	volatile       uint32_t TSICR;     // 0x040 Contains the bits that control the interface between the L4 interface and functional clock domains-posted mode and functional SW reset.
-	volatile const uint32_t TCAR2;     // 0x044 Holds the second captured value of the counter register.
-	volatile       uint32_t TPIR;      // 0x048 1ms Tick Generation.
-	volatile       uint32_t TNIR;      // 0x04C 1ms Tick Generation.
-	volatile       uint32_t TCVR;      // 0x050 1ms Tick Generation.
-	volatile       uint32_t TOCR;      // 0x054 Used to mask the tick interrupt for a selected number of ticks.
-	volatile       uint32_t TOWR;      // 0x058 Holds the number of masked overflow interrupts.
-#endif
-
-#if(TI_OMAP_MAJOR_VER == 5)
-	volatile const uint32_t TIDR;         // 0x00
-	volatile const uint32_t _reserved0;   // 0x04
-	volatile const uint32_t _reserved1;   // 0x08
-	volatile const uint32_t _reserved2;   // 0x0C
-	volatile       uint32_t TIOCP_CFG ;   // 0x10
-	volatile const uint32_t _reserved3;   // 0x14
-	volatile const uint32_t _reserved4;   // 0x18
-	volatile const uint32_t _reserved5;   // 0x1C
-	volatile const uint32_t RESERVED;     // 0x20
-	volatile       uint32_t IRQSTATUS_RAW;// 0x24
-	volatile       uint32_t IRQSTATUS;    // 0x28
-	volatile       uint32_t IRQSTATUS_SET;// 0x2C
-	volatile       uint32_t IRQSTATUS_CLR;// 0x30
-	volatile       uint32_t IRQWAKEEN;    // 0x34
-	volatile       uint32_t TCLR;         // 0x38 Controls optional features specific to the timer functionality
-	volatile       uint32_t TCRR;         // 0x3C Holds the value of the internal counter.
-	volatile       uint32_t TLDR;         // 0x40 Holds the timer load values.
-	volatile       uint32_t TTGR;         // 0x44 Triggers a counter reload of timer by writing any value in it.
-	volatile const uint32_t TWPS;         // 0x48 Indicates if a Write-Posted is pending.
-	volatile       uint32_t TMAR;         // 0x4C Holds the value to be compared with the counter value.
-	volatile const uint32_t TCAR1;        // 0x50 Holds the first captured value of the counter register
-	volatile       uint32_t TSICR;        // 0x54 Contains the bits that control the interface between the L4 interface and functional clock domains-posted mode and functional SW reset.
-	volatile const uint32_t TCAR2;        // 0x58 Holds the second captured value of the counter register.
-	volatile       uint32_t TPIR;         // 0x5C 1ms Tick Generation.
-	volatile       uint32_t TNIR;         // 0x60 1ms Tick Generation.
-	volatile       uint32_t TCVR;         // 0x64 1ms Tick Generation.
-	volatile       uint32_t TOCR;         // 0x68 Used to mask the tick interrupt for a selected number of ticks.
-	volatile       uint32_t TOWR;         // 0x6C Holds the number of masked overflow interrupts.
-#endif
+	U32_RO_REG_COMMON(TIDR);           // 0x000 ID REVISION CODE
+	U32_RO_REG_COMMON(_reserved0);
+	U32_RO_REG_COMMON(_reserved1);
+	U32_RO_REG_COMMON(_reserved2);
+	U32_RW_REG_COMMON(TIOCP_CFG);      // 0x010 GP TIMER L4 INTERFACE
+	/////////
+	U32_RO_REG_OMAP3(TISTAT);    // Status information about the module, excluding the interrupt status information.
+	U32_RW_REG_OMAP3(TISR);      // Shows which interrupt events are pending inside the module.
+	U32_RW_REG_OMAP3(TIER);      // Enable/Disable the interrupt events.
+	U32_RW_REG_OMAP3(TWER);      // Enable/Disable the wake-up feature on specific interrupt events.
+	/////////
+	U32_RO_REG_OMAP5(_reserved3);   // 0x14
+	U32_RO_REG_OMAP5(_reserved4);   // 0x18
+	U32_RO_REG_OMAP5(_reserved5);   // 0x1C
+	U32_RO_REG_OMAP5(RESERVED);     // 0x20
+	U32_RW_REG_OMAP5(IRQSTATUS_RAW);// 0x24
+	U32_RW_REG_OMAP5(IRQSTATUS);    // 0x28
+	U32_RW_REG_OMAP5(IRQSTATUS_SET);// 0x2C
+	U32_RW_REG_OMAP5(IRQSTATUS_CLR);// 0x30
+	U32_RW_REG_OMAP5(IRQWAKEEN);    // 0x34
+	/////////
+	U32_RW_REG_COMMON(TCLR);      // Controls optional features specific to the timer functionality
+	U32_RW_REG_COMMON(TCRR);      // Holds the value of the internal counter.
+	U32_RW_REG_COMMON(TLDR);      // Holds the timer load values.
+	U32_RW_REG_COMMON(TTGR);      // Triggers a counter reload of timer by writing any value in it.
+	U32_RO_REG_COMMON(TWPS);      // Indicates if a Write-Posted is pending.
+	U32_RW_REG_COMMON(TMAR);      // Holds the value to be compared with the counter value.
+	U32_RO_REG_COMMON(TCAR1);     // Holds the first captured value of the counter register
+	U32_RW_REG_COMMON(TSICR);     // Contains the bits that control the interface between the L4 interface and functional clock domains-posted mode and functional SW reset.
+	U32_RO_REG_COMMON(TCAR2);     // Holds the second captured value of the counter register.
+	U32_RW_REG_COMMON(TPIR);      // 1ms Tick Generation.
+	U32_RW_REG_COMMON(TNIR);      // 1ms Tick Generation.
+	U32_RW_REG_COMMON(TCVR);      // 1ms Tick Generation.
+	U32_RW_REG_COMMON(TOCR);      // Used to mask the tick interrupt for a selected number of ticks.
+	U32_RW_REG_COMMON(TOWR);      // Holds the number of masked overflow interrupts.
 };
 
 // TISR flags

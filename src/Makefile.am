@@ -86,6 +86,7 @@ SHOV_KERN_ARM_VMSAv7_CORE = \
   arch/arm/mm/VMSAv7/small_page.h
 
 SHOV_KERN_DRIVER_OMAP = \
+  drivers/ti/omap/register_macros.h \
   drivers/ti/omap/uart/uart.c \
   drivers/ti/omap/timer/timer.c \
   drivers/ti/omap/interrupt_controller/interrupt_controller.c \
