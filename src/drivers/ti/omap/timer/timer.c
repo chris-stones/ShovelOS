@@ -1,4 +1,8 @@
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <drivers/drivers.h>
 #include <stdint.h>
 #include <memory/memory.h>
@@ -14,7 +18,7 @@ struct context {
 	DRIVER_INTERFACE(struct irq,   irq_interface);   // implements IRQ interface.
 
 	// private data.
-	struct OMAP36XX_GPTIMER * regs;
+	struct OMAP_GPTIMER * regs;
 
 	uint32_t freq;
 
@@ -22,7 +26,7 @@ struct context {
 };
 
 /*
-static uint32_t _get_divisor(struct OMAP36XX_GPTIMER * timer) {
+static uint32_t _get_divisor(struct OMAP_GPTIMER * timer) {
 
 	WAIT_FOR_PENDING(timer, TCLR);
 
@@ -32,7 +36,7 @@ static uint32_t _get_divisor(struct OMAP36XX_GPTIMER * timer) {
 }
 */
 
-static int _set_divisor(struct OMAP36XX_GPTIMER * timer, uint32_t divisor) {
+static int _set_divisor(struct OMAP_GPTIMER * timer, uint32_t divisor) {
 
 	WAIT_FOR_PENDING(timer, TCLR);
 
@@ -136,7 +140,14 @@ static int _oneshot(timer_itf itf, const struct timespec * timespec) {
 	WAIT_FOR_PENDING_MULTIPLE(ctx->regs, W_PEND_TLDR | W_PEND_TTGR | W_PEND_TCLR);
 	ctx->regs->TLDR  =           0xffffffff - ticks; // set counter reset value.
 	ctx->regs->TTGR  =                            0; // reset the counter to TLDR.
-	ctx->regs->TIER  =                   OVF_IT_ENA; // enable only overflow interrupts.
+
+#if(TI_OMAP_MAJOR_VER==3)
+	ctx->regs->TIER  =                   OVF_IT_ENA; // enable only overflow interrupts. (OMAP3)
+#elif(TI_OMAP_MAJOR_VER==5)
+	ctx->regs->IRQSTATUS_SET =           OVF_IT_ENA; // enable only overflow interrupts. (OMAP5)
+#else
+#error unsupported OMAP version.
+#endif
 
 	// clear auto-reload, set trigger overflow and start the timer.
 	ctx->regs->TCLR  = (ctx->regs->TCLR & ~(AR | TRG_MASK)) | ST | TRG_OVR;
@@ -164,7 +175,13 @@ static int _IRQ(irq_itf itf) {
 
 //	kprintf("timer.c _IRQ\n");
 
-	ctx->regs->TISR = OVF_IT_FLAG; // clear interrupt status register.
+#if(TI_OMAP_MAJOR_VER==3)
+	ctx->regs->TISR = OVF_IT_FLAG; // clear interrupt status register. (OMAP3)
+#elif(TI_OMAP_MAJOR_VER==5)
+	ctx->regs->IRQSTATUS = OVF_IT_FLAG; // clear interrupt status register.
+#else
+#error omap version not supported
+#endif
 
 	return 0;
 }
@@ -174,10 +191,10 @@ static int _calibrate(timer_itf itf) {
 	struct context * ctx =
 		STRUCT_BASE(struct context, timer_interface, itf);
 
-	if(0 != vm_map(SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL ))
+	if(0 != vm_map(SYNCTIMER_32KHZ_PA_BASE_OMAP, SYNCTIMER_32KHZ_PA_BASE_OMAP, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL ))
 		return -1;
 
-	struct OMAP36XX_SYNCTIMER * sync = (struct OMAP36XX_SYNCTIMER*)SYNCTIMER_32KHZ_PA_BASE_OMAP36XX;
+	struct OMAP_SYNCTIMER * sync = (struct OMAP_SYNCTIMER*)SYNCTIMER_32KHZ_PA_BASE_OMAP;
 
 	const uint32_t ticks_32khz = 3200;
 
@@ -218,7 +235,7 @@ static int _calibrate(timer_itf itf) {
 
 	//kprintf("timer calibrated: %dHz (%d/%d)\n", ctx->freq, actual_timer_ticks, actual_32khz_ticks);
 
-	vm_unmap(SYNCTIMER_32KHZ_PA_BASE_OMAP36XX, PAGE_SIZE);
+	vm_unmap(SYNCTIMER_32KHZ_PA_BASE_OMAP, PAGE_SIZE);
 
 	return 0;
 }
@@ -231,17 +248,17 @@ static int _open(
 	struct context *ctx;
 
 	static const size_t _timer_base[] = {
-		GPTIMER1_PA_BASE_OMAP36XX,
-		GPTIMER2_PA_BASE_OMAP36XX,
-		GPTIMER3_PA_BASE_OMAP36XX,
-		GPTIMER4_PA_BASE_OMAP36XX,
-		GPTIMER5_PA_BASE_OMAP36XX,
-		GPTIMER6_PA_BASE_OMAP36XX,
-		GPTIMER7_PA_BASE_OMAP36XX,
-		GPTIMER8_PA_BASE_OMAP36XX,
-		GPTIMER9_PA_BASE_OMAP36XX,
-		GPTIMER10_PA_BASE_OMAP36XX,
-		GPTIMER11_PA_BASE_OMAP36XX,
+		GPTIMER1_PA_BASE_OMAP,
+		GPTIMER2_PA_BASE_OMAP,
+		GPTIMER3_PA_BASE_OMAP,
+		GPTIMER4_PA_BASE_OMAP,
+		GPTIMER5_PA_BASE_OMAP,
+		GPTIMER6_PA_BASE_OMAP,
+		GPTIMER7_PA_BASE_OMAP,
+		GPTIMER8_PA_BASE_OMAP,
+		GPTIMER9_PA_BASE_OMAP,
+		GPTIMER10_PA_BASE_OMAP,
+		GPTIMER11_PA_BASE_OMAP,
 	};
 
 	if(index >= (sizeof(_timer_base) / sizeof(_timer_base[0])))
@@ -273,10 +290,10 @@ static int _open(
 	ctx->irq_interface->get_irq_number = &_get_irq_number;
 
 	// initialise private data.
-	ctx->regs = (struct OMAP36XX_GPTIMER *)_timer_base[index]; // TODO: Virtual Address.
+	ctx->regs = (struct OMAP_GPTIMER*)_timer_base[index]; // TODO: Virtual Address.
 
 	// initialise IRQ number.
-	ctx->irq_number = GPTIMER_IRQ_BASE_OMAP36XX + index;
+	ctx->irq_number = GPTIMER_IRQ_BASE_OMAP + index;
 
 	// switch to POSTED mode..
 	//	don't stall on writes, but require software to wait

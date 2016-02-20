@@ -1,7 +1,8 @@
 /*
 	Timer Registers defined according to...
 
-			OMAP536XX Multimedia Device
+		Texas Instruments OMAP36XX:
+			OMAP36XX Multimedia Device
 			Silicon Revision 1.0
 			Texas Instruments OMAP(tm) Family of Products
 			Version B
@@ -11,34 +12,85 @@
 			December 2009
 
 			16.3 General purpose Timers Registers Manual.
+
+		Texas Instruments OPAP543X:
+			OMAP543x Multimedia Device
+			Silicon Revision 2.0
+			Texas Instruments OMAPTM Family of Products
+
+			Literature Number: SWPU249AC
+			May 2013 – Revised December 2014
+
 */
 
-#define SYNCTIMER_32KHZ_PA_BASE_OMAP36XX 0x48320000
+#if(TI_OMAP_MAJOR_VER == 3)
+#define SYNCTIMER_32KHZ_PA_BASE_OMAP 0x48320000
+#endif
 
-struct OMAP36XX_SYNCTIMER {
+#if(TI_OMAP_MAJOR_VER == 5)
+#define SYNCTIMER_32KHZ_PA_BASE_OMAP 0x4AE04000
+#endif
+
+struct OMAP_SYNCTIMER {
+
+#if(TI_OMAP_MAJOR_VER == 3)
 	volatile const uint32_t REG_32KSYNCNT_REV;
 	volatile       uint32_t REG_32KSYNCNT_SYSCONFIG;
 	volatile const uint32_t _reserved0;
 	volatile const uint32_t _reserved1;
 	volatile const uint32_t REG_32KSYNCNT_CR;
+#endif
+
+#if(TI_OMAP_MAJOR_VER == 5)
+	volatile const uint32_t REG_32KSYNCNT_REV;        // 0x000
+	volatile const uint32_t _reserved0;               // 0x004
+	volatile const uint32_t _reserved1;               // 0x008
+	volatile const uint32_t _reserved2;               // 0x00C
+	volatile       uint32_t REG_32KSYNCNT_SYSCONFIG;  // 0x010
+	volatile const uint32_t _reserved3;               // 0x014
+	volatile const uint32_t _reserved4;               // 0x018
+	volatile const uint32_t _reserved5;               // 0x01C
+	volatile const uint32_t _reserved6;               // 0x020
+	volatile const uint32_t _reserved7;               // 0x024
+	volatile const uint32_t _reserved8;               // 0x028
+	volatile const uint32_t _reserved9;               // 0x02C
+	volatile const uint32_t REG_32KSYNCNT_CR;         // 0x030
+#endif
 };
 
-#define GPTIMER_IRQ_BASE_OMAP36XX  37
+#define GPTIMER_IRQ_BASE_OMAP  37
 
-#define GPTIMER1_PA_BASE_OMAP36XX  0x48318000
-#define GPTIMER2_PA_BASE_OMAP36XX  0x49032000
-#define GPTIMER3_PA_BASE_OMAP36XX  0x49034000
-#define GPTIMER4_PA_BASE_OMAP36XX  0x49036000
-#define GPTIMER5_PA_BASE_OMAP36XX  0x49038000
-#define GPTIMER6_PA_BASE_OMAP36XX  0x4903A000
-#define GPTIMER7_PA_BASE_OMAP36XX  0x4903C000
-#define GPTIMER8_PA_BASE_OMAP36XX  0x4903E000
-#define GPTIMER9_PA_BASE_OMAP36XX  0x49040000
-#define GPTIMER10_PA_BASE_OMAP36XX 0x48086000
-#define GPTIMER11_PA_BASE_OMAP36XX 0x48088000
+#if(TI_OMAP_MAJOR_VER == 3)
+#define GPTIMER1_PA_BASE_OMAP  0x48318000
+#define GPTIMER2_PA_BASE_OMAP  0x49032000
+#define GPTIMER3_PA_BASE_OMAP  0x49034000
+#define GPTIMER4_PA_BASE_OMAP  0x49036000
+#define GPTIMER5_PA_BASE_OMAP  0x49038000
+#define GPTIMER6_PA_BASE_OMAP  0x4903A000
+#define GPTIMER7_PA_BASE_OMAP  0x4903C000
+#define GPTIMER8_PA_BASE_OMAP  0x4903E000
+#define GPTIMER9_PA_BASE_OMAP  0x49040000
+#define GPTIMER10_PA_BASE_OMAP 0x48086000
+#define GPTIMER11_PA_BASE_OMAP 0x48088000
+#endif
 
-struct OMAP36XX_GPTIMER {
+#if(TI_OMAP_MAJOR_VER == 5)
+#define GPTIMER1_PA_BASE_OMAP  0x4AE18000
+#define GPTIMER2_PA_BASE_OMAP  0x48032000
+#define GPTIMER3_PA_BASE_OMAP  0x48034000
+#define GPTIMER4_PA_BASE_OMAP  0x48036000
+#define GPTIMER5_PA_BASE_OMAP  0x49038000
+#define GPTIMER6_PA_BASE_OMAP  0x4903A000
+#define GPTIMER7_PA_BASE_OMAP  0x4903C000
+#define GPTIMER8_PA_BASE_OMAP  0x4903E000
+#define GPTIMER9_PA_BASE_OMAP  0x4803E000
+#define GPTIMER10_PA_BASE_OMAP 0x48086000
+#define GPTIMER11_PA_BASE_OMAP 0x48088000
+#endif
 
+struct OMAP_GPTIMER {
+
+#if(TI_OMAP_MAJOR_VER == 3)
 	volatile const uint32_t TIDR;      // 0x000 ID REVISION CODE
 	volatile const uint32_t _reserved0;// 0x004
 	volatile const uint32_t _reserved1;// 0x008
@@ -62,6 +114,38 @@ struct OMAP36XX_GPTIMER {
 	volatile       uint32_t TCVR;      // 0x050 1ms Tick Generation.
 	volatile       uint32_t TOCR;      // 0x054 Used to mask the tick interrupt for a selected number of ticks.
 	volatile       uint32_t TOWR;      // 0x058 Holds the number of masked overflow interrupts.
+#endif
+
+#if(TI_OMAP_MAJOR_VER == 5)
+	volatile const uint32_t TIDR;         // 0x00
+	volatile const uint32_t _reserved0;   // 0x04
+	volatile const uint32_t _reserved1;   // 0x08
+	volatile const uint32_t _reserved2;   // 0x0C
+	volatile       uint32_t TIOCP_CFG ;   // 0x10
+	volatile const uint32_t _reserved3;   // 0x14
+	volatile const uint32_t _reserved4;   // 0x18
+	volatile const uint32_t _reserved5;   // 0x1C
+	volatile const uint32_t RESERVED;     // 0x20
+	volatile       uint32_t IRQSTATUS_RAW;// 0x24
+	volatile       uint32_t IRQSTATUS;    // 0x28
+	volatile       uint32_t IRQSTATUS_SET;// 0x2C
+	volatile       uint32_t IRQSTATUS_CLR;// 0x30
+	volatile       uint32_t IRQWAKEEN;    // 0x34
+	volatile       uint32_t TCLR;         // 0x38 Controls optional features specific to the timer functionality
+	volatile       uint32_t TCRR;         // 0x3C Holds the value of the internal counter.
+	volatile       uint32_t TLDR;         // 0x40 Holds the timer load values.
+	volatile       uint32_t TTGR;         // 0x44 Triggers a counter reload of timer by writing any value in it.
+	volatile const uint32_t TWPS;         // 0x48 Indicates if a Write-Posted is pending.
+	volatile       uint32_t TMAR;         // 0x4C Holds the value to be compared with the counter value.
+	volatile const uint32_t TCAR1;        // 0x50 Holds the first captured value of the counter register
+	volatile       uint32_t TSICR;        // 0x54 Contains the bits that control the interface between the L4 interface and functional clock domains-posted mode and functional SW reset.
+	volatile const uint32_t TCAR2;        // 0x58 Holds the second captured value of the counter register.
+	volatile       uint32_t TPIR;         // 0x5C 1ms Tick Generation.
+	volatile       uint32_t TNIR;         // 0x60 1ms Tick Generation.
+	volatile       uint32_t TCVR;         // 0x64 1ms Tick Generation.
+	volatile       uint32_t TOCR;         // 0x68 Used to mask the tick interrupt for a selected number of ticks.
+	volatile       uint32_t TOWR;         // 0x6C Holds the number of masked overflow interrupts.
+#endif
 };
 
 // TISR flags
@@ -71,7 +155,7 @@ enum TISR{
 	TCAR_IT_FLAG = (1<<2),
 };
 
-// TIER flags.
+// TIER flags
 enum TIER {
 	MAT_IT_ENA  = (1<<0), // enable match interrupt.
 	OVF_IT_ENA  = (1<<1), // enable overflow interrupt.
