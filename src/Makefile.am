@@ -89,10 +89,12 @@ SHOV_KERN_DRIVER_OMAP = \
   drivers/ti/omap/register_macros.h \
   drivers/ti/omap/uart/uart.c \
   drivers/ti/omap/timer/timer.c \
-  drivers/ti/omap/interrupt_controller/interrupt_controller.c \
   drivers/ti/omap/uart/regs.h \
-  drivers/ti/omap/timer/regs.h \
-  drivers/ti/omap/interrupt_controller/regs.h
+  drivers/ti/omap/timer/regs.h
+
+SHOV_KERN_DRIVER_OMAP3 = \
+  drivers/ti/omap/omap3/interrupt_controller/regs.h \
+  drivers/ti/omap/omap3/interrupt_controller/interrupt_controller.c
 
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
@@ -108,4 +110,8 @@ endif
 
 if CONFIG_SHOV_DRIVER_OMAP
   kernel_SOURCES += $(SHOV_KERN_DRIVER_OMAP)
+endif
+
+if CONFIG_SHOV_DRIVER_OMAP3
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_OMAP3)
 endif
