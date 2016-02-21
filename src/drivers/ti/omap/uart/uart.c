@@ -15,6 +15,8 @@
 #include <file/file.h>
 #include <drivers/lib/uart_buffer.h>
 #include <concurrency/spinlock.h>
+#include <concurrency/kthread.h>
+#include <exceptions/exceptions.h>
 
 #include <console/console.h>
 
@@ -51,6 +53,10 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 	struct context * ctx =
 			STRUCT_BASE(struct context, file_interface, itf);
 
+	int flags = ctx->flags;
+	if(in_interrupt())
+		flags |= _NONBLOCK; // HACK - kprintf in an interrupt? use non-blocking.
+
 	uint8_t * vbuffer = (uint8_t *)_vbuffer;
 
 	while(count) {
@@ -71,8 +77,8 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 		}
 		spinlock_unlock_irqrestore(&ctx->spinlock);
 
-		if(count && !(ctx->flags & _NONBLOCK)) {
-			// TODO: SLEEP.
+		if(count && !(flags & _NONBLOCK)) {
+			kthread_yield();
 		}
 		else
 			break;
@@ -125,7 +131,7 @@ static ssize_t _read(file_itf itf, void * _vbuffer, size_t count) {
 		spinlock_unlock_irqrestore(&ctx->spinlock);
 
 		if(count && !(ctx->flags & _NONBLOCK)) {
-			// TODO: SLEEP.
+			kthread_yield();
 		}
 		else
 			break;
