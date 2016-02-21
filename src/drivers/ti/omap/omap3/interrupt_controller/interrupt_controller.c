@@ -146,7 +146,7 @@ static int _open(interrupt_controller_itf * itf) {
 		// PAUSE
 	}
 	ctx->regs->INTCPS_IDLE = 0; // all free-running.
-	for(int i=0;i<96;i++)
+	for(int i=0;i<(sizeof ctx->regs->INTCPS_ILRm / sizeof ctx->regs->INTCPS_ILRm[0]);i++)
 		ctx->regs->INTCPS_ILRm[i] = 0; // all top priority, IRQ.
 
 	ctx->regs->INTCPS_CONTROL = 3; // clear and enable IRQ and FIQ.
@@ -155,7 +155,7 @@ static int _open(interrupt_controller_itf * itf) {
 	return 0;
 }
 
-// install timers.
+// install interrupt controller.
 static int ___install___() {
 
 	return interrupt_controller_install(&_open);

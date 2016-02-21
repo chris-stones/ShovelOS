@@ -1,23 +1,14 @@
-/***
- * Global Interrupt Controller ( For ARM MPCore )
- */
+#pragma once
 
-#include <coprocessor_asm.h>
+#define INTERRUPTS_MAX 256
 
-static uint32_t _peripheral_base() {
+#define GIC_DISTRIBUTOR_OFFSET 								(0x1000)
+#define GIC_CPU_INTERFACE_OFFSET							(0x2000)
+#define GIC_VIRTUAL_INTERFACE_CONTROL_COMMBAR_OFFSET		(0x4000)
+#define GIC_VIRTUAL_INTERFACE_CONTROL_PROCSPECBAR_OFFSET	(0x5000)
+#define GIC_VIRTUAL_CPU_INTERFACE_OFFSET					(0x6000)
 
-	uint32_t cbar = _arm_cp_read_CBAR();
-
-	return cbar & 0xFFFF8000;
-}
-
-#define DISTRIBUTOR_OFFSET 								(0x1000)
-#define CPU_INTERFACE_OFFSET							(0x2000)
-#define VIRTUAL_INTERFACE_CONTROL_COMMBAR_OFFSET		(0x4000)
-#define VIRTUAL_INTERFACE_CONTROL__PROCSPECBAR_OFFSET	(0x5000)
-#define VIRTUAL_CPU_INTERFACE_OFFSET					(0x6000)
-
-struct GIT_DISTRIBUTOR {
+struct GIC_DISTRIBUTOR {
 
 	/*0x000*/ volatile       uint32_t GICD_CTLR; 			// RW Distributor Control Register
 	/*0x004*/ volatile const uint32_t GICD_TYPER; 			// RO Interrupt Controller Type Register
@@ -48,7 +39,7 @@ struct GIT_DISTRIBUTOR {
 	/*0xFEC*/ const uint32_t _padding7[5];
 };
 
-struct CPU_INTERFACE {
+struct GIC_CPU_INTERFACE {
 
 	/*0x0000*/ volatile       uint32_t GICC_CTLR; 			// RW CPU Interface Control Register
 	/*0x0004*/ volatile       uint32_t GICC_PMR; 			// RW Interrupt Priority Mask Register
@@ -70,18 +61,4 @@ struct CPU_INTERFACE {
 	/*0x0100*/ volatile const uint32_t _padding2[960];		// WTF !?
 	/*0x1000*/ volatile       uint32_t GICC_DIR;			// WO - Deactivate Interrupt Register
 };
-
-struct GIT_DISTRIBUTOR * gic_get_distributor() {
-
-	uint32_t addr = _peripheral_base() + DISTRIBUTOR_OFFSET;
-
-	return (struct GIT_DISTRIBUTOR *)addr;
-}
-
-struct CPU_INTERFACE * gic_get_cpu_interface() {
-
-	uint32_t addr = _peripheral_base() + CPU_INTERFACE_OFFSET;
-
-	return (struct CPU_INTERFACE *)addr;
-}
 
