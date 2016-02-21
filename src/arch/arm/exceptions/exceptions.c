@@ -30,9 +30,10 @@ int in_interrupt() {
 	case PSR_MODE_irq:  // IRQ
 	case PSR_MODE_abt:  // Abort
 	case PSR_MODE_und:  // Undefined
-	case PSR_MODE_svc:  // Supervisor
+//	case PSR_MODE_svc:  // Supervisor
 		return 1;
 	default:
+	case PSR_MODE_svc:  // Supervisor
 	case PSR_MODE_usr:  // User
 	case PSR_MODE_mon:  // Monitor ( Secure Only )
 	case PSR_MODE_hyp:  // Hyp ( Non-Secure Only )
