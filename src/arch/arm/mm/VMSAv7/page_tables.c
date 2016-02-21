@@ -112,7 +112,10 @@ int vm_map(size_t virt, size_t phy, size_t size, int mmu_flags, int gfp_flags) {
 
 		virt += PAGE_SIZE;
 		phy  += PAGE_SIZE;
-		size -= PAGE_SIZE;
+		if(size > PAGE_SIZE)
+			size -= PAGE_SIZE;
+		else
+			break;
 	}
 
 	///// FIXME: OVERKILL
