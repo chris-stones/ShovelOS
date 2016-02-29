@@ -25,6 +25,7 @@
 typedef enum {
 	_NONBLOCK = 1<<0,
 	_CONSOLE = 1<<1,
+	_DEV= 1<<2,
 } flags_enum_t;
 
 struct context {
@@ -43,6 +44,60 @@ struct context {
 };
 
 
+static ssize_t __debug(struct UART_REGS * debug_uart, const void * _vbuffer, ssize_t count)
+{
+	uint8_t * vbuffer = (uint8_t *)_vbuffer;
+
+	while(count) {
+		if(!(debug_uart->SSR & TX_FIFO_FULL )) {
+			debug_uart->THR = (uint32_t)*vbuffer++;
+			--count;
+		}
+	}
+	return (size_t)vbuffer - (size_t)_vbuffer;
+}
+
+// Bypass the character device and just dump a debug string to the serial port.
+ssize_t _debug_out( const char * string ) {
+
+	ssize_t ret;
+
+	struct UART_REGS * debug_uart =
+		(struct UART_REGS *)UART3_PA_BASE;
+
+	size_t len = strlen(string);
+
+	ret = __debug(debug_uart, string, len );
+
+	// flush TX FIFO
+	while( !(debug_uart->LSR & TX_SR_E ) );
+
+	return ret;
+}
+
+// Bypass the character device and just dump a debug number to the serial port.
+ssize_t _debug_out_uint( uint32_t i ) {
+
+	static const char c[] = "0123456789ABCDEF";
+
+	struct UART_REGS * debug_uart =
+		(struct UART_REGS *)UART3_PA_BASE;
+
+	__debug(debug_uart, c + ((i >> 28) & 0xF), 1);
+	__debug(debug_uart, c + ((i >> 24) & 0xF), 1);
+	__debug(debug_uart, c + ((i >> 20) & 0xF), 1);
+	__debug(debug_uart, c + ((i >> 16) & 0xF), 1);
+	__debug(debug_uart, c + ((i >> 12) & 0xF), 1);
+	__debug(debug_uart, c + ((i >>  8) & 0xF), 1);
+	__debug(debug_uart, c + ((i >>  4) & 0xF), 1);
+	__debug(debug_uart, c + ((i >>  0) & 0xF), 1);
+
+	// flush TX FIFO
+	while( !(debug_uart->LSR & TX_SR_E ) );
+
+	return 1;
+}
+
 /*
  * write up to 'count' bytes to the UART.
  * returns the number of bytes written.
@@ -58,6 +113,19 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 		flags |= _NONBLOCK; // HACK - kprintf in an interrupt? use non-blocking.
 
 	uint8_t * vbuffer = (uint8_t *)_vbuffer;
+
+	//////// DEVELOPMENT - MINIMALISTIC WRITE - INTERRUPTS MAY NOT BE WORKING ////////
+	if(flags & _DEV) {
+		while(count) {
+			if(!(ctx->regs->SSR & TX_FIFO_FULL )) {
+				ctx->regs->THR = (uint32_t)*vbuffer++;
+				--count;
+			}
+		}
+		while(!(ctx->regs->LSR & TX_SR_E )); // flush TX.
+		return (size_t)vbuffer - (size_t)_vbuffer;
+	}
+	/////////////////////////////////////////////////////////////////////////////////
 
 	while(count) {
 
@@ -216,6 +284,7 @@ static int _chrd_open(
 
 	struct context *ctx;
 	int is_console=0;
+	int is_dev=0;
 
 	static const size_t _uart_base[] = {
 #if(TI_OMAP_MAJOR_VER == 3)
@@ -245,6 +314,15 @@ static int _chrd_open(
 		major = CHRD_UART_MAJOR;
 		minor = CHRD_UART_MINOR_MIN+2;
 		is_console = 1;
+	}
+
+	if(CHRD_DEV_CONSOLE_MAJOR == major && CHRD_DEV_CONSOLE_MINOR == minor) {
+
+		// serial console is on UART3.
+		major = CHRD_UART_MAJOR;
+		minor = CHRD_UART_MINOR_MIN+2;
+		is_console = 1;
+		is_dev = 1;
 	}
 
 	uint32_t uart = minor - CHRD_UART_MINOR_MIN;
@@ -277,6 +355,9 @@ static int _chrd_open(
 	if(is_console)
 		ctx->flags |= _CONSOLE;
 
+	if(is_dev)
+		ctx->flags |= _DEV;
+
 	// initialise instance pointers.
 	DRIVER_INIT_INTERFACE( ctx, file_interface );
 	DRIVER_INIT_INTERFACE( ctx, irq_interface  );
@@ -297,7 +378,8 @@ static int _chrd_open(
 	ctx->irq_number = irq_numbers[uart];
 
 	// FIFO interrupt mode.
-	_configure_fifo_interrrupt_mode((file_itf)&(ctx->file_interface));
+	if(!is_dev)
+		_configure_fifo_interrrupt_mode((file_itf)&(ctx->file_interface));
 
 	// return desired interfaces.
 	*ifile = (file_itf)&(ctx->file_interface);
@@ -319,6 +401,9 @@ static int ___install___() {
 			e = -1;
 
 	if( chrd_install( &_chrd_open, CHRD_SERIAL_CONSOLE_MAJOR, CHRD_SERIAL_CONSOLE_MINOR ) != 0 )
+		e = -1;
+
+	if( chrd_install( &_chrd_open, CHRD_DEV_CONSOLE_MAJOR, CHRD_DEV_CONSOLE_MINOR ) != 0 )
 		e = -1;
 
 	return e;

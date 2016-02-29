@@ -22,6 +22,11 @@ void console_setup() {
 	}
 }
 
+void console_setup_dev() {
+
+	chrd_open( &_console_file, &_console_irq, CHRD_DEV_CONSOLE_MAJOR, CHRD_DEV_CONSOLE_MINOR);
+}
+
 void console_teardown() {
 
 	_console_file = 0;

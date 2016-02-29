@@ -26,5 +26,7 @@ int chrd_uninstall( chrd_major_t major, chrd_minor_t minor );
 #define CHRD_SERIAL_CONSOLE_MAJOR 3
 #define CHRD_SERIAL_CONSOLE_MINOR 0
 
-
-
+// Development console - absolute bare minimal serial console.
+//	for driving the serial port when we are debugging board bring-up.
+#define CHRD_DEV_CONSOLE_MAJOR 4
+#define CHRD_DEV_CONSOLE_MINOR 0
