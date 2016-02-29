@@ -2,11 +2,16 @@
  * Global Interrupt Controller ( For ARM MPCore )
  */
 
-#include <stdint.h>
-#include <coprocessor_asm.h>
 #include <drivers/drivers.h>
+#include <stdint.h>
 #include <memory/memory.h>
 #include <memory/vm/vm.h>
+#include <interrupt_controller/controller.h>
+#include <console/console.h>
+#include <concurrency/kthread.h>
+
+#include <coprocessor_asm.h>
+#include <asm.h>
 
 #include "regs.h"
 
@@ -43,24 +48,95 @@ struct GIC_CPU_INTERFACE * gic_get_cpu_interface() {
 	return (struct GIC_CPU_INTERFACE *)addr;
 }
 
-static int _register_handler(interrupt_controller_itf self, irq_itf irq) {
+static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
 
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
+
+	int e = (irq_num >= INTERRUPTS_MAX);
+
+	if(!e) {
+
+		struct context * ctx =
+			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
+
+		if(!ctx->interrupt_functions[irq_num]) {
+			ctx->interrupt_functions[irq_num] = i_irq;
+
+		}
+		else
+			e = -1;
+	}
+
+	return e;
+}
+
+static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
+
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
+
+	if(irq_num < INTERRUPTS_MAX) {
+
+		struct context * ctx =
+			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
+
+		int reg = irq_num/32;
+		int bit = 1 << (irq_num % 32);
+
+		ctx->gic_dist->GICD_ICENABLER[reg] = bit; // disable forwarding to CPU interface.
+
+		return 0;
+	}
 	return -1;
 }
 
-static int _mask(interrupt_controller_itf self, irq_itf irq) {
+static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
 
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
+
+	if(irq_num < INTERRUPTS_MAX) {
+
+		struct context * ctx =
+			STRUCT_BASE(struct context, interrupt_controller_interface, itf);
+
+		int reg = irq_num/32;
+		int bit = 1 << (irq_num % 32);
+
+		ctx->gic_dist->GICD_ISENABLER[reg] = bit; // enable forwarding to CPU interface.
+
+		return 0;
+	}
 	return -1;
 }
 
-static int _unmask(interrupt_controller_itf self, irq_itf irq) {
+static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
-	return -1;
-}
+	struct context * ctx =
+		STRUCT_BASE(struct context, interrupt_controller_interface, itf);
 
-static int __arm_IRQ(interrupt_controller_itf self, void * cpu_state) {
+	irq_t IAR = ctx->gic_cpu->GICC_IAR;
+	irq_t irq = IAR & 1023;
+	uint32_t spurious = (irq==1023);
 
-	return -1;
+	if(spurious || irq>=INTERRUPTS_MAX)
+		return -1;
+
+	irq_itf func = ctx->interrupt_functions[irq];
+
+	int e = 0;
+	if(func)
+		e = (*func)->IRQ(func);
+
+	// TIMER0 ON OMAP36XX drives task-scheduler. //////
+	if(irq == (37+0)) { // GPTIMER_IRQ_BASE+0 // FIXME: ASSUMING OMAP543X
+		_arm_irq_task_switch(cpu_state);
+	}
+	///////////////////////////////////////////////////
+
+	ctx->gic_cpu->GICC_EOIR = IAR; // DONE - allow next IRQ.
+
+	dsb();
+
+	return e;
 }
 
 static int _debug_dump(interrupt_controller_itf self) {
@@ -97,6 +173,32 @@ static int _open(interrupt_controller_itf * itf) {
 
 	if(0 != vm_map((size_t)ctx->gic_cpu,(size_t)ctx->gic_cpu, sizeof *ctx->gic_cpu, MMU_DEVICE, GFP_KERNEL))
 		return -1;
+
+
+	// disable all interrupts.
+	for(int i=0;i<(sizeof ctx->gic_dist->GICD_ICENABLER / sizeof ctx->gic_dist->GICD_ICENABLER[0]);i++)
+		ctx->gic_dist->GICD_ICENABLER[i] = 0xffffffff;
+
+	// set all interrupts to top-priority.
+	for(int i=0;i<(sizeof ctx->gic_dist->GICD_IPRIORITYR / sizeof ctx->gic_dist->GICD_IPRIORITYR[0]); i++)
+		ctx->gic_dist->GICD_IPRIORITYR[i] = 0;
+
+	// set all interrupts to target CPU0
+	for(int i=0;i<(sizeof ctx->gic_dist->GICD_ITARGETSR/ sizeof ctx->gic_dist->GICD_ITARGETSR[0]);i++)
+		ctx->gic_dist->GICD_ITARGETSR[i] =
+			((1<<24)|(1<<16)|(1<< 8)|(1<< 0));
+
+	// set all interrupts to EDGE triggered.
+	// the GIC specification on this register is REALLY confusing! This might be completely wrong.
+//	for(int i=0;i<(sizeof ctx->gic_dist->GICD_ICFGR / sizeof ctx->gic_dist->GICD_ICFGR[0]);i++)
+//		ctx->gic_dist->GICD_ICFGR[i] = 0xFFFFFFFF;
+
+	ctx->gic_cpu->GICC_PMR = 0xff; // set priority mask to lowest value. ( don't mask anything )
+
+	ctx->gic_cpu->GICC_CTLR  = 1; // enable forwarding interrupts to this CPU.
+	ctx->gic_dist->GICD_CTLR = 1; // globally enable forwarding interrupts to the CPU interface.
+
+
 
 	return -1; // TODO:
 }
