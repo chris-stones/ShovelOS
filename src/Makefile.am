@@ -55,7 +55,6 @@ SHOV_KERN_CORE = \
 SHOV_KERN_ARM_CORE = \
   arch/arm/entry.S \
   arch/arm/arm.c \
-  arch/arm/exceptions/gic.c \
   arch/arm/exceptions/exceptions.c \
   arch/arm/concurrency/kthread.c \
   arch/arm/concurrency/kthread.h \
@@ -94,6 +93,10 @@ SHOV_KERN_DRIVER_OMAP3 = \
   drivers/ti/omap/omap3/interrupt_controller/regs.h \
   drivers/ti/omap/omap3/interrupt_controller/interrupt_controller.c
 
+SHOV_KERN_DRIVER_ARM_GIC = \
+  drivers/arm/gic/regs.h \
+  drivers/arm/gic/gic.c
+
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
   config.h
@@ -112,4 +115,8 @@ endif
 
 if CONFIG_SHOV_DRIVER_OMAP3
   kernel_SOURCES += $(SHOV_KERN_DRIVER_OMAP3)
+endif
+
+if CONFIG_SHOV_DRIVER_ARM_GIC
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_GIC)
 endif

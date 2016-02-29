@@ -64,6 +64,7 @@ iGEPv5)
   AC_DEFINE([TI_OMAP_MAJOR_VER], [5], [Texas Instruments OMAP major version])
   omap_major_ver=5
   omap_soc=yes
+  config_shov_arch_is_arm_gic=yes
   CFLAGS="$CFLAGS -mtune=cortex-a15 -mcpu=cortex-a15"
   ;;
 *)
@@ -76,6 +77,7 @@ AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARM],      [test "x$config_shov_arch_is_arm"
 AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARMv7A],   [test "x$config_shov_arch_is_arm" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP],      [test "x$omap_soc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP3],     [test "x$omap_major_ver" = "x3"])
+AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_GIC],   [test "x$config_shov_arch_is_arm_gic" = "xyes"])
 
 AC_SUBST([SHOV_CONFIG_ARCH_DIR],[arm])
 
