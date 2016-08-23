@@ -12,10 +12,20 @@
 #include<concurrency/mutex.h>
 #include<concurrency/kthread.h>
 
+#include<system_control_register.h>
+
 extern int __BSS_BEGIN;
 extern int __BSS_END;
 
 void * setup_boot_pages() {
+
+	// HACK - DISABLE I/Z/C AS SOON AS POSSIBLE!
+//	dcache_clean_invalidate();
+//	uint32_t sctlr = _arm_cp_read_SCTLR();
+//	_arm_cp_write_SCTLR(sctlr & ~(/*SCTLR_I | SCTLR_Z |*/ SCTLR_C)); // DISABLE EVERYTHING EXCEPT THE MMU.
+//	dmb();
+//	isb();
+	// END HACK!
 
 	// need to clear '_boot_pages' in boot_pages.c
 	// clearing the BSS section should do that!
@@ -90,11 +100,12 @@ void * kthread_mutex_test(void *p) {
 		mutex_unlock(&_test_mutex_mutex);
 
 		if(_test_mutex_failed) {
-			kprintf("MUTEX FAILED\n");
+			kprintf("MUTEX FAILED\r\n");
 			for(;;);
 		}
 		else {
-			kprintf("%d", (int)p);
+			kprintf("%d\r\n", (int)p);
+			kthread_yield();
 		}
 	}
 	return NULL;
@@ -135,22 +146,30 @@ void main() {
 	register_drivers();
 	interrupt_controller_open(0);
 	console_setup();
+//	console_setup_dev();
 	kthread_init();
 
 	kprintf("%s", greeting);
-	kprintf("Allocated %d pages (%d bytes)\n", get_total_pages_allocated(), get_total_pages_allocated() * PAGE_SIZE);
-	kprintf("press any key to start writing characters in multiple threads...");
-	char c[2];
-	kgets(c, 2);
+//	_debug_out(greeting);
+
+//	for(;;);
+
+//	kprintf("Allocated %d pages (%d bytes)\n", get_total_pages_allocated(), get_total_pages_allocated() * PAGE_SIZE);
+//	kprintf("press any key to start writing characters in multiple threads...");
+//	char c[2];
+//	kgets(c, 2);
 
 	{
 		//int err;
 		kthread_t thread0 = NULL;
 		kthread_t thread1 = NULL;
+		_debug_out("create th0\r\n");
 		kthread_create(&thread0, GFP_KERNEL, &kthread_mutex_test, (void*)1);
+		_debug_out("create th1\r\n");
 		kthread_create(&thread1, GFP_KERNEL, &kthread_mutex_test, (void*)2);
-
+		_debug_out("run in main\r\n");
 		kthread_mutex_test((void*)3);
+		_debug_out("main DONE...\r\n");
 	}
 
 	for(;;)

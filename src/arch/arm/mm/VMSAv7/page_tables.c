@@ -25,8 +25,11 @@ static size_t _virt_to_phy(size_t virt) {
 
 static VMSAv7_smallpage_memtype_enum_t _get_memtype(int mmu_flags) {
 
+
 	if( mmu_flags & MMU_DEVICE )
 		return VMSAv7_SMALLPAGE_MEMTYPE_SHARED_DEVICE;
+
+	return VMSAv7_SMALLPAGE_MEMTYPE_SHARED_STRONGLY_ORDERED;
 
 	if( mmu_flags & MMU_RAM )
 		return VMSAv7_SMALLPAGE_MEMTYPE_SHARED_NORMAL_WRITEBACK_WRITEALLOCATE;
@@ -39,7 +42,7 @@ static VMSAv7_smallpage_access_permission_enum_t _get_access(int mmu_flags) {
 	if( mmu_flags == MMU_NOACCESS )
 		return VMSAv7_SMALLPAGE_ACCESS_NONE;
 
-	return VMSAv7_SMALLPAGE_ACCESS_PRIVILEGED_FULL;
+	return VMSAv7_SMALLPAGE_ACCESS_FULL;
 }
 
 static VMSAv7_smallpage_execute_never_t _get_execute(int mmu_flags) {
@@ -85,6 +88,9 @@ int vm_map(size_t virt, size_t phy, size_t size, int mmu_flags, int gfp_flags) {
 	uint32_t ttrb0 = _arm_cp_read_TTBR0();
 
 	pt_root = (VMSAv7_pagetable_t *)(ttrb0 & ~(0x4000-1));
+
+	if((ttrb0 < PHYSICAL_MEMORY_BASE_ADDRESS) || (ttrb0 >= (PHYSICAL_MEMORY_BASE_ADDRESS + PHYSICAL_MEMORY_LENGTH)))
+		return 0; // HACK - STILL USING BOOT-LOADER PAGE TABLES - DELETE ME
 
 	while(size) {
 

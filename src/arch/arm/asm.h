@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <stdint.h>
 
 static inline void dmb() {

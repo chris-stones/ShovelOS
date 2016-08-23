@@ -1,5 +1,6 @@
 
 #include "controller.h"
+#include <console/console.h>
 
 static interrupt_controller_open_func_t _open_func = 0;
 static interrupt_controller_itf _itf = 0;
@@ -18,7 +19,6 @@ int interrupt_controller_open(interrupt_controller_itf *_self) {
 			return i;
 		}
 	}
-
 	return -1;
 }
 

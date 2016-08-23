@@ -1,6 +1,6 @@
 
-#include "coprocessor_asm.h"
 #include <arch.h>
+#include <asm.h>
 
 static uint32_t _log2(uint32_t l) {
 
@@ -26,6 +26,13 @@ static uint32_t encode_set_way(
 		uint32_t set,
 		uint32_t way)
 {
+
+//	_debug_out("encode_set_way\r\n");
+//	_debug_out("    cache_level "); _debug_out_uint(cache_level); _debug_out("\r\n");
+//	_debug_out("    ass         "); _debug_out_uint(associativity); _debug_out("\r\n");
+//	_debug_out("    ll          "); _debug_out_uint(linelength); _debug_out("\r\n");
+//	_debug_out("    set         "); _debug_out_uint(set); _debug_out("\r\n");
+//	_debug_out("    way         "); _debug_out_uint(way); _debug_out("\r\n");
 	/***
 	 * ARM Architecture Reference Manual
 	 * 	ARMv7-A and ARMv7-R edition
@@ -52,6 +59,9 @@ static uint32_t encode_set_way(
 			(set 	<< 		L)	|
 			(Level 	<< 		1)	;
 
+//	_debug_out("    A           "); _debug_out_uint(A); _debug_out("\r\n");
+//	_debug_out("    L           "); _debug_out_uint(L); _debug_out("\r\n");
+//	_debug_out("    REG         "); _debug_out_uint(reg); _debug_out("\r\n");
 	return reg;
 }
 
@@ -65,14 +75,24 @@ enum dcache_op {
 static void dcache_do_level(enum dcache_op op, uint32_t level ) {
 
 	// Select Cache level.
-	_arm_cp_write_CSSELR( level<<1 ); // InD flags zero, Data or Unified Cache.
+	_arm_cp_write_CSSELR((level-1)<<1 ); // InD flags zero, Data or Unified Cache.
+
+	isb(); // to sync the change to cache selection register.
 
 	uint32_t ccsidr = _arm_cp_read_CCSIDR();
 
 	uint32_t nsets 			=      (1 + ((ccsidr & 0x0FFFE000) >> 13));
 	uint32_t associativity	=      (1 + ((ccsidr & 0x00001FF8) >>  3));
-	uint32_t linewords		= 1 << (2 + ((ccsidr & 0x00000007)      ));
-	uint32_t linebytes		= 32 * linewords;
+	uint32_t linewords_raw  =           ((ccsidr & 0x00000007)       );
+	uint32_t linewords		= 1 << (2 + ((linewords_raw      )      ));
+	uint32_t linebytes		= 4 * linewords;
+
+//	_debug_out("level      "); _debug_out_uint(level); _debug_out("\r\n");
+//	_debug_out("sets       "); _debug_out_uint(nsets);   _debug_out("\r\n");
+//	_debug_out("ways       "); _debug_out_uint(associativity); _debug_out("\r\n");
+//	_debug_out("line words "); _debug_out_uint(linewords);   _debug_out("\r\n");
+//	_debug_out("line bytes "); _debug_out_uint(linebytes);   _debug_out("\r\n");
+
 
 	for(uint32_t way = 0; way < associativity; way++) {
 
@@ -111,6 +131,7 @@ static void dcache_do_all( enum dcache_op op ) {
 	for(uint32_t index=0;index<7;index++) {
 
 		uint32_t ctype = (clidr >> (index*3)) & 7;
+		uint32_t level = index+1;
 
 		switch(ctype) {
 		default: /* No cache, or instruction cache. */
@@ -119,7 +140,7 @@ static void dcache_do_all( enum dcache_op op ) {
 		case 3: /* Separate Data/Instruction Caches */
 		case 4: /* Unified Cache */
 
-			dcache_do_level(op, index+1);
+			dcache_do_level(op, level);
 			break;
 		}
 	}
@@ -127,20 +148,30 @@ static void dcache_do_all( enum dcache_op op ) {
 
 void dcache_clean() {
 
+	dsb();
 	dcache_do_all(DCACHE_CLEAN);
+	dsb();
 }
 
 void dcache_invalidate() {
 
 	dcache_do_all(DCACHE_INVALIDATE);
+	dsb();
+	isb();
 }
 
 void dcache_clean_invalidate() {
 
+	dsb();
 	dcache_do_all(DCACHE_CLEAN_INVALIDATE);
+	dsb();
+	isb();
 }
 
 void icache_invalidate() {
 
-	_arm_cp_write_ign_ICIALLU();
+	_arm_cp_write_ign_ICIALLU(); // instruction cache invalidate to the point of unification.
+	_arm_cp_write_ign_BPIALL();  // branch predictor invalidate all.
+	dsb(); // wait for invalidation.
+	isb(); // make sure instruction stream sees invalidation.
 }

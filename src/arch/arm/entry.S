@@ -7,6 +7,8 @@
 .global _start
 _start:
 
+	clrex
+
 	ldr r0, .__pre_gfp_stack_base 	@ get address of temporary stack.
 	add r0, #pre_gpf_stacksize		@ find top address.
 	mov sp, r0						@ set as booststrap stack

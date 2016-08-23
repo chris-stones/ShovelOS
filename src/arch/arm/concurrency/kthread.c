@@ -130,7 +130,11 @@ int kthread_init() {
 
 					goto success;
 				}
+				else
+					_debug_out("GET IC FAILED IN KTHREAD INIT\r\n");
 			}
+			else
+				_debug_out("TIMER OPEN FAILED IN KTHREAD INIT\r\n");
 		}
 	}
 
@@ -211,6 +215,8 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
 }
 
 void _arm_irq_task_switch(void * _cpu_state) {
+
+	_debug_out("_arm_irq_task_switch\r\n");
 
 	if(run_queue) {
 

@@ -27,6 +27,7 @@ struct kmalloc_pool _pools[] = {
 	{ NULL, GFP_KERNEL,  256, 1 },
 	{ NULL, GFP_KERNEL,  512, 1 },
 	{ NULL, GFP_KERNEL, 1024, 1 }, // NOTE: required by VSMAv7 vm_map.
+	{ NULL, GFP_KERNEL, 2048, 1 }, // NOTE: required by drivers/arm/gic.
 };
 
 #define SIZEOFARRAY(x)\

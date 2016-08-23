@@ -43,35 +43,41 @@ int in_interrupt() {
 }
 
 void _arm_call_interrupt_controller_IRQ(void * cpu_state) {
+
+//	return; // DELETE ME NOW - DISABLE IRQ!
+
 	interrupt_controller_itf itf = 0;
 	if(0 == interrupt_controller(&itf))
 		(*itf)->_arm_IRQ(itf, cpu_state);
+
 }
 
 void __attribute__ ((interrupt ("FIQ"))) _arm_isr_FIQ() {
 
-	kprintf("FIQ\n");
-	_BREAK();
+	_debug_out("FIQ");
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("SWI"))) _arm_isr_SVC() {
 
+	_debug_out("SVC");
 }
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_PREFETCH_ABORT() {
 
+	_debug_out("PF ABORT");
+	for(;;);
 }
 
 void __attribute__ ((interrupt ("ABORT"))) _arm_isr_DATA_ABORT() {
 
+	_debug_out("D ABORT");
 	for(;;);
 }
 
 void __attribute__ ((interrupt ("UNDEF"))) _arm_isr_UNDEFINED() {
 
-	kprintf("UNDEFINED INSTRUCTION\n");
-	_BREAK();
+	_debug_out("UNDEF");
 	for(;;);
 }
 

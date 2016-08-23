@@ -19,6 +19,13 @@
 #include "large_page.h"
 #include "small_page.h"
 
+#include "tlb.h"
+
+void INVALIDATE_TLB_CODE() {
+
+	tlb_invalidate();
+}
+
 /* returns a 1k aligned free physical address for use in a level 2 page table */
 static VMSAv7_smallpage_t * _get_free_l2() {
 
@@ -68,13 +75,22 @@ static int _init_page_tables_l2(VMSAv7_pagetable_t * pt_root, size_t phy_mem_bas
 		VMSAv7_smallpage_t * sp =
 			(VMSAv7_smallpage_t *)(*pt & 0xfffffc00);
 
+// WORKS!
+//		vmsav7_build_smallpage(
+//						sp + ((virt_mem_base & 0xFF000) >> 12),
+//						phy_mem_base,
+//						VMSAv7_SMALLPAGE_MEMTYPE_SHARED_STRONGLY_ORDERED,
+//						VMSAv7_SMALLPAGE_ACCESS_PRIVILEGED_FULL,
+//						VMSAv7_SMALLPAGE_GLOBAL,
+//						VMSAv7_SMALLPAGE_EXECUTE);
+
 		vmsav7_build_smallpage(
-				sp + ((virt_mem_base & 0xFF000) >> 12),
-				phy_mem_base,
-				VMSAv7_SMALLPAGE_MEMTYPE_SHARED_NORMAL_WRITEBACK_WRITEALLOCATE,
-				VMSAv7_SMALLPAGE_ACCESS_PRIVILEGED_FULL,
-				VMSAv7_SMALLPAGE_GLOBAL,
-				VMSAv7_SMALLPAGE_EXECUTE);
+						sp + ((virt_mem_base & 0xFF000) >> 12),
+						phy_mem_base,
+						VMSAv7_SMALLPAGE_MEMTYPE_SHARED_NORMAL_WRITEBACK,
+						VMSAv7_SMALLPAGE_ACCESS_PRIVILEGED_FULL,
+						VMSAv7_SMALLPAGE_GLOBAL,
+						VMSAv7_SMALLPAGE_EXECUTE);
 
 		phy_mem_base   += PAGE_SIZE;
 		virt_mem_base  += PAGE_SIZE;
@@ -124,9 +140,7 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 
 	_init_page_tables_l2(pt_root, phy_mem_base, virt_mem_base, phy_mem_length);
 
-
 	dcache_clean();
-	dsb();
 
 	uint32_t sctlr = _arm_cp_read_SCTLR();
 
@@ -138,19 +152,19 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	_arm_cp_write_TTBR0( (uint32_t)pt_root );
 	_arm_cp_write_TTBCR(0);
 
-	icache_invalidate();
-	dcache_invalidate();
-
-	// TODO: detect and use correct TLB maintenance instruction.
-	_arm_cp_write_ign_ITLBIALL(); // Invalidate instruction TLB.
-	_arm_cp_write_ign_DTLBIALL(); // Invalidate data TLB
-	_arm_cp_write_ign_TLBIALL(); // Invalidate unified TLB
-	_arm_cp_write_ign_BPIALL(); // Invalidate branch predictor.
-
 	dsb();
 	isb();
 
-	_arm_cp_write_SCTLR(sctlr | SCTLR_M | SCTLR_C | SCTLR_Z | SCTLR_I); // Enable MMU, Data Cache, Branch predictor, Instruction Cache
+	icache_invalidate();
+	dcache_invalidate();
+
+	_arm_cp_write_ign_BPIALL(); // Invalidate branch predictor.
+	tlb_invalidate();
+
+	sctlr |= SCTLR_M | SCTLR_C | SCTLR_Z | SCTLR_I;							// ENABLE MMU
+//	sctlr &= ~(SCTLR_C | SCTLR_Z | SCTLR_I);	// DISABLE Cache, Branch predictor, Instruction Cache.
+
+	_arm_cp_write_SCTLR(sctlr);
 
 	dsb();
 	isb();

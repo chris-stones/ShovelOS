@@ -149,8 +149,10 @@ static int _open(interrupt_controller_itf * itf) {
 	struct context *ctx;
 
 	ctx = kmalloc(sizeof (struct context), GFP_KERNEL | GFP_ZERO);
-	if(!ctx)
+	if(!ctx) {
+
 		return -1;
+	}
 
 	DRIVER_INIT_INTERFACE(ctx, interrupt_controller_interface);
 
@@ -168,12 +170,15 @@ static int _open(interrupt_controller_itf * itf) {
 	ctx->interrupt_controller_interface->_arm_IRQ =
 		&__arm_IRQ;
 
-	if(0 != vm_map((size_t)ctx->gic_dist,(size_t)ctx->gic_dist, sizeof *ctx->gic_dist, MMU_DEVICE, GFP_KERNEL))
-		return -1;
+	if(0 != vm_map((size_t)ctx->gic_dist,(size_t)ctx->gic_dist, sizeof *ctx->gic_dist, MMU_DEVICE, GFP_KERNEL)) {
 
-	if(0 != vm_map((size_t)ctx->gic_cpu,(size_t)ctx->gic_cpu, sizeof *ctx->gic_cpu, MMU_DEVICE, GFP_KERNEL))
 		return -1;
+	}
 
+	if(0 != vm_map((size_t)ctx->gic_cpu,(size_t)ctx->gic_cpu, sizeof *ctx->gic_cpu, MMU_DEVICE, GFP_KERNEL)) {
+
+		return -1;
+	}
 
 	// disable all interrupts.
 	for(int i=0;i<(sizeof ctx->gic_dist->GICD_ICENABLER / sizeof ctx->gic_dist->GICD_ICENABLER[0]);i++)
@@ -198,9 +203,9 @@ static int _open(interrupt_controller_itf * itf) {
 	ctx->gic_cpu->GICC_CTLR  = 1; // enable forwarding interrupts to this CPU.
 	ctx->gic_dist->GICD_CTLR = 1; // globally enable forwarding interrupts to the CPU interface.
 
+	*itf = (interrupt_controller_itf)&(ctx->interrupt_controller_interface);
 
-
-	return -1; // TODO:
+	return 0;
 }
 
 // install interrupt controller.
