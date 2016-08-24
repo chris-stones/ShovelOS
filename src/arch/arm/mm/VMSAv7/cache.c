@@ -52,7 +52,7 @@ static uint32_t encode_set_way(
 	uint32_t L = _log2(linelength);
 
 	// Level = (Cache level to operate on)-1
-	uint32_t Level = cache_level-1;
+	uint32_t Level = cache_level /* -1 */;
 
 	uint32_t reg =
 			(way 	<< (32-A))	|
@@ -131,7 +131,7 @@ static void dcache_do_all( enum dcache_op op ) {
 	for(uint32_t index=0;index<7;index++) {
 
 		uint32_t ctype = (clidr >> (index*3)) & 7;
-		uint32_t level = index+1;
+		//uint32_t level = index+1;
 
 		switch(ctype) {
 		default: /* No cache, or instruction cache. */
@@ -140,7 +140,7 @@ static void dcache_do_all( enum dcache_op op ) {
 		case 3: /* Separate Data/Instruction Caches */
 		case 4: /* Unified Cache */
 
-			dcache_do_level(op, level);
+			dcache_do_level(op, index/*+1*/);
 			break;
 		}
 	}
