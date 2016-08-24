@@ -75,7 +75,7 @@ enum dcache_op {
 static void dcache_do_level(enum dcache_op op, uint32_t level ) {
 
 	// Select Cache level.
-	_arm_cp_write_CSSELR((level-1)<<1 ); // InD flags zero, Data or Unified Cache.
+	_arm_cp_write_CSSELR(level<<1); // InD flags zero, Data or Unified Cache.
 
 	isb(); // to sync the change to cache selection register.
 
