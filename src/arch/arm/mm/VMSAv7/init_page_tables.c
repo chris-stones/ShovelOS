@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <memory/memory.h>
+#include <memory/vm/vm.h>
 #include <asm.h>
 #include <arch.h>
 #include <system_control_register.h>
@@ -168,6 +169,17 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 
 	dsb();
 	isb();
+
+	{
+		int console_vm_map = -1;
+#if(TI_OMAP_MAJOR_VER == 3)
+		console_vm_map = vm_map(0x49020000, 0x49020000, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL);
+#elif(TI_OMAP_MAJOR_VER == 5)
+		console_vm_map = vm_map(0x48020000, 0x48020000, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL);
+#endif
+		if(console_vm_map == 0)
+			_debug_out("DEBUG: mapped console - SUCCESS\n");
+	}
 
 	return 0;
 }
