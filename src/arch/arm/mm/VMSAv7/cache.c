@@ -146,6 +146,7 @@ void dcache_clean() {
 	dsb();
 	dcache_do_all(DCACHE_CLEAN);
 	dsb();
+	isb();
 }
 
 void dcache_invalidate() {
