@@ -120,7 +120,7 @@ ___irq_wake_task_on_stack:
 
 .global _arm_svc
 _arm_svc:
-    push {LR}
+    push {LR}                       @ svc in supervisor mode clobbers LR.
     svc #0
     pop {PC}
 

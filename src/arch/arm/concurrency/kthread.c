@@ -216,7 +216,7 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
 
 void _arm_irq_task_switch(void * _cpu_state) {
 
-	_debug_out("_arm_irq_task_switch\r\n");
+//	_debug_out("_arm_irq_task_switch\r\n");
 
 	if(run_queue) {
 
@@ -244,3 +244,9 @@ void _arm_irq_task_switch(void * _cpu_state) {
 	}
 }
 
+void kthread_yield() {
+
+	uint32_t imask = _arm_disable_interrupts();
+	_arm_svc(0);
+	_arm_enable_interrupts(imask);
+}
