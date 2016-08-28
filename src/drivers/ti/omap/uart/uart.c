@@ -186,6 +186,20 @@ static ssize_t _read(file_itf itf, void * _vbuffer, size_t count) {
 	uint8_t byte;
 	uint8_t *vbuffer = (uint8_t*)_vbuffer;
 
+	int flags = ctx->flags;
+	if(in_interrupt())
+		flags |= _NONBLOCK; // HACK - kprintf in an interrupt? use non-blocking.
+
+	if(flags & _DEV) {
+		while(count>0)
+			while(((ctx->regs->LSR & RX_FIFO_E)!=0)) {
+
+				*vbuffer++ = (volatile uint8_t)(ctx->regs->RHR);
+				count--;
+			}
+		return (size_t)vbuffer - (size_t)_vbuffer;
+	}
+
 	for(;;) {
 		spinlock_lock_irqsave(&ctx->spinlock);
 		while(count) {
@@ -198,7 +212,7 @@ static ssize_t _read(file_itf itf, void * _vbuffer, size_t count) {
 		}
 		spinlock_unlock_irqrestore(&ctx->spinlock);
 
-		if(count && !(ctx->flags & _NONBLOCK)) {
+		if(count && !(flags & _NONBLOCK)) {
 			kthread_yield();
 		}
 		else
