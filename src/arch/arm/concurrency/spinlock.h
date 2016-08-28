@@ -47,74 +47,44 @@
     #error SET CONFIG_UNICORE or CONFIG_SMP
 #endif
 
+void spinlock_lock_irqsave(spinlock_t * lock);
+void spinlock_unlock_irqrestore(spinlock_t * lock);
+void spinlock_lock(spinlock_t * lock);
+void spinlock_unlock(spinlock_t * lock);
 
-void __spinlock_lock_irqsave_unicore       (spinlock_t * lock);
-void __spinlock_unlock_irqrestore_unicore  (spinlock_t * lock);
-
-void __spinlock_lock_unicore               (spinlock_t * lock);
-void __spinlock_unlock_unicore             (spinlock_t * lock);
-
-// On single CPU machines, locking a spin lock disables interrupts.
-//	In an interrupt context, nothing needs to be done.
-static inline void __spinlock_lock_irqsave_inline_unicore(spinlock_t * lock) {
-
-	if(!in_interrupt()) {
-		*lock = _arm_disable_interrupts();
-	}
-}
-
-// On single CPU machines, unlocking  a spin lock restores the interrupt enable state.
-//	In an interrupt context, nothing needs to be done.
-static inline void __spinlock_unlock_irqrestore_inline_unicore(spinlock_t * lock) {
-
-	if(!in_interrupt())
-		_arm_restore_interrupts(*lock);
-}
-
-// On single core machines, we MUST disable interrupts, because we can't actually spin!
-static inline void __spinlock_lock_inline_unicore(spinlock_t * lock) {
-
-	__spinlock_lock_irqsave_inline_unicore(lock);
-}
-
-// On single core machines, we MUST disable interrupts, because we can't actually spin!
-//  Restore it here.
-static inline void __spinlock_unlock_inline_unicore(spinlock_t * lock) {
-
-	__spinlock_unlock_irqrestore_inline_unicore(lock);
-}
-
-static inline void spinlock_lock_irqsave(spinlock_t * lock) {
+static inline void spinlock_lock_irqsave_inline(spinlock_t * lock) {
 
 #ifdef CONFIG_UNICORE
-	__spinlock_lock_irqsave_unicore(lock);
+	if(!in_interrupt())
+		*lock = _arm_disable_interrupts();
 #elif  CONFIG_SMP
 	#error spinlock_lock_smp NOT IMPLEMENTED
 #endif
 }
 
-static inline void spinlock_unlock_irqrestore(spinlock_t * lock) {
+static inline void spinlock_unlock_irqrestore_inline(spinlock_t * lock) {
 
 #ifdef CONFIG_UNICORE
-	__spinlock_unlock_irqrestore_unicore(lock);
+	if(!in_interrupt())
+		_arm_restore_interrupts(*lock);
 #elif  CONFIG_SMP
 	#error spinlock_unlock_smp NOT IMPLEMENTED
 #endif
 }
 
-static inline void spinlock_lock(spinlock_t * lock) {
+static inline void spinlock_lock_inline(spinlock_t * lock) {
 
 #ifdef CONFIG_UNICORE
-	__spinlock_lock_unicore(lock);
+	spinlock_lock_irqsave_inline(lock); // MUST irqsave in UNICORE, we have no-choice.
 #elif  CONFIG_SMP
 	#error spinlock_lock_smp NOT IMPLEMENTED
 #endif
 }
 
-static inline void spinlock_unlock(spinlock_t * lock) {
+static inline void spinlock_unlock_inline(spinlock_t * lock) {
 
 #ifdef CONFIG_UNICORE
-	__spinlock_unlock_unicore(lock);
+	spinlock_unlock_irqrestore_inline(lock); // MUST irqrestore in UNICORE, we have no-choice.
 #elif  CONFIG_SMP
 	#error spinlock_unlock_smp NOT IMPLEMENTED
 #endif
