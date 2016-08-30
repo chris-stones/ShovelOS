@@ -105,6 +105,7 @@ void * kthread_mutex_test(void *p) {
 		}
 		else {
 			kprintf("%d\r\n", (int)p);
+			//kgetchar();
 			kthread_yield();
 		}
 	}
@@ -149,6 +150,7 @@ void main() {
 //	console_setup_dev();
 	kthread_init();
 
+//	_debug_out(greeting);
 	kprintf("%s", greeting);
 //	_debug_out(greeting);
 
@@ -163,13 +165,13 @@ void main() {
 		//int err;
 		kthread_t thread0 = NULL;
 		kthread_t thread1 = NULL;
-		_debug_out("create th0\r\n");
+//		_debug_out("create th0\r\n");
 		kthread_create(&thread0, GFP_KERNEL, &kthread_mutex_test, (void*)1);
-		_debug_out("create th1\r\n");
+//		_debug_out("create th1\r\n");
 		kthread_create(&thread1, GFP_KERNEL, &kthread_mutex_test, (void*)2);
-		_debug_out("run in main\r\n");
+//		_debug_out("run in main\r\n");
 		kthread_mutex_test((void*)3);
-		_debug_out("main DONE...\r\n");
+//		_debug_out("main DONE...\r\n");
 	}
 
 	for(;;)

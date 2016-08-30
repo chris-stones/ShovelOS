@@ -171,14 +171,13 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	isb();
 
 	{
-		int console_vm_map = -1;
 #if(TI_OMAP_MAJOR_VER == 3)
-		console_vm_map = vm_map(0x49020000, 0x49020000, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL);
+		vm_map(0x49020000, 0x49020000, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL);
+//		vm_map(0x00000000, 0x80200000, PAGE_SIZE, MMU_RAM,    GFP_KERNEL); // HACK - trying to catch a jump to NULL
 #elif(TI_OMAP_MAJOR_VER == 5)
-		console_vm_map = vm_map(0x48020000, 0x48020000, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL);
+		vm_map(0x48020000, 0x48020000, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL);
+//		vm_map(0x00000000, 0x80200000, PAGE_SIZE, MMU_RAM,    GFP_KERNEL); // HACK - trying to catch a jump to NULL
 #endif
-		if(console_vm_map == 0)
-			_debug_out("DEBUG: mapped console - SUCCESS\n");
 	}
 
 	return 0;
