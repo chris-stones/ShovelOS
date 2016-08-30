@@ -125,24 +125,22 @@ _arm_svc:
     pop {PC}
 
 _svc_yield:
-	cps #18
-    push {R0-R12}                   @ on IRQ stack, push R0-R12
-    cps #19
-    add R4, LR, #4                  @ get supervisor LR (interrupted PC+4) ( IRQ return will subtract 4! )
-    mov R0, SP                      @ get supervisor SP (interrupted SP)
-    ldr R1, [SP]                    @ get supervisor LR (interrupted LR) from supervisor stack
-    cps #18
-    push {R0,R1}                    @ push interrupted SP/LR onto IRQ stack.
-    push {R4}                       @ push interrupted PC onto IRQ stack.
-    mrs R0, SPSR
-    push {R0}                       @ push interrupted CPSR onto IRQ stack.
-    mov R0, SP
-    bl _arm_irq_task_switch         @ call task switcher - pass in cpu state on IRQ stack.
-	b ___irq_wake_task_on_stack     @ task wake-up procedure should(must) be same as IRQ
+    cps  #18                              @ switch to IRQ mode.
+    push {R0-R12}                         @ push R0-R12 onto IRQ stack.
+    cps  #19                              @ switch to supervisor mode.
+    mrs   R0, SPSR                        @ get interrupted CPSR
+    add   R1, LR, #4                      @ get interrupted PC+4. ( IRQ RETURN SUBTRACTS 4 )
+    mov   R2, SP                          @ get interrupted mode SP.
+    ldr   R3,[SP]                         @ get interrupted mode LR (from the supervisor stack).
+    cps  #18                              @ switch to IRQ mode.
+    push {R0-R3}                          @ push interrupted CPSR,PC,SP,LR to IRQ stack.
+    mov   R0, SP                          @ set R0 to pointer to cpu-state struct.
+    bl _arm_call_interrupt_controller_IRQ @ called task scheduller.
+    b  ___irq_wake_task_on_stack          @ wake on yield code is same as IRQ task switch.
 
 .global _my_SVC_handler
 _my_SVC_handler:                    @ TODO check SPSR mode, _svc_yield WILL NOT WORK if called from USER mode.
     clrex                           @ invalidate any mutex lock attempts.
-    cmp R0, #0
-    beq _svc_yield
-    movs PC, LR
+    cmp R0, #0                      @ does R0==YIELD ?
+    beq _svc_yield                  @ if so, branch to yield.
+    movs PC, LR                     @ unknown SVC return.
