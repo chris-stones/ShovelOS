@@ -100,6 +100,7 @@ void * kthread_mutex_test(void *p) {
 		mutex_unlock(&_test_mutex_mutex);
 
 		if(_test_mutex_failed) {
+			_arm_disable_interrupts();
 			kprintf("MUTEX FAILED\r\n");
 			for(;;);
 		}
@@ -139,6 +140,17 @@ void * kthread_main1(void * args) {
 	return NULL;
 }
 
+
+static int threadcount = 0;
+void * kthread_newthread(void * args) {
+
+	kthread_t thread1 = NULL;
+	kthread_create(&thread1, GFP_KERNEL, &kthread_newthread, NULL);
+	kprintf("NEW THREAD 0x%X pages-%d %d\n", thread1, get_total_pages_allocated(), threadcount++);
+	return NULL;
+}
+
+
 void main() {
 
 	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
@@ -153,6 +165,14 @@ void main() {
 //	_debug_out(greeting);
 	kprintf("%s", greeting);
 //	_debug_out(greeting);
+
+
+	{
+		kthread_t thread1 = NULL;
+		kthread_create(&thread1, GFP_KERNEL, &kthread_newthread, NULL);
+		for(;;)
+			kthread_yield();
+	}
 
 //	for(;;);
 
