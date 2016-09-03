@@ -174,7 +174,9 @@ static void _exited_kthread() {
 
 	spinlock_unlock(&run_queue->spinlock);
 
-	for(;;);
+	kthread_yield();
+	for(;;)
+		kthread_yield();
 }
 
 int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(void *),void * args) {
@@ -216,8 +218,6 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
 
 void _arm_irq_task_switch(void * _cpu_state) {
 
-//	_debug_out("_arm_irq_task_switch\r\n");
-
 	if(run_queue) {
 
 		spinlock_lock(&run_queue->spinlock);
@@ -227,9 +227,13 @@ void _arm_irq_task_switch(void * _cpu_state) {
 
 		spinlock_unlock(&run_queue->spinlock);
 
-		if(c && n && (c!=n)) {
+		if(n && (c!=n)) {
 			struct cpu_state_struct * cpu_state = (struct cpu_state_struct *)_cpu_state;
-			memcpy(&c->cpu_state, cpu_state, sizeof(struct cpu_state_struct)); // store interrupted tasks CPU state.
+
+			// if current is null, then this thread has just exited... DONT store its state!
+			if(c)
+				memcpy(&c->cpu_state, cpu_state, sizeof(struct cpu_state_struct)); // store interrupted tasks CPU state.
+
 			memcpy(cpu_state, &n->cpu_state, sizeof(struct cpu_state_struct)); // replace with cpu state of next task to run.
 		}
 
