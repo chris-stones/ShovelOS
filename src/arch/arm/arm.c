@@ -17,3 +17,13 @@ void _break(const char * file, const char * func, int line) {
 	_debug_out("<<<BREAK!\r\n");
 	return ; // just a point to attach a debugger to.
 }
+
+
+void _bug(const char * file, const char * func, int line) {
+	_arm_disable_interrupts();
+	_debug_out(">>>BUG!\r\n");
+	_debug_out(file);_debug_out("\r\n");
+	_debug_out(func);_debug_out("\r\n");
+	_debug_out_uint(line);_debug_out("\r\n");
+	for(;;);
+}
