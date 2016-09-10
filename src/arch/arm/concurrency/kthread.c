@@ -175,6 +175,9 @@ static void _exited_kthread() {
 	spinlock_unlock(&run_queue->spinlock);
 
 	kthread_yield();
+
+	_BUG();
+
 	for(;;)
 		kthread_yield();
 }

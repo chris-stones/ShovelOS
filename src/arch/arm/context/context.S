@@ -135,7 +135,7 @@ _svc_yield:
     cps  #18                              @ switch to IRQ mode.
     push {R0-R3}                          @ push interrupted CPSR,PC,SP,LR to IRQ stack.
     mov   R0, SP                          @ set R0 to pointer to cpu-state struct.
-    bl _arm_call_interrupt_controller_IRQ @ called task scheduller.
+    bl _arm_irq_task_switch               @ call task scheduller.
     b  ___irq_wake_task_on_stack          @ wake on yield code is same as IRQ task switch.
 
 .global _my_SVC_handler
