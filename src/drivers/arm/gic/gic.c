@@ -108,7 +108,21 @@ static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
 	return -1;
 }
 
+static int _sgi(interrupt_controller_itf itf, irq_itf i_irq) {
+
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, interrupt_controller_interface, itf);
+
+	ctx->gic_dist->GICD_SGIR = GICD_SGIR_TARGER_LIST_FILTER_THIS | irq_num;
+
+	return 0;
+}
+
 static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
+
+	_debug_out("IRQ\r\n");
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, interrupt_controller_interface, itf);
@@ -165,6 +179,8 @@ static int _open(interrupt_controller_itf * itf) {
 		&_mask;
 	ctx->interrupt_controller_interface->unmask =
 		&_unmask;
+	ctx->interrupt_controller_interface->sgi =
+			&_sgi;
 	ctx->interrupt_controller_interface->debug_dump =
 		&_debug_dump;
 	ctx->interrupt_controller_interface->_arm_IRQ =
@@ -179,6 +195,10 @@ static int _open(interrupt_controller_itf * itf) {
 
 		return -1;
 	}
+
+	kprintf("gic.c gic_dist @ %x, gic_cpu @ %x\r\n", ctx->gic_dist, ctx->gic_cpu);
+	kprintf("gic.c gic_dist IIDR %x\r\n", ctx->gic_dist->GICD_IIDR );
+	kprintf("gic.c gic_cpu  IIDR %x\r\n", ctx->gic_cpu->GICC_IIDR  );
 
 	// disable all interrupts.
 	for(int i=0;i<(sizeof ctx->gic_dist->GICD_ICENABLER / sizeof ctx->gic_dist->GICD_ICENABLER[0]);i++)

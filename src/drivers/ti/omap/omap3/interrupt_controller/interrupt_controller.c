@@ -76,6 +76,30 @@ static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
 	return -1;
 }
 
+static int _sgi(interrupt_controller_itf itf, irq_itf i_irq) {
+
+	irq_t irq_num = (*i_irq)->get_irq_number(i_irq);
+
+	if(irq_num>=INTERRUPTS_MAX)
+		return -1;
+
+	struct context * ctx =
+		STRUCT_BASE(struct context, interrupt_controller_interface, itf);
+
+	irq_itf func = ctx->interrupt_functions[irq_num];
+
+	int e = 0;
+	if(func) {
+		uint32_t imask = _arm_disable_interrupts();
+
+		e = (*func)->IRQ(func);
+
+		_arm_enable_interrupts(imask);
+	}
+
+	return e;
+}
+
 static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
 	struct context * ctx =
@@ -130,6 +154,8 @@ static int _open(interrupt_controller_itf * itf) {
 		&_mask;
 	ctx->interrupt_controller_interface->unmask =
 		&_unmask;
+	ctx->interrupt_controller_interface->sgi =
+		&_sgi;
 	ctx->interrupt_controller_interface->debug_dump =
 		&_debug_dump;
 	ctx->interrupt_controller_interface->_arm_IRQ =

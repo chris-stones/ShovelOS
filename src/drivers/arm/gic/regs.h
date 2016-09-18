@@ -8,6 +8,11 @@
 #define GIC_VIRTUAL_INTERFACE_CONTROL_PROCSPECBAR_OFFSET	(0x5000)
 #define GIC_VIRTUAL_CPU_INTERFACE_OFFSET					(0x6000)
 
+#define GICD_SGIR_TARGET_LIST_FILTER_LIST  (0<<24) // if using this mask, must also use _CPUMASK
+#define GICD_SGIR_TARGET_LIST_FILTER_OTHER (1<<24)
+#define GICD_SGIR_TARGER_LIST_FILTER_THIS  (2<<24)
+#define GICD_SGIR_TARGET_LIST_CPUMASK(m)   (m<<16)
+
 struct GIC_DISTRIBUTOR {
 
 	/*0x000*/ volatile       uint32_t GICD_CTLR; 			// RW Distributor Control Register

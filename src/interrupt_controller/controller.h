@@ -14,6 +14,8 @@ struct interrupt_controller {
 	int (*mask)(interrupt_controller_itf self, irq_itf irq);
 	int (*unmask)(interrupt_controller_itf self, irq_itf irq);
 
+	int (*sgi)(interrupt_controller_itf self, irq_itf irq); // software generated interrupt.
+
 	int (*_arm_IRQ)(interrupt_controller_itf self, void * cpu_state);
 
 	int (*debug_dump)(interrupt_controller_itf self);

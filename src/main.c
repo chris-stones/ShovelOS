@@ -146,32 +146,70 @@ void * kthread_newthread(void * args) {
 
 	kthread_t thread1 = NULL;
 	kthread_create(&thread1, GFP_KERNEL, &kthread_newthread, NULL);
-	kprintf("NEW THREAD 0x%X pages-%d %d\n", thread1, get_total_pages_allocated(), threadcount++);
+	kprintf("NEW THREAD 0x%X pages-%d %d\r\n", thread1, get_total_pages_allocated(), threadcount++);
 	return NULL;
 }
 
+struct dummy_sgi_handler_context {
+
+	DRIVER_INTERFACE(struct irq,  irq_interface);  // implements IRQ interface.
+};
+struct dummy_sgi_handler_context __dummy_sgi_handler_context;
+
+static int __dummy_sgi_handler_IRQ(irq_itf itf) {
+
+	_debug_out("DUMMY_SGI_IRQ\r\n");
+	return 0;
+}
+static irq_t __dummy_sgi_handler_get_irq_number(irq_itf itf) {
+	return 0;
+}
 
 void main() {
+
+	DRIVER_INIT_INTERFACE((&__dummy_sgi_handler_context), irq_interface);
+	__dummy_sgi_handler_context.irq_interface->IRQ = &__dummy_sgi_handler_IRQ;
+	__dummy_sgi_handler_context.irq_interface->get_irq_number = &__dummy_sgi_handler_get_irq_number;
 
 	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
 
 	exceptions_setup();
 	register_drivers();
+	console_setup_dev();
 	interrupt_controller_open(0);
-	console_setup();
-//	console_setup_dev();
+//	console_setup();
 	kthread_init();
 
 //	_debug_out(greeting);
 	kprintf("%s", greeting);
 //	_debug_out(greeting);
 
+	{
+		irq_itf sgi_irq = (irq_itf)&(__dummy_sgi_handler_context.irq_interface);
+		interrupt_controller_itf intc = 0;
+		if(interrupt_controller_open(&intc)==0) {
+			(*intc)->register_handler(intc, sgi_irq);
+			(*intc)->unmask(intc, sgi_irq);
+		}
+
+		for(;;) {
+			kprintf(">\r\n");
+			kgetchar();
+			if((*intc)->sgi)
+				(*intc)->sgi(intc, sgi_irq);
+		}
+	}
+
+	kgetchar();
 
 	{
 		kthread_t thread1 = NULL;
 		kthread_create(&thread1, GFP_KERNEL, &kthread_newthread, NULL);
-		for(;;)
+//		volatile int i = 0;
+		for(;;) {
+//			kprintf("main : %d\n", i++);
 			kthread_yield();
+		}
 	}
 
 //	for(;;);
