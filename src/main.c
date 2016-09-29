@@ -1,5 +1,5 @@
 
-#include<config.h>
+#include<_config.h>
 
 #include<memory/memory.h>
 #include<memory/vm/vm.h>
@@ -12,24 +12,11 @@
 #include<concurrency/mutex.h>
 #include<concurrency/kthread.h>
 
-#include<system_control_register.h>
-
-extern int __BSS_BEGIN;
-extern int __BSS_END;
-
 void * setup_boot_pages() {
-
-	// HACK - DISABLE I/Z/C AS SOON AS POSSIBLE!
-//	dcache_clean_invalidate();
-//	uint32_t sctlr = _arm_cp_read_SCTLR();
-//	_arm_cp_write_SCTLR(sctlr & ~(/*SCTLR_I | SCTLR_Z |*/ SCTLR_C)); // DISABLE EVERYTHING EXCEPT THE MMU.
-//	dmb();
-//	isb();
-	// END HACK!
 
 	// need to clear '_boot_pages' in boot_pages.c
 	// clearing the BSS section should do that!
-	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
+	_zero_bss();
 
 	// return a boot stack.. ( is 1 page enough!? )
 	size_t boot_stack_pages = 1;
@@ -65,20 +52,6 @@ void setup_memory() {
 	kmalloc_setup();
 }
 
-extern int __REGISTER_DRIVERS_BEGIN;
-extern int __REGISTER_DRIVERS_END;
-typedef void (*register_func)();
-
-static void register_drivers() {
-
-	register_func * begin 	= 	(register_func*)&__REGISTER_DRIVERS_BEGIN;
-	register_func * end 	= 	(register_func*)&__REGISTER_DRIVERS_END;
-	register_func * itor;
-
-	for(itor = begin; itor != end; itor++)
-		(**itor)();
-}
-
 
 volatile int _test_mutex_int = 0;
 volatile int _test_mutex_failed = 0;
@@ -100,7 +73,7 @@ void * kthread_mutex_test(void *p) {
 		mutex_unlock(&_test_mutex_mutex);
 
 		if(_test_mutex_failed) {
-			_arm_disable_interrupts();
+			//_arm_disable_interrupts();
 			kprintf("MUTEX FAILED\r\n");
 			for(;;);
 		}
@@ -165,7 +138,7 @@ static irq_t __dummy_sgi_handler_get_irq_number(irq_itf itf) {
 	return 0;
 }
 
-void main() {
+void Main() {
 
 	DRIVER_INIT_INTERFACE((&__dummy_sgi_handler_context), irq_interface);
 	__dummy_sgi_handler_context.irq_interface->IRQ = &__dummy_sgi_handler_IRQ;
@@ -195,7 +168,7 @@ void main() {
 		for(;;) {
 			kprintf(">\r\n");
 			kgetchar();
-			if((*intc)->sgi)
+			if (intc && (*intc)->sgi)
 				(*intc)->sgi(intc, sgi_irq);
 		}
 	}

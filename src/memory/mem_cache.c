@@ -11,9 +11,7 @@
  *		for use inside a host OS.
  */
 
-#if defined(HAVE_CONFIG_H)
-#include <config.h>
-#endif
+#include<_config.h>
 
 #if defined(MC_USERLAND_DEBUG) && !defined(MC_USERLAND)
 	#define MC_USERLAND

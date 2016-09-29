@@ -32,7 +32,6 @@
 #include <exceptions/exceptions.h>
 #include <stdint.h>
 #include <asm.h>
-#include <config.h>
 
 #ifdef CONFIG_UNICORE
 	typedef uint32_t spinlock_t;

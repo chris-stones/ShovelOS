@@ -21,9 +21,7 @@
  *					etc etc etc.
  */
 
-#if defined(HAVE_CONFIG_H)
-#include <config.h>
-#endif
+#include<_config.h>
 
 #if defined(GFP_USERLAND_DEBUG) && !defined(GFP_USERLAND)
 #define GFP_USERLAND
@@ -295,7 +293,7 @@ void free_pages(void * addr, size_t pages) {
 
 		_total_allocated -= pages; // TODO: double-free!?
 
-		size_t block = ((size_t)((addr - _page_offset) - _phy_base)) / PAGE_SIZE;
+		size_t block = ((size_t)((((size_t)addr) - _page_offset) - _phy_base)) / PAGE_SIZE;
 
 		buddy_free( normal_buddy, (int)block, pages );
 	}
@@ -343,6 +341,15 @@ int get_free_page_setup(
 #if defined(GFP_USERLAND)
 	posix_memalign((void**)&virtual_base, PAGE_SIZE, _total_memory);
 	phy_base = 0;
+#endif
+
+#if defined(HOSTED_PLATFORM)
+	static uint8_t ___hosted_raw_base[PHYSICAL_MEMORY_LENGTH + (PAGE_SIZE*2)];
+	virtual_base = (size_t)___hosted_raw_base;
+	if (virtual_base & (PAGE_SIZE - 1))
+		virtual_base = ((virtual_base + PAGE_SIZE) & ~(PAGE_SIZE - 1));
+	phy_base = virtual_base;
+	preallocated = 0; // on hosted, operates on a different pool to boot_pages!
 #endif
 
 	_phy_base    = phy_base;

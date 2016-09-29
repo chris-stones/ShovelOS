@@ -27,3 +27,24 @@ void _bug(const char * file, const char * func, int line) {
 	_debug_out_uint(line);_debug_out("\r\n");
 	for(;;);
 }
+
+extern int __BSS_BEGIN;
+extern int __BSS_END;
+void _zero_bss() {
+
+	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
+}
+
+extern int __REGISTER_DRIVERS_BEGIN;
+extern int __REGISTER_DRIVERS_END;
+typedef void(*register_func)();
+
+void register_drivers() {
+
+	register_func * begin = (register_func*)&__REGISTER_DRIVERS_BEGIN;
+	register_func * end = (register_func*)&__REGISTER_DRIVERS_END;
+	register_func * itor;
+
+	for (itor = begin; itor != end; itor++)
+		(**itor)();
+}

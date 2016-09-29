@@ -45,7 +45,7 @@ _start:
 	mov sp,   r8         @ set Supervisor stack.
 
 	@ run kernel main in supervisor mode
-	b  main              @ run main!!!
+	b  Main              @ run main!!!
 
 @ a tiny array that we will use for a stack before get_free_page() is setup.
 .align 8
