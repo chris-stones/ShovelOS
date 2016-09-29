@@ -2,6 +2,7 @@
 
 #include "asm.h"
 #include <arch.h>
+#include <stdlib.h>
 
 #include "mm/VMSAv7/supersection.h"
 #include "mm/VMSAv7/section.h"

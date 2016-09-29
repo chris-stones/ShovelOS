@@ -1,3 +1,4 @@
+#include<_config.h>
 
 #include<memory/memory.h>
 #include<stdlib/stdlib.h>

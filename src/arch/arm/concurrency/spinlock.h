@@ -40,7 +40,7 @@
 
 		*lock = SPINLOCK_UNLOCKED;
 	}
-#elif
+#elif defined(CONFIG_SMP)
     #error CONFIG_SMP NOT IMPLEMENTED
 #else
     #error SET CONFIG_UNICORE or CONFIG_SMP
