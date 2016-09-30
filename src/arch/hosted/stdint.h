@@ -17,17 +17,41 @@ typedef unsigned long long int   uint64_t;
 #define NULL ((void*)0)
 #endif
 
+// TRY to detemine wordsize...
+//	First try GCC and compatible...
 #if (__SIZEOF_POINTER__ == 8)
   //64bit
+  #define __SIZE_T_IS_DEFINED__
   typedef uint64_t size_t;
   typedef sint64_t ssize_t;
 #elif (__SIZEOF_POINTER__ == 4)
   //32bit?
+  #define __SIZE_T_IS_DEFINED__
   typedef uint32_t size_t;
   typedef sint32_t ssize_t;
-#else
-  #error unknown wordsize
 #endif
+
+// Next, try Microsofts Compiler.
+#if !defined(__SIZE_T_IS_DEFINED__)
+  #if defined(_M_AMD64 )
+    //64bit
+    #define __SIZE_T_IS_DEFINED__
+    typedef uint64_t size_t;
+    typedef sint64_t ssize_t;
+  #elif defined(_M_IX86)
+    //32bit?
+    #define __SIZE_T_IS_DEFINED__
+    typedef uint32_t size_t;
+    typedef sint32_t ssize_t;
+  #endif
+#endif
+
+// give-up!
+#if !defined(__SIZE_T_IS_DEFINED__)
+  #error failed to determine wordsize.
+#endif
+
+#undef __SIZE_T_IS_DEFINED__
 
 typedef          ssize_t off_t;
 
