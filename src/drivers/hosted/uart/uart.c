@@ -18,6 +18,22 @@
 
 #include <console/console.h>
 
+/////////////////////////////////////////
+// HACK
+//  In hosted builds,
+//  we compile with no-std-include
+//  but WITH std-lib.
+//  prototype required stdlib funcs here.
+int putchar(int);
+int getchar();
+#if !defined(_MSC_VER)
+static int _kbhit() {
+  // TODO:
+  return 0;
+}
+#endif
+/////////////////////////////////////////
+
 typedef enum {
 	_NONBLOCK = 1 << 0,
 	_CONSOLE = 1 << 1,
@@ -223,11 +239,11 @@ static int _IRQ(irq_itf itf) {
 
 		//kprintf("IT_TYPE_RHR\n");
 
-		int err = 0;
+		//int err = 0;
 		while (_kbhit()) {
 			uint8_t console_byte = (uint8_t)getchar();
 			if (uart_buffer_putb(&ctx->read_buffer, console_byte) != UART_BUFFER_PUT_SUCCESS)
-				err = 1;
+			  { /*err = 1;*/ }
 	}
 
 		/*** TODO: HANDLE ERROR - LOST BYTES!! ***/
