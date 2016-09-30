@@ -2,20 +2,22 @@
 #include "stdlib.h"
 #include <stdint.h>
 
-void memcpy(void * _d, const void * _s, size_t size) {
+void * memcpy(void * _d, const void * _s, size_t size) {
 
 	const uint8_t * s = (const uint8_t *)_s;
 	      uint8_t * d = (      uint8_t *)_d;
 	while(size--)
 		*d++ = *s++;
+	return _d;
 }
 
-void memset(void * _p, int _c, size_t size) {
+void * memset(void * _p, int _c, size_t size) {
 
 	uint8_t * p = (uint8_t *)_p;
 	uint8_t   c = (uint8_t  )_c;
 	while(size--)
 		*p++ = c;
+	return _p;
 }
 
 size_t strlen(const char * const string) {
@@ -31,12 +33,12 @@ static uint8_t isnum(char c) {
         return c >= '0' && c <= '9';
 }
 
-uint8_t isdigit(char c) {
+int isdigit(int c) {
 
 	return isnum(c);
 }
 
-uint8_t isspace(char c) {
+int isspace(int c) {
 	switch(c) {
 	default:
 		return 0;
