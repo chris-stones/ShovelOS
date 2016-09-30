@@ -17,8 +17,17 @@ typedef unsigned long long int   uint64_t;
 #define NULL ((void*)0)
 #endif
 
-typedef unsigned int  size_t;
-typedef          int ssize_t;
+#if (__SIZEOF_POINTER__ == 8)
+  //64bit
+  typedef uint64_t size_t;
+  typedef sint64_t ssize_t;
+#elif (__SIZEOF_POINTER__ == 4)
+  //32bit?
+  typedef uint32_t size_t;
+  typedef sint32_t ssize_t;
+#else
+  #error unknown wordsize
+#endif
 
 typedef          ssize_t off_t;
 
