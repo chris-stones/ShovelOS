@@ -78,7 +78,7 @@ void * kthread_mutex_test(void *p) {
 			for(;;);
 		}
 		else {
-			kprintf("%d\r\n", (int)p);
+			kprintf("%d\r\n",(int)(size_t)p);
 			//kgetchar();
 			kthread_yield();
 		}
