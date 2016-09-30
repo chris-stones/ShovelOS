@@ -1,0 +1,378 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="autoconf">
+      <UniqueIdentifier>{dc5ffad5-fbfe-412e-8626-f5cbcaa67c51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\timer">
+      <UniqueIdentifier>{f4eb8893-9304-4751-8be9-e1949fc4ada9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\stdlib">
+      <UniqueIdentifier>{0de01f2c-8746-46b3-b7da-bb7f49c90d9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory">
+      <UniqueIdentifier>{bf228b3d-6202-4c8f-9675-8bc0b4f88f77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interrupt_controller">
+      <UniqueIdentifier>{bc97b267-3278-4c4d-aac0-1d3e4aaede2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\file">
+      <UniqueIdentifier>{318aec43-08aa-4afa-b662-686990a5b2f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers">
+      <UniqueIdentifier>{e6be90e3-5821-47f9-a5ba-8d07d497ea50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\console">
+      <UniqueIdentifier>{8403d45a-f3bd-48d8-b87f-91e5ecf2443e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\chardevice">
+      <UniqueIdentifier>{464a6f3b-18cd-4989-a3ee-626b54f75b7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch">
+      <UniqueIdentifier>{42d3e59c-02f7-47bc-bd9d-a572cd7336ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\arm">
+      <UniqueIdentifier>{f5d3826a-8c49-4593-ac89-3a648bac0a1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\x86">
+      <UniqueIdentifier>{1f0ea89d-b2dd-4aab-ae05-f5a3b004aa58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\arm\mm">
+      <UniqueIdentifier>{250d4ead-29dc-4328-b0fc-cd24819c24b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\arm\exceptions">
+      <UniqueIdentifier>{b995f95a-da77-474c-bcab-85ab0bd09e1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\arm\context">
+      <UniqueIdentifier>{405f901d-91f3-4ffb-9742-0a02a882fe42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\arm\concurrency">
+      <UniqueIdentifier>{a71b460d-bf51-41dc-9804-83dce27b9a26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\arm\mm\VMSAv6">
+      <UniqueIdentifier>{e55f2137-0586-4690-9546-23cc8698fb5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\arm\mm\VMSAv7">
+      <UniqueIdentifier>{ff1f74c4-f737-4fda-81ec-6562d0a81b4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory\vm">
+      <UniqueIdentifier>{7c0880d8-224c-4ad9-88c9-0299a7307236}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\ti">
+      <UniqueIdentifier>{af0ca01a-d5ac-4020-904e-52f1848104e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\lib">
+      <UniqueIdentifier>{fe71c16b-e42d-4ad3-877e-25a206d2824d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\arm">
+      <UniqueIdentifier>{9fba27a6-96ba-4ef7-aa1a-552224ea2012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\arm\gic">
+      <UniqueIdentifier>{f40c239f-3c5b-46c5-aadc-9e99397db39c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\ti\omap">
+      <UniqueIdentifier>{a952b081-734d-4baf-8d9f-6faf088026b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\ti\omap\omap3">
+      <UniqueIdentifier>{52bda803-fb07-4eff-bca9-3a36f2c2acc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\ti\omap\timer">
+      <UniqueIdentifier>{0451c76a-5177-4cab-b7c0-68100892e080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\ti\omap\uart">
+      <UniqueIdentifier>{060f517a-7198-49b6-a57b-a67b9375f85c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\ti\omap\omap3\interrupt_controller">
+      <UniqueIdentifier>{d23678af-e69a-4853-bc66-83d330fa1de2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\hosted">
+      <UniqueIdentifier>{b25b396e-83b8-4b0f-9cb6-56144f86bc11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\hosted\concurrency">
+      <UniqueIdentifier>{177a5dd1-9e46-4130-8faf-cd46cf77e735}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\hosted\exceptions">
+      <UniqueIdentifier>{063e7596-964c-48aa-9af9-a849897fe9fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\hosted">
+      <UniqueIdentifier>{1d24741c-2001-4b2e-8f3f-db2cefb493ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drivers\hosted\uart">
+      <UniqueIdentifier>{d63ae6cd-3126-436d-8b20-0000ce4be256}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\configure.ac">
+      <Filter>autoconf</Filter>
+    </None>
+    <None Include="..\Makefile.am">
+      <Filter>autoconf</Filter>
+    </None>
+    <None Include="..\src\link.script">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\src\Makefile.am">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\src\arch\x86\mbr.s">
+      <Filter>Source Files\arch\x86</Filter>
+    </None>
+    <None Include="..\src\arch\x86\vbr.s">
+      <Filter>Source Files\arch\x86</Filter>
+    </None>
+    <None Include="..\src\arch\arm\entry.S">
+      <Filter>Source Files\arch\arm</Filter>
+    </None>
+    <None Include="..\src\arch\arm\concurrency\mutex.S">
+      <Filter>Source Files\arch\arm\concurrency</Filter>
+    </None>
+    <None Include="..\src\arch\arm\context\context.S">
+      <Filter>Source Files\arch\arm\context</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\arm.c">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\concurrency\kthread.c">
+      <Filter>Source Files\arch\arm\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\concurrency\spinlock.c">
+      <Filter>Source Files\arch\arm\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\exceptions\exceptions.c">
+      <Filter>Source Files\arch\arm\exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\mm\VMSAv7\cache.c">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\mm\VMSAv7\init_page_tables.c">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\mm\VMSAv7\page_tables.c">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\timer\devices.c">
+      <Filter>Source Files\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\stdlib\fgets.c">
+      <Filter>Source Files\stdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\stdlib\fprintf.c">
+      <Filter>Source Files\stdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\stdlib\stdlib.c">
+      <Filter>Source Files\stdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\chardevice\devices.c">
+      <Filter>Source Files\chardevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\console\console.c">
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\interrupt_controller\controller.c">
+      <Filter>Source Files\interrupt_controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\memory\boot_pages.c">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\memory\kmalloc.c">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\memory\mem_cache.c">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\memory\page.c">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\arm\gic\gic.c">
+      <Filter>Source Files\drivers\arm\gic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\ti\omap\uart\uart.c">
+      <Filter>Source Files\drivers\ti\omap\uart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\ti\omap\timer\timer.c">
+      <Filter>Source Files\drivers\ti\omap\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\ti\omap\omap3\interrupt_controller\interrupt_controller.c">
+      <Filter>Source Files\drivers\ti\omap\omap3\interrupt_controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\hosted.c">
+      <Filter>Source Files\arch\hosted</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\hosted\uart\uart.c">
+      <Filter>Source Files\drivers\hosted\uart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\concurrency\kthread.c">
+      <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\concurrency\mutex.c">
+      <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\concurrency\spinlock.c">
+      <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\entry.c">
+      <Filter>Source Files\arch\hosted</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\arch\arm\arch.h">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\asm.h">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\coprocessor_asm.h">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\program_status_register.h">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\stdint.h">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\system_control_register.h">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\concurrency\kthread.h">
+      <Filter>Source Files\arch\arm\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\concurrency\mutex.h">
+      <Filter>Source Files\arch\arm\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\concurrency\spinlock.h">
+      <Filter>Source Files\arch\arm\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\context\context.h">
+      <Filter>Source Files\arch\arm\context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\exceptions\exceptions.h">
+      <Filter>Source Files\arch\arm\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\coarse_page_table.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv6</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\extended_small_page.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv6</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\large_page.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv6</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\section.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv6</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\supersection.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv6</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\large_page.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\pagetable.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\section.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\small_page.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\supersection.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\tlb.h">
+      <Filter>Source Files\arch\arm\mm\VMSAv7</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\timer\timer.h">
+      <Filter>Source Files\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stdlib\stdarg.h">
+      <Filter>Source Files\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stdlib\stdlib.h">
+      <Filter>Source Files\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\chardevice\chardevice.h">
+      <Filter>Source Files\chardevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\console\console.h">
+      <Filter>Source Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\file\file.h">
+      <Filter>Source Files\file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\interrupt_controller\controller.h">
+      <Filter>Source Files\interrupt_controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memory\boot_pages.h">
+      <Filter>Source Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memory\kmalloc.h">
+      <Filter>Source Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memory\mem_cache.h">
+      <Filter>Source Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memory\memory.h">
+      <Filter>Source Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memory\page.h">
+      <Filter>Source Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\memory\vm\vm.h">
+      <Filter>Source Files\memory\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\drivers.h">
+      <Filter>Source Files\drivers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\arm\gic\regs.h">
+      <Filter>Source Files\drivers\arm\gic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\lib\uart_buffer.h">
+      <Filter>Source Files\drivers\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\ti\omap\register_macros.h">
+      <Filter>Source Files\drivers\ti\omap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\ti\omap\uart\regs.h">
+      <Filter>Source Files\drivers\ti\omap\uart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\ti\omap\timer\regs.h">
+      <Filter>Source Files\drivers\ti\omap\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\ti\omap\omap3\interrupt_controller\regs.h">
+      <Filter>Source Files\drivers\ti\omap\omap3\interrupt_controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\stdint.h">
+      <Filter>Source Files\arch\hosted</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\concurrency\kthread.h">
+      <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\_config.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\default_config.h">
+      <Filter>Source Files\arch\hosted</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\arch.h">
+      <Filter>Source Files\arch\hosted</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\exceptions\exceptions.h">
+      <Filter>Source Files\arch\hosted\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\concurrency\spinlock.h">
+      <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\concurrency\mutex.h">
+      <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

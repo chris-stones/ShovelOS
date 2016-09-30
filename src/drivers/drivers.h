@@ -1,14 +1,19 @@
 
 #pragma once
 
-#if defined(HAVE_CONFIG_H)
-#include <config.h>
-#endif
+#include<_config.h>
 
 #include <stdint.h>
 
 // driver module constructor.
-#define ATTRIBUTE_REGISTER_DRIVER __attribute__ ((section (".register_drivers")))
+#if !defined(HOSTED_PLATFORM)
+	#define ATTRIBUTE_REGISTER_DRIVER __attribute__ ((section (".register_drivers")))
+#else
+	// on the hosted platform (debug)
+	//	we will have to manually install the drviers.
+	//	visual studio doesnt seem to support linker-scripts?
+	#define ATTRIBUTE_REGISTER_DRIVER
+#endif
 
 // get a structures address from the address of one of its members.
 #define STRUCT_BASE(base_type, member, member_addr)\

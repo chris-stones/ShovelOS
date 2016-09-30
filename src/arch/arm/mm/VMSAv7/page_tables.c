@@ -2,7 +2,7 @@
  *	modify virtual -> physical mappings.
  */
 
-#include <config.h>
+#include<_config.h>
 #include <memory/memory.h>
 #include <memory/vm/vm.h>
 #include <coprocessor_asm.h>

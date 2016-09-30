@@ -6,24 +6,29 @@ kernel_CPPFLAGS = \
 
 kernel_CFLAGS = \
   -ggdb3 \
-  -marm \
   -Wall \
   -Werror \
   -std=c99 \
   -Os \
-  -mno-unaligned-access \
-  -ffreestanding \
-  -nostdinc \
-  -nostdlib
+  -nostdinc
 
-kernel_LDFLAGS = \
-  -Wl,-Map,link.map,--nmagic \
-  -T $(top_srcdir)/src/link.script \
-  -static \
-  -nodefaultlibs \
-  -nostdlib
+if ! CONFIG_SHOV_HOSTED_PLATFORM
+  kernel_CFLAGS += \
+    -nostdlib \
+    -mno-unaligned-access \
+    -ffreestanding \
+    -marm
+
+  kernel_LDFLAGS = \
+    -Wl,-Map,link.map,--nmagic \
+    -T $(top_srcdir)/src/link.script \
+    -static \
+    -nodefaultlibs \
+    -nostdlib
+endif
 
 SHOV_KERN_CORE = \
+  _config.h \
   main.c \
   memory/boot_pages.c \
   memory/kmalloc.c \
@@ -71,6 +76,19 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/stdint.h \
   arch/arm/context/context.S
 
+SHOV_KERN_HOSTED_CORE = \
+  arch/hosted/entry.c \
+  arch/hosted/hosted.c \
+  arch/hosted/arch.h \
+  arch/hosted/default_config.h \
+  arch/hosted/stdint.h \
+  arch/hosted/concurrency/kthread.c \
+  arch/hosted/concurrency/kthread.h \
+  arch/hosted/concurrency/mutex.c \
+  arch/hosted/concurrency/mutex.h \
+  arch/hosted/concurrency/spinlock.c \
+  arch/hosted/concurrency/spinlock.h \
+  arch/hosted/exceptions/exceptions.h
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
   arch/arm/mm/VMSAv7/page_tables.c \
@@ -97,9 +115,17 @@ SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
   drivers/arm/gic/gic.c
 
+SHOV_KERN_DRIVER_HOSTED = \
+  drivers/hosted/uart/uart.c
+
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
   config.h
+
+if CONFIG_SHOV_HOSTED_PLATFORM
+  kernel_SOURCES += $(SHOV_KERN_HOSTED_CORE)
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_HOSTED)
+endif
 
 if CONFIG_SHOV_ARCH_IS_ARM
   kernel_SOURCES += $(SHOV_KERN_ARM_CORE)

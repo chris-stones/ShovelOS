@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BA38A20A-F8F0-4AD9-BC37-1E87C98101F9}</ProjectGuid>
+    <RootNamespace>ShovelOS</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <AdditionalIncludeDirectories>$(SolutionDir)../src/stdlib;$(SolutionDir)../src/arch/hosted;$(SolutionDir)../src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <AdditionalIncludeDirectories>$(SolutionDir)../src/arch/hosted;$(SolutionDir)../src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\configure.ac" />
+    <None Include="..\Makefile.am" />
+    <None Include="..\src\arch\arm\concurrency\mutex.S" />
+    <None Include="..\src\arch\arm\context\context.S" />
+    <None Include="..\src\arch\arm\entry.S" />
+    <None Include="..\src\arch\x86\mbr.s" />
+    <None Include="..\src\arch\x86\vbr.s" />
+    <None Include="..\src\link.script" />
+    <None Include="..\src\Makefile.am" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\arch\arm\arm.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\concurrency\kthread.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\concurrency\spinlock.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\exceptions\exceptions.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\mm\VMSAv7\cache.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\mm\VMSAv7\init_page_tables.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\mm\VMSAv7\page_tables.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\concurrency\kthread.c" />
+    <ClCompile Include="..\src\arch\hosted\concurrency\mutex.c" />
+    <ClCompile Include="..\src\arch\hosted\concurrency\spinlock.c" />
+    <ClCompile Include="..\src\arch\hosted\entry.c" />
+    <ClCompile Include="..\src\arch\hosted\hosted.c" />
+    <ClCompile Include="..\src\chardevice\devices.c" />
+    <ClCompile Include="..\src\console\console.c" />
+    <ClCompile Include="..\src\drivers\arm\gic\gic.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\hosted\uart\uart.c" />
+    <ClCompile Include="..\src\drivers\ti\omap\omap3\interrupt_controller\interrupt_controller.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\ti\omap\timer\timer.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\ti\omap\uart\uart.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\interrupt_controller\controller.c" />
+    <ClCompile Include="..\src\main.c" />
+    <ClCompile Include="..\src\memory\boot_pages.c" />
+    <ClCompile Include="..\src\memory\kmalloc.c" />
+    <ClCompile Include="..\src\memory\mem_cache.c" />
+    <ClCompile Include="..\src\memory\page.c" />
+    <ClCompile Include="..\src\stdlib\fgets.c" />
+    <ClCompile Include="..\src\stdlib\fprintf.c" />
+    <ClCompile Include="..\src\stdlib\stdlib.c" />
+    <ClCompile Include="..\src\timer\devices.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\arch\arm\arch.h" />
+    <ClInclude Include="..\src\arch\arm\asm.h" />
+    <ClInclude Include="..\src\arch\arm\concurrency\kthread.h" />
+    <ClInclude Include="..\src\arch\arm\concurrency\mutex.h" />
+    <ClInclude Include="..\src\arch\arm\concurrency\spinlock.h" />
+    <ClInclude Include="..\src\arch\arm\context\context.h" />
+    <ClInclude Include="..\src\arch\arm\coprocessor_asm.h" />
+    <ClInclude Include="..\src\arch\arm\exceptions\exceptions.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\coarse_page_table.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\extended_small_page.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\large_page.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\section.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv6\supersection.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\large_page.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\pagetable.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\section.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\small_page.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\supersection.h" />
+    <ClInclude Include="..\src\arch\arm\mm\VMSAv7\tlb.h" />
+    <ClInclude Include="..\src\arch\arm\program_status_register.h" />
+    <ClInclude Include="..\src\arch\arm\stdint.h" />
+    <ClInclude Include="..\src\arch\arm\system_control_register.h" />
+    <ClInclude Include="..\src\arch\hosted\arch.h" />
+    <ClInclude Include="..\src\arch\hosted\concurrency\kthread.h" />
+    <ClInclude Include="..\src\arch\hosted\concurrency\mutex.h" />
+    <ClInclude Include="..\src\arch\hosted\concurrency\spinlock.h" />
+    <ClInclude Include="..\src\arch\hosted\default_config.h" />
+    <ClInclude Include="..\src\arch\hosted\exceptions\exceptions.h" />
+    <ClInclude Include="..\src\arch\hosted\stdint.h" />
+    <ClInclude Include="..\src\chardevice\chardevice.h" />
+    <ClInclude Include="..\src\console\console.h" />
+    <ClInclude Include="..\src\drivers\arm\gic\regs.h" />
+    <ClInclude Include="..\src\drivers\drivers.h" />
+    <ClInclude Include="..\src\drivers\lib\uart_buffer.h" />
+    <ClInclude Include="..\src\drivers\ti\omap\omap3\interrupt_controller\regs.h" />
+    <ClInclude Include="..\src\drivers\ti\omap\register_macros.h" />
+    <ClInclude Include="..\src\drivers\ti\omap\timer\regs.h" />
+    <ClInclude Include="..\src\drivers\ti\omap\uart\regs.h" />
+    <ClInclude Include="..\src\file\file.h" />
+    <ClInclude Include="..\src\interrupt_controller\controller.h" />
+    <ClInclude Include="..\src\memory\boot_pages.h" />
+    <ClInclude Include="..\src\memory\kmalloc.h" />
+    <ClInclude Include="..\src\memory\memory.h" />
+    <ClInclude Include="..\src\memory\mem_cache.h" />
+    <ClInclude Include="..\src\memory\page.h" />
+    <ClInclude Include="..\src\memory\vm\vm.h" />
+    <ClInclude Include="..\src\stdlib\stdarg.h" />
+    <ClInclude Include="..\src\stdlib\stdlib.h" />
+    <ClInclude Include="..\src\timer\timer.h" />
+    <ClInclude Include="..\src\_config.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -5,12 +5,12 @@
 #include <file/file.h>
 #include <stdarg.h>
 
-void memset(void * p, int c, size_t size);
-void memcpy(void * d, const void * s, size_t size);
+void * memset(void * p, int c, size_t size);
+void * memcpy(void * d, const void * s, size_t size);
 
 size_t strlen(const char * const string);
-uint8_t isdigit(char c);
-uint8_t isspace(char c);
+int isdigit(int c);
+int isspace(int c);
 sint64_t atoq(const char * str);
 sint64_t atoll(const char * str);
 sint32_t atoi(const char * str);

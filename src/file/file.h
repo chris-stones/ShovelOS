@@ -18,10 +18,10 @@ struct file {
 	int (*seek)(file_itf  self, off_t offset, int whence);
 
 	// read from the device.
-	int (*read)(file_itf  self, void * buffer, size_t count);
+	ssize_t (*read)(file_itf  self, void * buffer, size_t count);
 
 	// write to the device.
-	int (*write)(file_itf  self, const void * buffer, size_t count);
+	ssize_t (*write)(file_itf  self, const void * buffer, size_t count);
 
 	// close the device.
 	int (*close)(file_itf *self);

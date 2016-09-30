@@ -1,7 +1,5 @@
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include<_config.h>
 
 #include <drivers/drivers.h>
 #include <stdint.h>
