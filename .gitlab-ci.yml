@@ -1,6 +1,7 @@
 ShovelOS:
   script:
     - mkdir build
+    - ./autogen.sh
     - cd build
     - ../configure --with-machine=beaglexm --host=arm-none-eabi
     - make
