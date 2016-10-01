@@ -1,0 +1,6 @@
+ShovelOS:
+  script:
+    - mkdir build
+    - cd build
+    - ../configure --with-machine=beaglexm --host=arm-none-eabi
+    - make
