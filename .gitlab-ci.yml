@@ -14,8 +14,8 @@ build:beaglexm:
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
-      - src/kernel
-      - src/kernel.bin
+      - build/src/kernel
+      - build/src/kernel.bin
     expire_in: 1 day
 
 build:iGEPv5:
@@ -30,8 +30,8 @@ build:iGEPv5:
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
-      - src/kernel
-      - src/kernel.bin
+      - build/src/kernel
+      - build/src/kernel.bin
     expire_in: 1 day 
 
 build:hosted:
@@ -45,7 +45,7 @@ build:hosted:
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
-      - src/kernel
+      - build/src/kernel
     expire_in: 1 day 
 
 
