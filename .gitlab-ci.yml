@@ -1,7 +1,49 @@
-ShovelOS:
+
+stages:
+  - build
+
+build:beaglexm:
+  stage: build
   script:
     - mkdir build
     - ./autogen.sh
     - cd build
     - ../configure --with-machine=beaglexm --host=arm-none-eabi
     - make
+    - arm-none-eabi-objcopy src/kernel src/kernel.bin
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+    paths:
+      src/kernel
+      src/kernel.bin
+    expire_in: 1 day
+
+build:iGEPv5:
+  stage: build
+  script:
+    - mkdir build
+    - ./autogen.sh
+    - cd build
+    - ../configure --with-machine=iGEPv5 --host=arm-none-eabi
+    - make
+    - arm-none-eabi-objcopy src/kernel src/kernel.bin
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+    paths:
+      src/kernel
+      src/kernel.bin
+    expire_in: 1 day 
+
+build:hosted:
+  stage: build
+  script:
+    - mkdir build
+    - ./autogen.sh
+    - cd build
+    - ../configure --with-machine=hosted
+    - make
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+    paths:
+      src/kernel
+   expire_in: 1 day
