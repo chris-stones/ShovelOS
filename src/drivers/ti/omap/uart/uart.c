@@ -190,7 +190,7 @@ static ssize_t _read(file_itf itf, void * _vbuffer, size_t count) {
 
 	if(flags & _DEV) {
 		while(count>0)
-			while(((ctx->regs->LSR & RX_FIFO_E)!=0)) {
+			if(((ctx->regs->LSR & RX_FIFO_E)!=0)) {
 
 				*vbuffer++ = (volatile uint8_t)(ctx->regs->RHR);
 				count--;
