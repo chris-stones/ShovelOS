@@ -82,9 +82,7 @@ SHOV_KERN_HOSTED_CORE = \
   arch/hosted/arch.h \
   arch/hosted/default_config.h \
   arch/hosted/stdint.h \
-  arch/hosted/concurrency/kthread.c \
   arch/hosted/concurrency/kthread.h \
-  arch/hosted/concurrency/mutex.c \
   arch/hosted/concurrency/mutex.h \
   arch/hosted/concurrency/spinlock.c \
   arch/hosted/concurrency/spinlock.h \
@@ -127,12 +125,13 @@ if CONFIG_SHOV_HOSTED_PLATFORM
   kernel_SOURCES += $(SHOV_KERN_DRIVER_HOSTED)
 endif
 
-if CONFIG_SHOV_ARCH_IS_ARM
-  kernel_SOURCES += $(SHOV_KERN_ARM_CORE)
-endif
-
-if CONFIG_SHOV_ARCH_IS_ARMv7A
-  kernel_SOURCES += $(SHOV_KERN_ARM_VMSAv7_CORE)
+if !CONFIG_SHOV_HOSTED_PLATFORM
+  if CONFIG_SHOV_ARCH_IS_ARM
+    kernel_SOURCES += $(SHOV_KERN_ARM_CORE)
+  endif
+  if CONFIG_SHOV_ARCH_IS_ARMv7A
+    kernel_SOURCES += $(SHOV_KERN_ARM_VMSAv7_CORE)
+  endif
 endif
 
 if CONFIG_SHOV_DRIVER_OMAP
