@@ -251,7 +251,7 @@ static int __find_unallocated(
 	const size_t extra_bits =
 		chunks % WORDBITS;
 
-	int w;
+	unsigned int w;
 
 	struct slab * slab =
 		(**free_slab_ptr);
