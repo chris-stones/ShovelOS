@@ -35,10 +35,13 @@
 
 #ifdef CONFIG_UNICORE
 	typedef uint32_t spinlock_t;
-	#define SPINLOCK_UNLOCKED 0
 	static inline void spinlock_init(spinlock_t * lock) {
 
-		*lock = SPINLOCK_UNLOCKED;
+		*lock = 0; // architechture implementation defined.
+	}
+
+	static inline void spinlock_destroy(spinlock_t * lock) {
+		// nothing to do!
 	}
 #elif defined(CONFIG_SMP)
     #error CONFIG_SMP NOT IMPLEMENTED

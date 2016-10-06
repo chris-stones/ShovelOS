@@ -1,11 +1,16 @@
 
 #pragma once
 
+#include <stdint.h>
+
 typedef uint32_t mutex_t;
-#define MUTEX_UNLOCKED 0
 static inline void mutex_init(mutex_t * lock) {
 
-	*lock = MUTEX_UNLOCKED;
+	*lock = 0; // architechture implementation defined, see mutex.S
+}
+
+static inline void mutex_destroy(mutex_t * lock) {
+	// nothing to do!
 }
 
 void mutex_lock(mutex_t * lock);
