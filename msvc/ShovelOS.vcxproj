@@ -109,8 +109,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\src\arch\hosted\concurrency\kthread.c" />
-    <ClCompile Include="..\src\arch\hosted\concurrency\mutex.c" />
     <ClCompile Include="..\src\arch\hosted\concurrency\spinlock.c" />
     <ClCompile Include="..\src\arch\hosted\entry.c" />
     <ClCompile Include="..\src\arch\hosted\hosted.c" />
@@ -173,6 +171,8 @@
     <ClInclude Include="..\src\arch\hosted\concurrency\spinlock.h" />
     <ClInclude Include="..\src\arch\hosted\default_config.h" />
     <ClInclude Include="..\src\arch\hosted\exceptions\exceptions.h" />
+    <ClInclude Include="..\src\arch\hosted\libNix\libNix.h" />
+    <ClInclude Include="..\src\arch\hosted\libWin32\libWin32.h" />
     <ClInclude Include="..\src\arch\hosted\stdint.h" />
     <ClInclude Include="..\src\chardevice\chardevice.h" />
     <ClInclude Include="..\src\console\console.h" />
@@ -195,6 +195,11 @@
     <ClInclude Include="..\src\stdlib\stdlib.h" />
     <ClInclude Include="..\src\timer\timer.h" />
     <ClInclude Include="..\src\_config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\arch\hosted\libWin32\msvc\libWin32.vcxproj">
+      <Project>{bf1df3d0-c4fd-4770-b3ef-767f8fa7a747}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

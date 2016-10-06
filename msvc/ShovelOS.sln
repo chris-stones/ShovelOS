@@ -4,6 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShovelOS", "ShovelOS.vcxproj", "{BA38A20A-F8F0-4AD9-BC37-1E87C98101F9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BF1DF3D0-C4FD-4770-B3EF-767F8FA7A747} = {BF1DF3D0-C4FD-4770-B3EF-767F8FA7A747}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libWin32", "..\src\arch\hosted\libWin32\msvc\libWin32.vcxproj", "{BF1DF3D0-C4FD-4770-B3EF-767F8FA7A747}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libNix", "..\src\arch\hosted\libNix\msvc\libNix.vcxproj", "{AC2F9044-CE80-4650-A574-6F8A22B6888D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +22,14 @@ Global
 		{BA38A20A-F8F0-4AD9-BC37-1E87C98101F9}.Debug|Win32.Build.0 = Debug|Win32
 		{BA38A20A-F8F0-4AD9-BC37-1E87C98101F9}.Release|Win32.ActiveCfg = Release|Win32
 		{BA38A20A-F8F0-4AD9-BC37-1E87C98101F9}.Release|Win32.Build.0 = Release|Win32
+		{BF1DF3D0-C4FD-4770-B3EF-767F8FA7A747}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BF1DF3D0-C4FD-4770-B3EF-767F8FA7A747}.Debug|Win32.Build.0 = Debug|Win32
+		{BF1DF3D0-C4FD-4770-B3EF-767F8FA7A747}.Release|Win32.ActiveCfg = Release|Win32
+		{BF1DF3D0-C4FD-4770-B3EF-767F8FA7A747}.Release|Win32.Build.0 = Release|Win32
+		{AC2F9044-CE80-4650-A574-6F8A22B6888D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AC2F9044-CE80-4650-A574-6F8A22B6888D}.Debug|Win32.Build.0 = Debug|Win32
+		{AC2F9044-CE80-4650-A574-6F8A22B6888D}.Release|Win32.ActiveCfg = Release|Win32
+		{AC2F9044-CE80-4650-A574-6F8A22B6888D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
