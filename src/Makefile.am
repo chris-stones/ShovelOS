@@ -148,5 +148,5 @@ if CONFIG_SHOV_DRIVER_ARM_GIC
 endif
 
 if CONFIG_SHOV_HOSTED_PLATFORM
-  kernel_LDADD = src/arch/hosted/libNix/libnux.la
+  kernel_LDADD = arch/hosted/libNix/libnix.la
 endif
