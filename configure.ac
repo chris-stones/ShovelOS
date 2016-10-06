@@ -8,6 +8,8 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 
+LT_INIT
+
 AC_CANONICAL_HOST
 
 case "$host_cpu" in
@@ -98,5 +100,6 @@ AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes
 AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
+	src/arch/hosted/libNix/Makefile
 ])
 AC_OUTPUT
