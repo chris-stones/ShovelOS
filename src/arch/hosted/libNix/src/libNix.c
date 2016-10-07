@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+#include <sys/select.h>
+#include <termios.h>
+#include <stropts.h>
+#include <sys/ioctl.h>
+
 //#if defined(HAVE_CONFIG_H)
 //	#include <config.h>
 //#endif
@@ -129,7 +135,19 @@
 
 int  host_os_kbhit() {
 
-	return 0; // TODO:
+    static int _initialised=0;
+    if(!_initialised) {
+        struct termios term;
+        tcgetattr(0, &term);
+        term.c_lflag &= ~ICANON;
+        tcsetattr(0, TCSANOW, &term);
+        setbuf(stdin, NULL);
+        _initialised = 1;
+    }
+
+    int bytesWaiting;
+    ioctl(0, FIONREAD, &bytesWaiting);
+    return bytesWaiting;
 }
 int  host_os_getchar() {
 	return getchar();
