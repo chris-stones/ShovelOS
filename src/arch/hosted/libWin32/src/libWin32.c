@@ -61,9 +61,9 @@ void kthread_yield()
 	Sleep(0);
 }
 
-void kthread_join(kthread_t * thread)
+void kthread_join(kthread_t thread)
 {
-	WaitForSingleObject(*thread, INFINITE);
+	WaitForSingleObject(thread, INFINITE);
 }
 
 int  host_os_kbhit() {

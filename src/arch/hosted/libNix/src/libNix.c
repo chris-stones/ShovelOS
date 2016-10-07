@@ -132,9 +132,9 @@
 		sched_yield();
 	}
 
-	void kthread_join(kthread_t * ppthread) {
+	void kthread_join(kthread_t pthread) {
 
-		pthread_join((*ppthread)->thr, NULL);
+		pthread_join(pthread->thr, NULL);
 	}
 #endif /* pthreads */
 

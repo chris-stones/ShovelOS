@@ -274,13 +274,13 @@ void kthread_yield() {
 	_arm_enable_interrupts(imask);
 }
 
-void kthread_join(kthread_t * thread) {
+void kthread_join(kthread_t thread) {
 
-	if (!thread || !(*thread))
+	if (!thread)
 		return;
 
-	while (!((*thread)->flags & KTHREAD_JOINABLE))
+	while (!(thread->flags & KTHREAD_JOINABLE))
 		kthread_yield();
 
-	_free_kthread(*thread);
+	_free_kthread(thread);
 }
