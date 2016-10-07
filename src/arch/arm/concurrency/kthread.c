@@ -33,12 +33,18 @@ struct cpu_state_struct {
 	uint32_t R12;
 };
 
+enum kthread_flags {
+	KTHREAD_JOINABLE = (1<<0),
+};
+
 struct kthread {
 
 	struct cpu_state_struct cpu_state;
 
-	uint32_t stack_base;
-	uint32_t stack_pages;
+	ssize_t stack_base;
+	ssize_t stack_pages;
+
+	uint32_t flags;
 };
 
 struct run_queue_struct {
@@ -154,10 +160,19 @@ err:
 	return -1;
 }
 
+static void _free_kthread_stack(struct kthread * t) {
+
+	if(t && t->stack_base) {
+		free_pages((void*)t->stack_base, t->stack_pages);
+		t->stack_base  = 0;
+		t->stack_pages = 0;
+	}
+}
+
 static void _free_kthread(struct kthread * t) {
 
-	if(t) {
-		free_pages((void*)t->stack_base, t->stack_pages);
+	if (t) {
+		_free_kthread_stack(t);
 		kfree(t);
 	}
 }
@@ -170,7 +185,7 @@ static void _exited_kthread() {
 
 	if(c) {
 		run_queue_remove(c);
-		_free_kthread(c);
+		c->flags |= KTHREAD_JOINABLE; 
 	}
 
 	spinlock_unlock(&run_queue->spinlock);
@@ -257,4 +272,15 @@ void kthread_yield() {
 	uint32_t imask = _arm_disable_interrupts();
 	_arm_svc(0);
 	_arm_enable_interrupts(imask);
+}
+
+void kthread_join(kthread_t * thread) {
+
+	if (!thread || !(*thread))
+		return;
+
+	while (!((*thread)->flags & KTHREAD_JOINABLE))
+		kthread_yield();
+
+	_free_kthread(*thread);
 }

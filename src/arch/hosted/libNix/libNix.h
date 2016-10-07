@@ -18,6 +18,7 @@ typedef struct kthread* kthread_t;
 int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(void *), void * args);
 int kthread_init();
 void kthread_yield();
+void kthread_join(kthread_t * thread);
 
 int  host_os_kbhit();
 int  host_os_getchar();

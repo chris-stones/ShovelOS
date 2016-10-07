@@ -131,6 +131,11 @@
 	void kthread_yield() {
 		sched_yield();
 	}
+
+	void kthread_join(kthread_t * ppthread) {
+
+		pthread_join((*ppthread)->thr, NULL);
+	}
 #endif /* pthreads */
 
 int  host_os_kbhit() {
