@@ -1,7 +1,7 @@
 
-noinst_LTLIBRARIES = libnix.la
+noinst_LIBRARIES = libnix.a
 
-libnix_la_CFLAGS = \
+libnix_a_CFLAGS = \
   -pthread \
   -ggdb3 \
   -Wall \
@@ -9,6 +9,6 @@ libnix_la_CFLAGS = \
   -std=c99 \
   -Os
 
-libnix_la_SOURCES = \
+libnix_a_SOURCES = \
   libNix.h \
   src/libNix.c

@@ -13,7 +13,10 @@ kernel_CFLAGS = \
   -Os \
   -nostdinc
 
-if ! CONFIG_SHOV_HOSTED_PLATFORM
+if CONFIG_SHOV_HOSTED_PLATFORM
+  kernel_CFLAGS += \
+    -pthread
+else
   kernel_CFLAGS += \
     -nostdlib \
     -mno-unaligned-access \
@@ -127,12 +130,12 @@ if CONFIG_SHOV_HOSTED_PLATFORM
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
-  if CONFIG_SHOV_ARCH_IS_ARM
+if CONFIG_SHOV_ARCH_IS_ARM
     kernel_SOURCES += $(SHOV_KERN_ARM_CORE)
-  endif
-  if CONFIG_SHOV_ARCH_IS_ARMv7A
+endif
+if CONFIG_SHOV_ARCH_IS_ARMv7A
     kernel_SOURCES += $(SHOV_KERN_ARM_VMSAv7_CORE)
-  endif
+endif
 endif
 
 if CONFIG_SHOV_DRIVER_OMAP
@@ -148,5 +151,5 @@ if CONFIG_SHOV_DRIVER_ARM_GIC
 endif
 
 if CONFIG_SHOV_HOSTED_PLATFORM
-  kernel_LDADD = arch/hosted/libNix/libnix.la
+  kernel_LDADD = arch/hosted/libNix/libnix.a
 endif

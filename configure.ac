@@ -8,8 +8,6 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 
-LT_INIT
-
 AC_CANONICAL_HOST
 
 case "$host_cpu" in
@@ -46,6 +44,7 @@ AS_IF([test "x$config_shov_arch_is_arm" = "xyes"],
 ])
 
 AC_PROG_CC
+AC_PROG_RANLIB
 AM_PROG_AS
 
 case "$config_shov_machine" in
