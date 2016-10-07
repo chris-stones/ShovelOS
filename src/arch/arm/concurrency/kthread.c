@@ -282,5 +282,5 @@ void kthread_join(kthread_t * thread) {
 	while (!(thread->flags & KTHREAD_JOINABLE))
 		kthread_yield();
 
-	_free_kthread(thread);
+	_free_kthread(*thread);
 }
