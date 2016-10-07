@@ -18,22 +18,6 @@
 
 #include <console/console.h>
 
-/////////////////////////////////////////
-// HACK
-//  In hosted builds,
-//  we compile with no-std-include
-//  but WITH std-lib.
-//  prototype required stdlib funcs here.
-int putchar(int);
-int getchar();
-#if !defined(_MSC_VER)
-static int _kbhit() {
-  // TODO:
-  return 0;
-}
-#endif
-/////////////////////////////////////////
-
 typedef enum {
 	_NONBLOCK = 1 << 0,
 	_CONSOLE = 1 << 1,
@@ -52,6 +36,9 @@ struct context {
 
 	int flags;
 	int irq_number;
+
+	kthread_t irq_thread;
+	volatile int halt_flag;
 };
 
 static ssize_t __debug(const void * _vbuffer, ssize_t count)
@@ -59,7 +46,7 @@ static ssize_t __debug(const void * _vbuffer, ssize_t count)
 	uint8_t * vbuffer = (uint8_t *)_vbuffer;
 
 	while (count) {
-		putchar((uint32_t)*vbuffer++);
+		host_os_putchar((uint32_t)*vbuffer++);
 		--count;
 	}
 	return (size_t)vbuffer - (size_t)_vbuffer;
@@ -111,7 +98,7 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 	//////// DEVELOPMENT - MINIMALISTIC WRITE - INTERRUPTS MAY NOT BE WORKING ////////
 	if (flags & _DEV) {
 		while (count) {
-			putchar((uint32_t)*vbuffer++);
+			host_os_putchar((uint32_t)*vbuffer++);
 			--count;
 		}
 		return (size_t)vbuffer - (size_t)_vbuffer;
@@ -153,6 +140,12 @@ static int _close(file_itf *itf) {
 		struct context * context =
 			STRUCT_BASE(struct context, file_interface, *itf);
 
+		context->halt_flag = 1;
+
+		if (context->irq_thread)
+			while (context->halt_flag == 1) // wait for irq_thread to finish before deleting its resources.
+				kthread_yield();
+
 		kfree(context);
 
 		*itf = NULL;
@@ -179,8 +172,8 @@ static ssize_t _read(file_itf itf, void * _vbuffer, size_t count) {
 
 	if (flags & _DEV) {
 		while (count>0)
-		while (_kbhit()) {
-			*vbuffer++ = (uint8_t)(getchar());
+		if (host_os_kbhit()) {
+			*vbuffer++ = (uint8_t)(host_os_getchar());
 			count--;
 		}
 		return (size_t)vbuffer - (size_t)_vbuffer;
@@ -227,7 +220,7 @@ static int _IRQ(irq_itf itf) {
 		uint8_t b;
 		for(;;) {
 			if (uart_buffer_getb(&ctx->write_buffer, &b) == UART_BUFFER_GET_SUCCESS)
-				putchar((uint32_t)b);
+				host_os_putchar((uint32_t)b);
 			else {
 				// DISABLE TRANSMIT INTERRUPTS - WE HAVE NO DATA TO TRANSMIT!
 				break;
@@ -235,13 +228,10 @@ static int _IRQ(irq_itf itf) {
 		}
 	}
 
-	if (_kbhit()) {
+	if (host_os_kbhit()) {
 
-		//kprintf("IT_TYPE_RHR\n");
-
-		//int err = 0;
-		while (_kbhit()) {
-			uint8_t console_byte = (uint8_t)getchar();
+		while (host_os_kbhit()) {
+			uint8_t console_byte = (uint8_t)host_os_getchar();
 			if (uart_buffer_putb(&ctx->read_buffer, console_byte) != UART_BUFFER_PUT_SUCCESS)
 			  { /*err = 1;*/ }
 	}
@@ -254,6 +244,20 @@ static int _IRQ(irq_itf itf) {
 	return 0;
 }
 
+static void * service_IRQ(void * _ctx) {
+
+	struct context * ctx = (struct context*)_ctx;
+	irq_itf irq = (irq_itf)&(ctx->irq_interface);
+
+	while (ctx->halt_flag == 0) {
+		ctx->irq_interface->IRQ(irq);
+		kthread_yield();
+	}
+
+	ctx->halt_flag = 0; // HACK - signal that closing thread can free the devices resources.
+
+	return NULL;
+}
 
 // Open and initialise a UART instance.
 //	This is the drivers main entry point.
@@ -337,9 +341,10 @@ static int _chrd_open(
 
 	// FIFO interrupt mode.
 	if (!is_dev) {
-		// configure for interrupt driven I/O.
+		kthread_t th;
+		if (kthread_create(&th, GFP_KERNEL, &service_IRQ, ctx) == 0)
+			ctx->irq_thread = th;
 	}
-		
 
 	// return desired interfaces.
 	*ifile = (file_itf)&(ctx->file_interface);

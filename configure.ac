@@ -44,6 +44,7 @@ AS_IF([test "x$config_shov_arch_is_arm" = "xyes"],
 ])
 
 AC_PROG_CC
+AC_PROG_RANLIB
 AM_PROG_AS
 
 case "$config_shov_machine" in
@@ -98,5 +99,6 @@ AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes
 AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
+	src/arch/hosted/libNix/Makefile
 ])
 AC_OUTPUT

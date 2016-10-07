@@ -121,7 +121,7 @@ struct mem_cache {
 //	Actual slabs allocated will be rounded up to the next page boundary.
 static struct slab * _more_slabs(size_t slabs, int gfp_flags) {
 
-	int p,s;
+	unsigned int p,s;
 
 	struct slab *  first_slab = NULL;
 	struct slab ** last_slab = &first_slab;
@@ -251,7 +251,7 @@ static int __find_unallocated(
 	const size_t extra_bits =
 		chunks % WORDBITS;
 
-	int w;
+	unsigned int w;
 
 	struct slab * slab =
 		(**free_slab_ptr);

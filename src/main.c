@@ -55,7 +55,7 @@ void setup_memory() {
 
 volatile int _test_mutex_int = 0;
 volatile int _test_mutex_failed = 0;
-mutex_t _test_mutex_mutex = MUTEX_UNLOCKED;
+mutex_t _test_mutex_mutex;
 void * kthread_mutex_test(void *p) {
 
 	for(;;) {
@@ -148,15 +148,28 @@ void Main() {
 
 	exceptions_setup();
 	register_drivers();
-	console_setup_dev();
+	//console_setup_dev(); // DEPENDS ON DRIVERS.
 	interrupt_controller_open(0);
-//	console_setup();
-	kthread_init();
+	kthread_init();  // DEPENDS ON INTERRUPT CONTROLLER.
+	console_setup(); // DEPENDS ON KTHREAD, DRIVERS.
+
+
+	for (uint32_t i = 0;;i++)
+	{
+		kprintf("%04d> ", i);
+		char string[12];
+		memset(string, 0, sizeof string);
+		kgets(string, sizeof string);
+		kprintf("%04d> \"%s\"\n", i, string);
+	}
+
+	mutex_init(&_test_mutex_mutex);
 
 //	_debug_out(greeting);
 	kprintf("%s", greeting);
 //	_debug_out(greeting);
 
+	/*
 	{
 		irq_itf sgi_irq = (irq_itf)&(__dummy_sgi_handler_context.irq_interface);
 		interrupt_controller_itf intc = 0;
@@ -172,20 +185,10 @@ void Main() {
 				(*intc)->sgi(intc, sgi_irq);
 		}
 	}
+	*/
 
-	kgetchar();
+//	kgetchar();
 
-	{
-		kthread_t thread1 = NULL;
-		kthread_create(&thread1, GFP_KERNEL, &kthread_newthread, NULL);
-//		volatile int i = 0;
-		for(;;) {
-//			kprintf("main : %d\n", i++);
-			kthread_yield();
-		}
-	}
-
-//	for(;;);
 
 //	kprintf("Allocated %d pages (%d bytes)\n", get_total_pages_allocated(), get_total_pages_allocated() * PAGE_SIZE);
 //	kprintf("press any key to start writing characters in multiple threads...");

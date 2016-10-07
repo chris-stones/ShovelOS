@@ -78,10 +78,10 @@ struct buddy {
 
 // get the buddy order to search for allocating given number of blocks.
 static int buddy_order(size_t nb) {
-	int i;
+	unsigned int i;
 	for(i=0;i<NB_ORDERS;i++)
-		if((1<<i) >= nb )
-			return i;
+		if((unsigned int)(1<<i) >= nb )
+			return (int)i;
 	return -1;
 }
 
@@ -166,9 +166,9 @@ static void buddy_free(struct buddy * buddy, const int _block, const size_t nb) 
 
 	// join adjacent smaller blocks to create new larger free blocks.
 	{
-		const int multiple = (size_t)1 << (NB_ORDERS-1);
-		const int first    =  _block / multiple;
-		const int last     = (_block+nb+(multiple-1)) / multiple;
+		const unsigned int multiple = (size_t)1 << (NB_ORDERS-1);
+		const unsigned int first = _block / multiple;
+		const unsigned int last = (_block + nb + (multiple - 1)) / multiple;
 
 		#define _MIN(x,y) (x)<(y) ? (x) : (y)
 
@@ -218,7 +218,7 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 
 	if(order>=0) {
 
-		int w;
+		unsigned int w;
 		struct order * p =
 			buddy->orders.order + order;
 

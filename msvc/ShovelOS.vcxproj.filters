@@ -104,6 +104,12 @@
     <Filter Include="Source Files\drivers\hosted\uart">
       <UniqueIdentifier>{d63ae6cd-3126-436d-8b20-0000ce4be256}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\arch\hosted\libWin32">
+      <UniqueIdentifier>{14a44b57-c9b7-4771-a60d-7d2a24bda799}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\arch\hosted\libNix">
+      <UniqueIdentifier>{c2d312d2-d969-441d-8d66-d6de31d4aaa1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\configure.ac">
@@ -209,12 +215,6 @@
     </ClCompile>
     <ClCompile Include="..\src\drivers\hosted\uart\uart.c">
       <Filter>Source Files\drivers\hosted\uart</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\arch\hosted\concurrency\kthread.c">
-      <Filter>Source Files\arch\hosted\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\arch\hosted\concurrency\mutex.c">
-      <Filter>Source Files\arch\hosted\concurrency</Filter>
     </ClCompile>
     <ClCompile Include="..\src\arch\hosted\concurrency\spinlock.c">
       <Filter>Source Files\arch\hosted\concurrency</Filter>
@@ -373,6 +373,12 @@
     </ClInclude>
     <ClInclude Include="..\src\arch\hosted\concurrency\mutex.h">
       <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\libWin32\libWin32.h">
+      <Filter>Source Files\arch\hosted\libWin32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\libNix\libNix.h">
+      <Filter>Source Files\arch\hosted\libNix</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
