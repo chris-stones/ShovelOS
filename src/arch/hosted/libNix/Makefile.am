@@ -1,3 +1,4 @@
+if CONFIG_SHOV_HOSTED_PLATFORM
 
 noinst_LIBRARIES = libnix.a
 
@@ -12,3 +13,5 @@ libnix_a_CFLAGS = \
 libnix_a_SOURCES = \
   libNix.h \
   src/libNix.c
+
+endif
