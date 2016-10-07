@@ -276,10 +276,10 @@ void kthread_yield() {
 
 void kthread_join(kthread_t * thread) {
 
-	if (!thread)
+	if (!thread || !(*thread))
 		return;
 
-	while (!(thread->flags & KTHREAD_JOINABLE))
+	while (!((*thread)->flags & KTHREAD_JOINABLE))
 		kthread_yield();
 
 	_free_kthread(*thread);
