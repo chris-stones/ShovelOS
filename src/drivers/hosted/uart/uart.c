@@ -141,10 +141,7 @@ static int _close(file_itf *itf) {
 			STRUCT_BASE(struct context, file_interface, *itf);
 
 		context->halt_flag = 1;
-
-		if (context->irq_thread)
-			while (context->halt_flag == 1) // wait for irq_thread to finish before deleting its resources.
-				kthread_yield();
+		kthread_join(context->irq_thread);
 
 		kfree(context);
 
@@ -253,9 +250,6 @@ static void * service_IRQ(void * _ctx) {
 		ctx->irq_interface->IRQ(irq);
 		kthread_yield();
 	}
-
-	ctx->halt_flag = 0; // HACK - signal that closing thread can free the devices resources.
-
 	return NULL;
 }
 
