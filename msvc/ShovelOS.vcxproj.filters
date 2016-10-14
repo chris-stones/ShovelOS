@@ -110,6 +110,9 @@
     <Filter Include="Source Files\arch\hosted\libNix">
       <UniqueIdentifier>{c2d312d2-d969-441d-8d66-d6de31d4aaa1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\drivers\ti\omap\disk">
+      <UniqueIdentifier>{fe8452e3-f9e0-4bad-8155-ae1dc47e00ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\configure.ac">
@@ -221,6 +224,9 @@
     </ClCompile>
     <ClCompile Include="..\src\arch\hosted\entry.c">
       <Filter>Source Files\arch\hosted</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\ti\omap\disk\disk.c">
+      <Filter>Source Files\drivers\ti\omap\disk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -379,6 +385,9 @@
     </ClInclude>
     <ClInclude Include="..\src\arch\hosted\libNix\libNix.h">
       <Filter>Source Files\arch\hosted\libNix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\ti\omap\disk\regs.h">
+      <Filter>Source Files\drivers\ti\omap\disk</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
