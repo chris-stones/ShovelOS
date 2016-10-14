@@ -20,6 +20,10 @@ SECTIONS
     	KEEP (*(.register_drivers))
     	PROVIDE_HIDDEN (__REGISTER_DRIVERS_END = .);
     	
+		PROVIDE_HIDDEN (__REGISTER_DEVICE_ADDRESS_BEGIN = .);
+    	KEEP (*(.register_device_address))
+    	PROVIDE_HIDDEN (__REGISTER_DEVICE_ADDRESS_END = .);
+
     	*(.rodata)
   	}
 	

@@ -8,11 +8,13 @@
 // driver module constructor.
 #if !defined(HOSTED_PLATFORM)
 	#define ATTRIBUTE_REGISTER_DRIVER __attribute__ ((section (".register_drivers")))
+	#define ATTRIBUTE_REGISTER_DEVICE_ADDRESS __attribute__ ((section (".register_device_address")))
 #else
 	// on the hosted platform (debug)
 	//	we will have to manually install the drviers.
 	//	visual studio doesnt seem to support linker-scripts?
 	#define ATTRIBUTE_REGISTER_DRIVER
+	#define ATTRIBUTE_REGISTER_DEVICE_ADDRESS
 #endif
 
 // get a structures address from the address of one of its members.
