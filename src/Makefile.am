@@ -59,7 +59,8 @@ SHOV_KERN_CORE = \
   interrupt_controller/controller.h \
   interrupt_controller/controller.c \
   drivers/lib/uart_buffer.h \
-  drivers/drivers.h
+  drivers/drivers.h \
+  drivers/drivers.c
 
 SHOV_KERN_ARM_CORE = \
   arch/arm/entry.S \

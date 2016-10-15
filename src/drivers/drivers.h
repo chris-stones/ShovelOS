@@ -40,3 +40,12 @@ struct irq {
 	irq_t (*get_irq_number)(irq_itf self);
 };
 
+struct vm_device_region {
+  const size_t physical_address;
+  const size_t size;
+};
+
+#define VM_DEVICE_REGION(_GUID, _PHY, _SIZE)					\
+  const struct vm_device_region _GUID ## _vm_device_region ATTRIBUTE_REGISTER_DEVICE_ADDRESS = {(_PHY),(_SIZE)}
+
+void vm_map_device_regions();

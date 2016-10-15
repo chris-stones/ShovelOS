@@ -189,9 +189,6 @@ static int _calibrate(timer_itf itf) {
 	struct context * ctx =
 		STRUCT_BASE(struct context, timer_interface, itf);
 
-	if(0 != vm_map(SYNCTIMER_32KHZ_PA_BASE_OMAP, SYNCTIMER_32KHZ_PA_BASE_OMAP, PAGE_SIZE, MMU_DEVICE, GFP_KERNEL ))
-		return -1;
-
 	struct OMAP_SYNCTIMER * sync = (struct OMAP_SYNCTIMER*)SYNCTIMER_32KHZ_PA_BASE_OMAP;
 
 	const uint32_t ticks_32khz = 3200;
@@ -232,8 +229,6 @@ static int _calibrate(timer_itf itf) {
 	ctx->freq = (uint32_t)((32768ULL * (uint64_t)actual_timer_ticks) / (uint64_t)actual_32khz_ticks);
 
 	//kprintf("timer calibrated: %dHz (%d/%d)\n", ctx->freq, actual_timer_ticks, actual_32khz_ticks);
-
-	vm_unmap(SYNCTIMER_32KHZ_PA_BASE_OMAP, PAGE_SIZE);
 
 	return 0;
 }
@@ -330,3 +325,5 @@ static int ___install___() {
 }
 
 const driver_install_func_ptr __omap36xx_timer_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
+
+VM_DEVICE_REGION(sync_timer, SYNCTIMER_32KHZ_PA_BASE_OMAP, sizeof(struct OMAP_SYNCTIMER));
