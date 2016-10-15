@@ -12,6 +12,7 @@
  */
 
 #include<_config.h>
+#include<arch.h>
 
 #if defined(MC_USERLAND_DEBUG) && !defined(MC_USERLAND)
 	#define MC_USERLAND
@@ -202,6 +203,8 @@ int mem_cache_new(
 		size_t chunk_sz,					// allocation chunk size
 		int gfp_flags)						// get_free_pages flags
 {
+  _BUG_ON(!root_mem_cache.mem_cache);
+  
 	if(root_mem_cache.caches_used < root_mem_cache.caches_totoal) {
 
 		struct mem_cache * mem_cache =
