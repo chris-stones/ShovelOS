@@ -424,4 +424,3 @@ static int ___install___() {
 // put pointer to installer function somewhere we can find it.
 const driver_install_func_ptr __omap36xx_uart_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
 
-VM_DEVICE_REGION(console_uart, UART3_PA_BASE, sizeof(struct UART_REGS));
