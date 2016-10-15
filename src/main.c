@@ -50,6 +50,8 @@ void setup_memory() {
 	mem_cache_setup();
 
 	kmalloc_setup();
+
+	vm_map_device_regions();
 }
 
 

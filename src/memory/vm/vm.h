@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #define MMU_NOACCESS (0)
 #define MMU_RAM 	 (1<< 0)
 #define MMU_DEVICE   (1<< 1)
