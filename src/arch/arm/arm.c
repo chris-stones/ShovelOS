@@ -22,6 +22,12 @@ void _break(const char * file, const char * func, int line) {
 
 void _bug(const char * file, const char * func, int line) {
 	_arm_disable_interrupts();
+
+	uint32_t sctlr = _arm_cp_read_SCTLR();
+	_arm_cp_write_SCTLR(sctlr & ~SCTLR_M); // DISABLE MMU
+	dsb();
+	isb();
+	
 	_debug_out(">>>BUG!\r\n");
 	_debug_out(file);_debug_out("\r\n");
 	_debug_out(func);_debug_out("\r\n");
