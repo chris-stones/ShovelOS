@@ -9,6 +9,7 @@
 #include <console/console.h>
 
 #include "regs.h"
+#include "sync_regs.h"
 
 struct context {
 
@@ -326,4 +327,3 @@ static int ___install___() {
 
 const driver_install_func_ptr __omap36xx_timer_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
 
-VM_DEVICE_REGION(sync_timer, SYNCTIMER_32KHZ_PA_BASE_OMAP, sizeof(struct OMAP_SYNCTIMER));

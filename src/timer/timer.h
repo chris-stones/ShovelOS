@@ -4,12 +4,9 @@
 #include<stdint.h>
 #include<drivers/drivers.h>
 
-#define TIMERS_MAX 16 // max timers to support
+#include "timespec.h"
 
-struct timespec {
-	uint32_t seconds;
-	uint32_t nanoseconds;
-};
+#define TIMERS_MAX 16 // max timers to support
 
 struct timer;
 
