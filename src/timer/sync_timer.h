@@ -4,7 +4,7 @@
 
 struct sync_timer;
 
-typedef const struct sync_timer * const * symc_timer_itf;
+typedef const struct sync_timer * const * sync_timer_itf;
 
 struct sync_timer {
   uint64_t (*cur)(sync_timer_itf self);

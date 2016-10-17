@@ -18,7 +18,7 @@ static uint64_t _cur(sync_timer_itf self) {
   struct OMAP_SYNCTIMER * st =
     (struct OMAP_SYNCTIMER*)SYNCTIMER_32KHZ_PA_BASE_OMAP;
 
-  return st->REG_32KSYNCT_CR;
+  return st->REG_32KSYNCNT_CR;
 }
 
 static uint64_t _freq(sync_timer_itf self) {
@@ -40,9 +40,9 @@ static int _open(sync_timer_itf * i_sync_timer) {
 
   DRIVER_INIT_INTERFACE(ctx, sync_timer_interface);
 
-  ctx->cur = &_cur;
-  ctx->freq = &_freq;
-  ctx->wrap = &_wrap;
+  ctx->sync_timer_interface->cur = &_cur;
+  ctx->sync_timer_interface->freq = &_freq;
+  ctx->sync_timer_interface->wrap = &_wrap;
 
   *i_sync_timer = (sync_timer_itf)&(ctx->sync_timer_interface);
   return 0;

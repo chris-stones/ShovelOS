@@ -56,6 +56,9 @@ SHOV_KERN_CORE = \
   console/console.c \
   timer/timer.h \
   timer/devices.c \
+  timer/timespec.h \
+  timer/sync_timer.h \
+  timer/sync_timer.c \
   interrupt_controller/controller.h \
   interrupt_controller/controller.c \
   drivers/lib/uart_buffer.h \
@@ -107,6 +110,8 @@ SHOV_KERN_DRIVER_OMAP = \
   drivers/ti/omap/register_macros.h \
   drivers/ti/omap/uart/uart.c \
   drivers/ti/omap/timer/timer.c \
+  drivers/ti/omap/timer/sync_timer.c \
+  drivers/ti/omap/timer/sync_timer.h \
   drivers/ti/omap/uart/regs.h \
   drivers/ti/omap/timer/regs.h
 
