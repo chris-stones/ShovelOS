@@ -59,6 +59,8 @@ SHOV_KERN_CORE = \
   timer/timespec.h \
   timer/sync_timer.h \
   timer/sync_timer.c \
+  timer/system_time.h \
+  timer/system_time.c \
   interrupt_controller/controller.h \
   interrupt_controller/controller.c \
   drivers/lib/uart_buffer.h \
