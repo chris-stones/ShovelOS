@@ -98,9 +98,33 @@ int get_system_time(struct timespec * ts) {
     } else {
       // time has not progressed.
     }
-    *ts = system_time.curr_ts;
+    if(ts)
+      *ts = system_time.curr_ts;
   }
   spinlock_unlock_irqrestore(&system_time.spinlock);
 
+  return 0;
+}
+
+int compare_system_time(const struct timespec *ts0, const struct timespec *ts1) {
+
+  if(ts0->seconds < ts1->seconds)
+    return -1;
+  else if(ts0->seconds > ts1->seconds)
+    return  1;
+  else if(ts0->nanoseconds < ts1->nanoseconds)
+    return -1;
+  else if(ts0->nanoseconds > ts1->nanoseconds)
+    return  1;
+  else
+    return 0;
+}
+
+int add_system_time(struct timespec *accum, const struct timespec * add) {
+
+  accum->seconds += add->seconds;
+  accum->nanoseconds += add->nanoseconds;
+  accum->seconds += accum->nanoseconds % 1000000000;
+  accum->nanoseconds %= 1000000000;
   return 0;
 }

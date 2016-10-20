@@ -7,6 +7,7 @@
 #include<console/console.h>
 #include<exceptions/exceptions.h>
 #include<timer/timer.h>
+#include<timer/system_time.h>
 #include<interrupt_controller/controller.h>
 #include<concurrency/spinlock.h>
 #include<concurrency/mutex.h>
@@ -150,8 +151,10 @@ void Main() {
 
 	exceptions_setup();
 	register_drivers();
+	start_system_time(); // DEPENDS ON DRIVERS.
 	//console_setup_dev(); // DEPENDS ON DRIVERS.
 	interrupt_controller_open(0);
+	
 	kthread_init();  // DEPENDS ON INTERRUPT CONTROLLER.
 	console_setup(); // DEPENDS ON KTHREAD, DRIVERS.
 
