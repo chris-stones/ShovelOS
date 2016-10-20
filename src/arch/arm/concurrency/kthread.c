@@ -9,6 +9,7 @@
 #include<console/console.h>
 #include<program_status_register.h>
 #include<timer/timer.h>
+#include<timer/system_time.h>
 #include<interrupt_controller/controller.h>
 
 // NOTE - THIS STRUCT COUPLED TIGHTLY WITH _my_IRQ_handler in context.S
@@ -34,45 +35,77 @@ struct cpu_state_struct {
 };
 
 enum kthread_flags {
-	KTHREAD_JOINABLE = (1<<0),
+  KTHREAD_JOINABLE = (1<<0),
+  KTHREAD_SLEEP_UNTIL_TIME = (1<<1),
 };
 
 struct kthread {
 
-	struct cpu_state_struct cpu_state;
+  struct cpu_state_struct cpu_state;
 
-	ssize_t stack_base;
-	ssize_t stack_pages;
+  ssize_t stack_base;
+  ssize_t stack_pages;
 
-	uint32_t flags;
+  uint32_t flags;
+
+  struct timespec sleep_until_time;
 };
 
 struct run_queue_struct {
 
-    spinlock_t spinlock;
-    struct kthread * kthreads[32];
-    int running;
+  spinlock_t spinlock;
+  struct kthread * kthreads[32];
+  int running;
 
-    timer_itf timer;
+  timer_itf timer;
+
+  struct timespec sched_time;
 };
 
 struct run_queue_struct *run_queue = 0;
 
+static int _is_runnable(struct kthread * th) {
+  if(th) {
+    // no sleep-flags set? RUNNABLE.
+    if(th->flags == 0)
+      return 1;
+    // sleep on time flag set, check time contidition.
+    if(th->flags & KTHREAD_SLEEP_UNTIL_TIME) {
+      if(compare_system_time(&run_queue->sched_time, &th->sleep_until_time) >= 0) {
+	th->flags &= ~KTHREAD_SLEEP_UNTIL_TIME;
+	return 1;
+      }
+    }
+  }
+  return 0; // couldnt find a reason to wake the thread.
+}
 
 static struct kthread * run_queue_next() {
 
-	struct kthread * next = 0;
+  struct kthread * next = 0;
 
-	for(;;) {
+  const int idle_task=0;
+  const int current = run_queue->running;
+  int running = current;
+  
+  for(;;) {
+    running++;
+    running %= (sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]);
 
-		run_queue->running++;
-		run_queue->running %= (sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]);
-
-		if((next = run_queue->kthreads[run_queue->running]))
-			break;
-	}
-
+    // find next runnable task.
+    if(running != idle_task) {
+      if(_is_runnable((next = run_queue->kthreads[running]))) {
+	run_queue->running = running;	  
 	return next;
+      }
+    }
+
+    // is no tasks are runnable, run idle-task.
+    if(running == current) {
+      run_queue->running = idle_task;
+      return run_queue->kthreads[idle_task];
+    }
+  }
 }
 
 static struct kthread * run_queue_current() {
@@ -115,17 +148,23 @@ static int run_queue_remove(struct kthread * kthread) {
 	return e;
 }
 
+void * _asm_idle_task(void *args);
+
 int kthread_init() {
 
+  const int idle_task=0;
+  const int boot_task=1;
+  
 	if((run_queue = kmalloc(sizeof *run_queue, GFP_KERNEL | GFP_ZERO))) {
 
 		spinlock_init(&run_queue->spinlock);
-
+		run_queue->running = boot_task; 
+		
 		// create an empty kthread for the boot-task!
-		run_queue->kthreads[0] =
-			kmalloc(sizeof run_queue->kthreads[0], GFP_KERNEL | GFP_ZERO);
+		run_queue->kthreads[boot_task] =
+			kmalloc(sizeof run_queue->kthreads[boot_task], GFP_KERNEL | GFP_ZERO);
 
-		if(run_queue->kthreads[0]) {
+		if(run_queue->kthreads[boot_task]) {
 			irq_itf irq;
 			if(timer_open(&run_queue->timer, &irq, 0)==0) {
 
@@ -148,15 +187,16 @@ int kthread_init() {
 	goto err;
 
 success:
+	// start idle-task.
+	if(kthread_create(&run_queue->kthreads[idle_task], GFP_KERNEL, &_asm_idle_task, 0)==0)
 	{
-		struct timespec ts;
-		ts.seconds = 0;
-		ts.nanoseconds = 1000000;
-		if((*run_queue->timer)->oneshot(run_queue->timer, &ts)==0)
-			return 0;
+	  struct timespec ts;
+	  ts.seconds = 0;
+	  ts.nanoseconds = 1000000;
+	  if((*run_queue->timer)->oneshot(run_queue->timer, &ts)==0)
+	    return 0;
 	}
 err:
-	_BREAK();
 	return -1;
 }
 
@@ -241,6 +281,8 @@ void _arm_irq_task_switch(void * _cpu_state) {
 
 		spinlock_lock(&run_queue->spinlock);
 
+		get_system_time(&run_queue->sched_time);
+
 		struct kthread * c = run_queue_current();
 		struct kthread * n = run_queue_next();
 
@@ -283,4 +325,41 @@ void kthread_join(kthread_t thread) {
 		kthread_yield();
 
 	_free_kthread(thread);
+}
+
+void kthread_sleep_ts(const struct timespec * ts) {
+
+  struct timespec system_time;
+  get_system_time(&system_time);
+  add_system_time(&system_time, ts);
+
+  spinlock_lock(&run_queue->spinlock);
+  
+  struct kthread * thr = run_queue_current();
+  
+  if(thr) {
+    thr->flags |= KTHREAD_SLEEP_UNTIL_TIME;
+    thr->sleep_until_time = system_time;
+  }
+  spinlock_unlock(&run_queue->spinlock);
+
+  kthread_yield();
+}
+
+void kthread_sleep_ms(uint32_t ms) {
+  uint64_t s = ms/1000000LL;
+  uint64_t n = 1000LL * (ms - (s*1000000LL));
+  struct timespec ts;
+  ts.seconds = s;
+  ts.nanoseconds = n;
+  kthread_sleep_ts(&ts);
+}
+
+void kthread_sleep_ns(uint64_t ns) {
+  uint64_t s = ns/1000000000LL;
+  uint64_t n = ns - (s*1000000000LL);
+  struct timespec ts;
+  ts.seconds = s;
+  ts.nanoseconds = n;
+  kthread_sleep_ts(&ts);
 }
