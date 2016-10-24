@@ -6,10 +6,12 @@
 
 
 extern const driver_install_func_ptr __hosted_uart_install_ptr;
+extern const driver_install_func_ptr __hosted_synctimer_install_ptr;
 
 void register_drivers() {
 
 	__hosted_uart_install_ptr();
+	__hosted_synctimer_install_ptr();
 }
 
 int in_interrupt() {

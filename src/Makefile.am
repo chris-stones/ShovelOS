@@ -87,6 +87,7 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/context/context.S
 
 SHOV_KERN_HOSTED_CORE = \
+  arch/hosted/host_os_glue.h \
   arch/hosted/entry.c \
   arch/hosted/hosted.c \
   arch/hosted/arch.h \
@@ -126,7 +127,8 @@ SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/gic.c
 
 SHOV_KERN_DRIVER_HOSTED = \
-  drivers/hosted/uart/uart.c
+  drivers/hosted/uart/uart.c \
+  drivers/hosted/timer/sync_timer.c
 
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
