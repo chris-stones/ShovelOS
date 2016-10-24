@@ -9,7 +9,7 @@ kernel_CFLAGS = \
   -ggdb3 \
   -Wall \
   -Werror \
-  -std=c99 \
+  -std=gnu99 \
   -Os \
   -nostdinc
 

@@ -7,7 +7,7 @@ libnix_a_CFLAGS = \
   -ggdb3 \
   -Wall \
   -Werror \
-  -std=c99 \
+  -std=gnu99 \
   -Os
 
 libnix_a_SOURCES = \
