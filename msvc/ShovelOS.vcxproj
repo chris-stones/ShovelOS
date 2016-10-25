@@ -109,6 +109,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\concurrency\kthread.c" />
     <ClCompile Include="..\src\arch\hosted\concurrency\spinlock.c" />
     <ClCompile Include="..\src\arch\hosted\entry.c" />
     <ClCompile Include="..\src\arch\hosted\hosted.c" />
@@ -118,6 +119,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\hosted\timer\sync_timer.c" />
     <ClCompile Include="..\src\drivers\hosted\uart\uart.c" />
     <ClCompile Include="..\src\drivers\ti\omap\omap3\interrupt_controller\interrupt_controller.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -141,6 +143,8 @@
     <ClCompile Include="..\src\stdlib\fprintf.c" />
     <ClCompile Include="..\src\stdlib\stdlib.c" />
     <ClCompile Include="..\src\timer\devices.c" />
+    <ClCompile Include="..\src\timer\sync_timer.c" />
+    <ClCompile Include="..\src\timer\system_time.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\arch\arm\arch.h" />
@@ -171,6 +175,7 @@
     <ClInclude Include="..\src\arch\hosted\concurrency\spinlock.h" />
     <ClInclude Include="..\src\arch\hosted\default_config.h" />
     <ClInclude Include="..\src\arch\hosted\exceptions\exceptions.h" />
+    <ClInclude Include="..\src\arch\hosted\host_os_glue.h" />
     <ClInclude Include="..\src\arch\hosted\libNix\libNix.h" />
     <ClInclude Include="..\src\arch\hosted\libWin32\libWin32.h" />
     <ClInclude Include="..\src\arch\hosted\stdint.h" />
@@ -193,7 +198,10 @@
     <ClInclude Include="..\src\memory\vm\vm.h" />
     <ClInclude Include="..\src\stdlib\stdarg.h" />
     <ClInclude Include="..\src\stdlib\stdlib.h" />
+    <ClInclude Include="..\src\timer\sync_timer.h" />
+    <ClInclude Include="..\src\timer\system_time.h" />
     <ClInclude Include="..\src\timer\timer.h" />
+    <ClInclude Include="..\src\timer\timespec.h" />
     <ClInclude Include="..\src\_config.h" />
   </ItemGroup>
   <ItemGroup>

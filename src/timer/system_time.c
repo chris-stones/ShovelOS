@@ -39,7 +39,7 @@ int start_system_time() {
   
   memset(&system_time, 0, sizeof system_time);
 
-  if(!(e = sync_timer_open(&system_time.sync_timer)))
+  if((e = sync_timer_open(&system_time.sync_timer)))
     return e;
   
   spinlock_init(&system_time.spinlock);  
@@ -124,7 +124,7 @@ int add_system_time(struct timespec *accum, const struct timespec * add) {
 
   accum->seconds += add->seconds;
   accum->nanoseconds += add->nanoseconds;
-  accum->seconds += accum->nanoseconds % 1000000000;
+  accum->seconds += accum->nanoseconds / 1000000000;
   accum->nanoseconds %= 1000000000;
   return 0;
 }

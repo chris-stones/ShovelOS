@@ -26,6 +26,8 @@ int init_page_tables(size_t phy_mem_base, size_t virt_mem_base, size_t phy_mem_l
 	return -1;
 }
 
+void vm_map_device_regions() {}
+
 void _bug(const char * file, const char * func, int line) {
   
   _debug_out(">>>BUG!\r\n");

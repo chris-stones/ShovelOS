@@ -22,8 +22,8 @@ void kthread_sleep_ts(const struct timespec * ts) {
 }
 
 void kthread_sleep_ms(uint32_t ms) {
-  uint64_t s = ms/1000000LL;
-  uint64_t n = 1000LL * (ms - (s*1000000LL));
+  uint64_t s = ms/1000LL;
+  uint64_t n = 1000000LL * (ms - (s*1000LL));
   struct timespec ts;
   ts.seconds = s;
   ts.nanoseconds = n;

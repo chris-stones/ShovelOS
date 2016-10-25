@@ -79,3 +79,12 @@ void host_os_putchar(int c) {
 
 	putchar(c);
 }
+
+unsigned int host_os_sync_freq() {
+	return 1000;
+}
+
+unsigned int host_os_sync_tick() {
+	
+	return GetTickCount();
+}

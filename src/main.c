@@ -158,6 +158,14 @@ void Main() {
 	kthread_init();  // DEPENDS ON INTERRUPT CONTROLLER.
 	console_setup(); // DEPENDS ON KTHREAD, DRIVERS.
 
+	for (int i = 0; i < 5; i++) {
+		kprintf("SLEEPING %d\r\n",i+1);
+		kthread_sleep_ms(5000);
+	}
+
+	kprintf("DONE\r\n");
+	for (;;)
+		kthread_yield();
 
 	for (uint32_t i = 0;;i++)
 	{

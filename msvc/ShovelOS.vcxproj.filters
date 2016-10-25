@@ -110,6 +110,9 @@
     <Filter Include="Source Files\arch\hosted\libNix">
       <UniqueIdentifier>{c2d312d2-d969-441d-8d66-d6de31d4aaa1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\drivers\hosted\timer">
+      <UniqueIdentifier>{7bc4fd70-d207-4d3d-a70f-1c08e5939d69}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\configure.ac">
@@ -221,6 +224,18 @@
     </ClCompile>
     <ClCompile Include="..\src\arch\hosted\entry.c">
       <Filter>Source Files\arch\hosted</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\hosted\timer\sync_timer.c">
+      <Filter>Source Files\drivers\hosted\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\hosted\concurrency\kthread.c">
+      <Filter>Source Files\arch\hosted\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\timer\sync_timer.c">
+      <Filter>Source Files\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\timer\system_time.c">
+      <Filter>Source Files\timer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -379,6 +394,18 @@
     </ClInclude>
     <ClInclude Include="..\src\arch\hosted\libNix\libNix.h">
       <Filter>Source Files\arch\hosted\libNix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\host_os_glue.h">
+      <Filter>Source Files\arch\hosted</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\timer\sync_timer.h">
+      <Filter>Source Files\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\timer\system_time.h">
+      <Filter>Source Files\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\timer\timespec.h">
+      <Filter>Source Files\timer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
