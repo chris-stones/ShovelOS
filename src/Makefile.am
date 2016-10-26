@@ -94,6 +94,7 @@ SHOV_KERN_HOSTED_CORE = \
   arch/hosted/default_config.h \
   arch/hosted/stdint.h \
   arch/hosted/concurrency/kthread.h \
+  arch/hosted/concurrency/kthread.c \
   arch/hosted/concurrency/mutex.h \
   arch/hosted/concurrency/spinlock.c \
   arch/hosted/concurrency/spinlock.h \
