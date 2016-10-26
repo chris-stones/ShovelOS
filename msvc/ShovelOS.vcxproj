@@ -119,6 +119,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\drivers.c" />
     <ClCompile Include="..\src\drivers\hosted\timer\sync_timer.c" />
     <ClCompile Include="..\src\drivers\hosted\uart\uart.c" />
     <ClCompile Include="..\src\drivers\ti\omap\omap3\interrupt_controller\interrupt_controller.c">

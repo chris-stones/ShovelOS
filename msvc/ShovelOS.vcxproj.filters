@@ -237,6 +237,9 @@
     <ClCompile Include="..\src\timer\system_time.c">
       <Filter>Source Files\timer</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\drivers.c">
+      <Filter>Source Files\drivers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\arch\arm\arch.h">
