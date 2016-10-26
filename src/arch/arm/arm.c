@@ -55,3 +55,11 @@ void register_drivers() {
 	for (itor = begin; itor != end; itor++)
 		(**itor)();
 }
+
+static void _wfi() {__asm__ __volatile__ ("wfi");}
+
+void halt() {
+  _arm_disable_interrupts();
+  for(;;)
+    _wfi();
+}

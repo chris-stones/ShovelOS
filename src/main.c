@@ -152,18 +152,50 @@ void Main() {
 	exceptions_setup();
 	register_drivers();
 	start_system_time(); // DEPENDS ON DRIVERS.
-	//console_setup_dev(); // DEPENDS ON DRIVERS.
+	console_setup_dev(); // DEPENDS ON DRIVERS.
 	interrupt_controller_open(0);
 	
 	kthread_init();  // DEPENDS ON INTERRUPT CONTROLLER.
-	console_setup(); // DEPENDS ON KTHREAD, DRIVERS.
+	//console_setup(); // DEPENDS ON KTHREAD, DRIVERS.
 
-	for (int i = 0; i < 5; i++) {
-		kprintf("SLEEPING %d\r\n",i+1);
-		kthread_sleep_ms(5000);
+	const int test_busy_sleep = 0;
+	const int test_idle_sleep = 1;
+
+	if(test_busy_sleep)
+	{
+	  struct timespec now;
+	  struct timespec later;
+	  struct timespec _5s;
+	  _5s.seconds=5;
+	  _5s.nanoseconds=0;
+	  for (int i = 0; i < 5; i++) {
+	    kprintf("SLEEPING %d\r\n",i+1);
+
+	    get_system_time(&now);
+	    later = now;
+	    add_system_time(&later,&_5s);
+
+	    for(;;) {
+	      get_system_time(&now);
+	      if(compare_system_time(&now, &later) >= 0)
+		break;
+	      else
+		kthread_yield();
+	    }
+	    //kthread_sleep_ms(5000);
+	  }
 	}
 
+	if(test_idle_sleep)
+	{
+	  for (int i = 0; i < 5; i++) {
+	    kprintf("SLEEPING %d\r\n",i+1);
+	    kthread_sleep_ms(5000);
+	  }
+	}
+	
 	kprintf("DONE\r\n");
+	halt();
 	for (;;)
 		kthread_yield();
 

@@ -34,3 +34,8 @@ void _bug(const char * file, const char * func, int line) {
   _debug_out_uint(line);_debug_out("\r\n");
   for(;;);
 }
+
+void exit(int status);
+void halt() {
+  exit(0);
+}
