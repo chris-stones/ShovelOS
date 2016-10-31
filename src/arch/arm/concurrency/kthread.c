@@ -72,13 +72,6 @@ static int _is_runnable(struct kthread * th) {
     // sleep on time flag set, check time contidition.
     if(th->flags & KTHREAD_SLEEP_UNTIL_TIME) {
       if(compare_system_time(&run_queue->sched_time, &th->sleep_until_time) >= 0) {
-
-	kprintf("comp_sys_t %u:%u > %u:%u\r\n",
-		run_queue->sched_time.seconds,
-		run_queue->sched_time.nanoseconds,
-		th->sleep_until_time.seconds,
-		th->sleep_until_time.nanoseconds);
-	
 	th->flags &= ~KTHREAD_SLEEP_UNTIL_TIME;
 	return 1;
       }
@@ -103,7 +96,6 @@ static struct kthread * run_queue_next() {
     if(running != idle_task) {
       if(_is_runnable((next = run_queue->kthreads[running]))) {
 	run_queue->running = running;
-	kprintf("waking sleeping %d %x\r\n",running, next);
 	return next;
       }
     }
@@ -111,7 +103,7 @@ static struct kthread * run_queue_next() {
     // is no tasks are runnable, run idle-task.
     if(running == current) {
       run_queue->running = idle_task;
-      //      kprintf("waking idle %d %x\r\n", idle_task,run_queue->kthreads[idle_task]);
+      _BUG_ON(!run_queue->kthreads[idle_task]);
       return run_queue->kthreads[idle_task];
     }
   }
@@ -119,53 +111,45 @@ static struct kthread * run_queue_next() {
 
 static struct kthread * run_queue_current() {
 
-	struct kthread * current = 0;
+  struct kthread * current = 0;
 
-	current = run_queue->kthreads[run_queue->running];
+  current = run_queue->kthreads[run_queue->running];
 
-	return current;
+  return current;
 }
 
 static int run_queue_add(struct kthread * kthread) {
 
-	int e = -1;
+  int e = -1;
 
-	if(run_queue) {
+  if(run_queue) {
 
-		for(int i=0;i<(sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]); i++)
-			if(!run_queue->kthreads[i]) {
-				run_queue->kthreads[i] = kthread;
-				e = 0;
-				break;
-			}
-	}
+    for(int i=0;i<(sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]); i++)
+      if(!run_queue->kthreads[i]) {
+	run_queue->kthreads[i] = kthread;
+	e = 0;
+	break;
+      }
+  }
 
-	return e;
+  return e;
 }
 
 static int run_queue_remove(struct kthread * kthread) {
 
-	int e = -1;
+  int e = -1;
 
-	for(int i=0;i<(sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]); i++)
-		if(run_queue->kthreads[i] == kthread) {
-			run_queue->kthreads[i] = 0;
-			e = 0;
-			break;
-		}
-
-	return e;
+  for(int i=0;i<(sizeof run_queue->kthreads / sizeof run_queue->kthreads[0]); i++)
+    if(run_queue->kthreads[i] == kthread) {
+      run_queue->kthreads[i] = 0;
+      e = 0;
+      break;
+    }
+  
+  return e;
 }
 
 void * _asm_idle_task(void *args);
-
-void * _pre_asm_idle_task(void * args) {
-  _debug_out(">>_asm_idle_task\r\n");
-  _asm_idle_task(args);
-  _debug_out(">>_asm_idle_task\r\n");
-  _BUG();
-  for(;;);
-}
 
 static struct kthread * _kmalloc_kthread() {
   return kmalloc(sizeof(struct kthread), GFP_KERNEL | GFP_ZERO);
@@ -175,6 +159,8 @@ static void _exited_kthread() {
 
   spinlock_lock(&run_queue->spinlock);
 
+  _BUG_ON(run_queue->running==0); // CANT QUIT IDLE TASK!
+  
   struct kthread * c = run_queue_current();
 
   if(c) {
@@ -188,8 +174,7 @@ static void _exited_kthread() {
 
   _BUG();
   
-  for(;;)
-    kthread_yield();
+  _asm_idle_task(NULL);
 }
 
 static void _free_kthread_stack(struct kthread * t) {
@@ -211,7 +196,7 @@ static void _free_kthread(struct kthread * t) {
 
 static int _kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(void *),void * args) {
 
-  *thread = kmalloc(sizeof (struct kthread), gfp_flags | GFP_ZERO);
+  *thread = _kmalloc_kthread();
 
   if(*thread) {
     (*thread)->cpu_state.PC = (uint32_t)(start_routine);
@@ -242,48 +227,52 @@ int kthread_init() {
   const int idle_task=0;
   const int boot_task=1;
   
-	if((run_queue = kmalloc(sizeof *run_queue, GFP_KERNEL | GFP_ZERO))) {
+  if((run_queue = kmalloc(sizeof *run_queue, GFP_KERNEL | GFP_ZERO))) {
 
-		spinlock_init(&run_queue->spinlock);
-		run_queue->running = boot_task; 
+    spinlock_init(&run_queue->spinlock);
+    run_queue->running = boot_task; 
 		
-		// create an empty kthread for the boot-task!
-		run_queue->kthreads[boot_task] = _kmalloc_kthread();
+    // create an empty kthread for the boot-task! UGLY!
+    run_queue->kthreads[boot_task] = _kmalloc_kthread();
 		
-		if(run_queue->kthreads[boot_task]) {
-			irq_itf irq;
-			if(timer_open(&run_queue->timer, &irq, 0)==0) {
-
-				interrupt_controller_itf intc;
-				if(interrupt_controller(&intc) == 0) {
-
-					(*intc)->register_handler(intc, irq);
-					(*intc)->unmask(intc, irq);
-
-					goto success;
-				}
-				else
-				  _BUG();
-			}
-			else
-			  _BUG();
-		}
+    if(run_queue->kthreads[boot_task]) {
+      irq_itf irq;
+      if(timer_open(&run_queue->timer, &irq, 0)==0) {
+	
+	interrupt_controller_itf intc;
+	if(interrupt_controller(&intc) == 0) {
+	  
+	  (*intc)->register_handler(intc, irq);
+	  (*intc)->unmask(intc, irq);
+	  
+	  goto success;
 	}
+      }
+    }
+  }
 
-	goto err;
+  goto err;
 
 success:
-	// start idle-task.
-	if(_kthread_create(&run_queue->kthreads[idle_task], GFP_KERNEL, &_pre_asm_idle_task, 0)==0)
-	{
-	  struct timespec ts;
-	  ts.seconds = 0;
-	  ts.nanoseconds = 1000000;
-	  if((*run_queue->timer)->oneshot(run_queue->timer, &ts)==0)
-	    return 0;
-	}
+  // start idle-task.
+  if(_kthread_create(&run_queue->kthreads[idle_task], GFP_KERNEL, &_asm_idle_task, 0)==0)
+    {
+      _BUG_ON(!run_queue->kthreads[idle_task]);
+      struct timespec ts;
+      ts.seconds = 0;
+      ts.nanoseconds = 1000000;
+      if((*run_queue->timer)->oneshot(run_queue->timer, &ts)==0) {
+
+	// UGLY - yield to self! current task is first, and only runnable thread right now.
+	// we NEED to do this to populate the empty kthread we allocated for ourselves earlier.
+	kthread_yield();
+	    
+	return 0;
+      }
+    }
 err:
-	return -1;
+  _BUG();
+  return -1;
 }
 
 int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(void *),void * args) {
@@ -306,54 +295,57 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
 
 void _arm_irq_task_switch(void * _cpu_state) {
 
-	if(run_queue) {
+  if(run_queue) {
 
-		spinlock_lock(&run_queue->spinlock);
+    spinlock_lock(&run_queue->spinlock);
 
-		get_system_time(&run_queue->sched_time);
+    get_system_time(&run_queue->sched_time);
 
-		struct kthread * c = run_queue_current();
-		struct kthread * n = run_queue_next();
+    struct kthread * c = run_queue_current();
+    struct kthread * n = run_queue_next();
+		
+    spinlock_unlock(&run_queue->spinlock);
 
-		spinlock_unlock(&run_queue->spinlock);
+    _BUG_ON(!n);
 
-		if(n && (c!=n)) {
-			struct cpu_state_struct * cpu_state = (struct cpu_state_struct *)_cpu_state;
-
-			// if current is null, then this thread has just exited... DONT store its state!
-			if(c)
-				memcpy(&c->cpu_state, cpu_state, sizeof(struct cpu_state_struct)); // store interrupted tasks CPU state.
-
-			memcpy(cpu_state, &n->cpu_state, sizeof(struct cpu_state_struct)); // replace with cpu state of next task to run.
-		}
-
-		// schedule next switch.
-		struct timespec ts;
-		ts.seconds = 0;
-		ts.nanoseconds = 1000000;
-		if((*run_queue->timer)->oneshot(run_queue->timer, &ts)!=0) {
-			_BREAK();
-			for(;;);
-		}
-	}
+    // UGLY - Must still copy CPU states on switch to self because of the yield-to-populate hack in kthread_init.
+    if(n /* && (c!=n) */)
+      {
+	struct cpu_state_struct * cpu_state = (struct cpu_state_struct *)_cpu_state;
+	
+	// if current is null, then this thread has just exited... DONT store its state!
+	if(c)
+	  memcpy(&c->cpu_state, cpu_state, sizeof(struct cpu_state_struct)); // store interrupted tasks CPU state.
+	memcpy(cpu_state, &n->cpu_state, sizeof(struct cpu_state_struct)); // replace with cpu state of next task to run.
+      }
+    
+    // schedule next switch.
+    struct timespec ts;
+    ts.seconds = 0;
+    ts.nanoseconds = 1000000;
+    if((*run_queue->timer)->oneshot(run_queue->timer, &ts)!=0) {
+      _BUG();
+      for(;;);
+    }
+  }
 }
 
 void kthread_yield() {
 
-	uint32_t imask = _arm_disable_interrupts();
-	_arm_svc(0);
-	_arm_enable_interrupts(imask);
+  uint32_t imask = _arm_disable_interrupts();
+  _arm_svc(0);
+  _arm_enable_interrupts(imask);
 }
 
 void kthread_join(kthread_t thread) {
 
-	if (!thread)
-		return;
+  if (!thread)
+    return;
 
-	while (!(thread->flags & KTHREAD_JOINABLE))
-		kthread_yield();
+  while (!(thread->flags & KTHREAD_JOINABLE))
+    kthread_yield();
 
-	_free_kthread(thread);
+  _free_kthread(thread);
 }
 
 void kthread_sleep_ts(const struct timespec * ts) {
