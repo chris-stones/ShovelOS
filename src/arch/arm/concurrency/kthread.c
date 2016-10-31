@@ -199,7 +199,7 @@ static int _kthread_create(kthread_t * thread, int gfp_flags, void * (*start_rou
   *thread = _kmalloc_kthread();
 
   if(*thread) {
-    (*thread)->cpu_state.PC = (uint32_t)(start_routine);
+    (*thread)->cpu_state.PC = (uint32_t)(start_routine) + 4;
     (*thread)->cpu_state.LR = (uint32_t)(&_exited_kthread);
     (*thread)->cpu_state.R0 = (uint32_t)(args);
 
