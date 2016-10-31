@@ -148,5 +148,4 @@ _my_SVC_handler:                    @ TODO check SPSR mode, _svc_yield WILL NOT 
 .global _asm_idle_task
 _asm_idle_task:
 	wfi
-	bl kthread_yield
 	b _asm_idle_task
