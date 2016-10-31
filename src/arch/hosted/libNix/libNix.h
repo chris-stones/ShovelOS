@@ -24,3 +24,5 @@ int  host_os_kbhit();
 int  host_os_getchar();
 void host_os_putchar(int c);
 
+unsigned int host_os_sync_freq();
+unsigned int host_os_sync_tick();

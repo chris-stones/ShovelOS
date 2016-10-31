@@ -144,3 +144,8 @@ _my_SVC_handler:                    @ TODO check SPSR mode, _svc_yield WILL NOT 
     cmp R0, #0                      @ does R0==YIELD ?
     beq _svc_yield                  @ if so, branch to yield.
     movs PC, LR                     @ unknown SVC return.
+
+.global _asm_idle_task
+_asm_idle_task:
+	wfi
+	b _asm_idle_task

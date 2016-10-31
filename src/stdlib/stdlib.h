@@ -20,3 +20,6 @@ int32_t  fprintf(file_itf file, const char * format, ...);
 int32_t vfprintf(file_itf file, const char * format, va_list va);
 
 char * fgets(char * s, size_t size, file_itf file);
+
+#define INVOKE(__interface, __func, ...)\
+  do {(*(__interface))->__func(__interface, __VA_ARGS__)} while(0)

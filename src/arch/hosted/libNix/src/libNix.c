@@ -1,6 +1,8 @@
 
 #include "libNix.h"
 
+#include <time.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,6 +11,7 @@
 #include <termios.h>
 #include <stropts.h>
 #include <sys/ioctl.h>
+
 
 //#if defined(HAVE_CONFIG_H)
 //	#include <config.h>
@@ -161,3 +164,12 @@ void host_os_putchar(int c) {
 	putchar(c);
 }
 
+unsigned int host_os_sync_freq() {
+  return 1000;
+}
+
+unsigned int host_os_sync_tick() {
+  struct timespec res;
+  clock_gettime(CLOCK_MONOTONIC, &res);
+  return (res.tv_sec * 1000) + (res.tv_nsec / 1000000);  
+}

@@ -6,10 +6,12 @@
 
 
 extern const driver_install_func_ptr __hosted_uart_install_ptr;
+extern const driver_install_func_ptr __hosted_synctimer_install_ptr;
 
 void register_drivers() {
 
 	__hosted_uart_install_ptr();
+	__hosted_synctimer_install_ptr();
 }
 
 int in_interrupt() {
@@ -31,4 +33,9 @@ void _bug(const char * file, const char * func, int line) {
   _debug_out(func);_debug_out("\r\n");
   _debug_out_uint(line);_debug_out("\r\n");
   for(;;);
+}
+
+void exit(int status);
+void halt() {
+  exit(0);
 }
