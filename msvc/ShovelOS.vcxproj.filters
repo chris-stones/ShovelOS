@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -112,6 +112,8 @@
     </Filter>
     <Filter Include="Source Files\drivers\hosted\timer">
       <UniqueIdentifier>{7bc4fd70-d207-4d3d-a70f-1c08e5939d69}</UniqueIdentifier>
+    <Filter Include="Source Files\drivers\ti\omap\disk">
+      <UniqueIdentifier>{fe8452e3-f9e0-4bad-8155-ae1dc47e00ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +241,8 @@
     </ClCompile>
     <ClCompile Include="..\src\drivers\drivers.c">
       <Filter>Source Files\drivers</Filter>
+    <ClCompile Include="..\src\drivers\ti\omap\disk\disk.c">
+      <Filter>Source Files\drivers\ti\omap\disk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -409,6 +413,8 @@
     </ClInclude>
     <ClInclude Include="..\src\timer\timespec.h">
       <Filter>Source Files\timer</Filter>
+    <ClInclude Include="..\src\drivers\ti\omap\disk\regs.h">
+      <Filter>Source Files\drivers\ti\omap\disk</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

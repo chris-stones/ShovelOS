@@ -122,6 +122,10 @@
     <ClCompile Include="..\src\drivers\drivers.c" />
     <ClCompile Include="..\src\drivers\hosted\timer\sync_timer.c" />
     <ClCompile Include="..\src\drivers\hosted\uart\uart.c" />
+    <ClCompile Include="..\src\drivers\ti\omap\disk\disk.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\drivers\ti\omap\omap3\interrupt_controller\interrupt_controller.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -185,6 +189,7 @@
     <ClInclude Include="..\src\drivers\arm\gic\regs.h" />
     <ClInclude Include="..\src\drivers\drivers.h" />
     <ClInclude Include="..\src\drivers\lib\uart_buffer.h" />
+    <ClInclude Include="..\src\drivers\ti\omap\disk\regs.h" />
     <ClInclude Include="..\src\drivers\ti\omap\omap3\interrupt_controller\regs.h" />
     <ClInclude Include="..\src\drivers\ti\omap\register_macros.h" />
     <ClInclude Include="..\src\drivers\ti\omap\timer\regs.h" />

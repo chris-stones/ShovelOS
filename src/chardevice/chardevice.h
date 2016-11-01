@@ -30,3 +30,7 @@ int chrd_uninstall( chrd_major_t major, chrd_minor_t minor );
 //	for driving the serial port when we are debugging board bring-up.
 #define CHRD_DEV_CONSOLE_MAJOR 4
 #define CHRD_DEV_CONSOLE_MINOR 0
+
+#define CHRD_DISK_MAJOR 5
+#define CHRD_DISK_MINOR_MIN 0
+#define CHRD_DISK_MINOR_MAX 5
