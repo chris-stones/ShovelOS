@@ -182,15 +182,19 @@ void Main() {
 	      else
 		kthread_yield();
 	    }
-	    //kthread_sleep_ms(5000);
+	    kprintf("b: systime %d:%d\r\n",now.seconds, now.nanoseconds);
 	  }
 	}
 
 	if(test_idle_sleep)
 	{
-	  for (int i = 0; i < 5; i++) {
+	  for (int i = 0; i < 20; i++) {
 	    kprintf("SLEEPING %d\r\n",i+1);
 	    kthread_sleep_ms(5000);
+
+	    struct timespec ts;
+	    get_system_time(&ts);
+	    kprintf("i: systime %d:%d\r\n",ts.seconds, ts.nanoseconds);
 	  }
 	}
 	

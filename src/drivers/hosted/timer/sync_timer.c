@@ -9,12 +9,17 @@
 #include <memory/vm/vm.h>
 #include <timer/sync_timer.h>
 
+#define TEST_SYNC_WRAP 1500 // Check system timer's ability to cope with hardware sync timer wrapping.
+
 struct context {
   DRIVER_INTERFACE(struct sync_timer, sync_timer_interface); // implements sync_timer interface.
 };
 
 static uint64_t _cur(sync_timer_itf self) {
-  
+
+#if defined(TEST_SYNC_WRAP)
+  return host_os_sync_tick() % TEST_SYNC_WRAP;
+#endif
   return host_os_sync_tick();
 }
 
@@ -23,6 +28,9 @@ static uint64_t _freq(sync_timer_itf self) {
 }
 
 static uint64_t _wrap(sync_timer_itf self) {
+#if defined(TEST_SYNC_WRAP)
+  return TEST_SYNC_WRAP;
+#endif
   return 0xFFFFFFFF;
 }
 
