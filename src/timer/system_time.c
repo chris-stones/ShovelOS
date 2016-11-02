@@ -128,3 +128,15 @@ int add_system_time(struct timespec *accum, const struct timespec * add) {
   accum->nanoseconds %= 1000000000;
   return 0;
 }
+
+int sub_system_time(struct timespec *accum, const struct timespec * sub) {
+
+  if(accum->nanoseconds >= sub->nanoseconds)
+    accum->nanoseconds -= sub->nanoseconds;
+  else {
+    accum->nanoseconds = 1000000000 - (sub->nanoseconds - accum->nanoseconds);
+    accum->seconds--;
+  }
+  accum->seconds -= sub->seconds;
+  return 0;
+}
