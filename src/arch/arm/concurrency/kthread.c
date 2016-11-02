@@ -64,6 +64,18 @@ struct run_queue_struct {
 
 struct run_queue_struct *run_queue = 0;
 
+static int _sched_next_task(struct timespec *now) {
+
+  struct timespec ts;
+  ts.seconds = 0;
+  ts.nanoseconds = 1000000;
+  if((*run_queue->timer)->oneshot(run_queue->timer, &ts)!=0) {
+    _BUG();
+    return -1;
+  }
+  return 0;
+}
+
 static int _is_runnable(struct kthread * th) {
   if(th) {
     // no sleep-flags set? RUNNABLE.
@@ -256,19 +268,14 @@ int kthread_init() {
 success:
   // start idle-task.
   if(_kthread_create(&run_queue->kthreads[idle_task], GFP_KERNEL, &_asm_idle_task, 0)==0)
-    {
+  {
       _BUG_ON(!run_queue->kthreads[idle_task]);
-      struct timespec ts;
-      ts.seconds = 0;
-      ts.nanoseconds = 1000000;
-      if((*run_queue->timer)->oneshot(run_queue->timer, &ts)==0) {
 
-	// UGLY - yield to self! current task is first, and only runnable thread right now.
-	// we NEED to do this to populate the empty kthread we allocated for ourselves earlier.
-	kthread_yield();
-	    
-	return 0;
-      }
+      // UGLY - yield to self! current task is first, and only runnable thread right now.
+      // we NEED to do this to populate the empty kthread we allocated for ourselves earier.
+      kthread_yield();
+      
+      return _sched_next_task(NULL);
     }
 err:
   _BUG();
@@ -320,13 +327,7 @@ void _arm_irq_task_switch(void * _cpu_state) {
       }
     
     // schedule next switch.
-    struct timespec ts;
-    ts.seconds = 0;
-    ts.nanoseconds = 1000000;
-    if((*run_queue->timer)->oneshot(run_queue->timer, &ts)!=0) {
-      _BUG();
-      for(;;);
-    }
+    _sched_next_task(NULL);
   }
 }
 
