@@ -44,9 +44,10 @@ int start_system_time() {
   
   spinlock_init(&system_time.spinlock);  
 
-  system_time.base_tick = (*system_time.sync_timer)->cur(system_time.sync_timer);
-  system_time.sync_freq = (*system_time.sync_timer)->freq(system_time.sync_timer);
-  system_time.sync_loop = (*system_time.sync_timer)->wrap(system_time.sync_timer);
+  system_time.base_tick = INVOKE(system_time.sync_timer,  cur);
+  system_time.sync_freq = INVOKE(system_time.sync_timer, freq);
+  system_time.sync_loop = INVOKE(system_time.sync_timer, wrap);
+  
   system_time.sync_freq_factor = (1000000000LL / system_time.sync_freq);
   
   return e;
@@ -85,8 +86,7 @@ int get_system_time(struct timespec * ts) {
   
   spinlock_lock_irqsave(&system_time.spinlock);
   {
-    const uint64_t tick = (*system_time.sync_timer)
-      ->cur(system_time.sync_timer);
+    const uint64_t tick = INVOKE(system_time.sync_timer, cur);
     const uint64_t base = system_time.base_tick;
     
     if(tick > base) {
