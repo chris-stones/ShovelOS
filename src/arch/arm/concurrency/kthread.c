@@ -69,7 +69,7 @@ static int _sched_next_task(struct timespec *now) {
   struct timespec ts;
   ts.seconds = 0;
   ts.nanoseconds = 1000000;
-  if((*run_queue->timer)->oneshot(run_queue->timer, &ts)!=0) {
+  if(INVOKE(run_queue->timer, oneshot, &ts)!=0) {
     _BUG();
     return -1;
   }
@@ -253,9 +253,9 @@ int kthread_init() {
 	
 	interrupt_controller_itf intc;
 	if(interrupt_controller(&intc) == 0) {
-	  
-	  (*intc)->register_handler(intc, irq);
-	  (*intc)->unmask(intc, irq);
+
+	  INVOKE(intc, register_handler, irq);
+	  INVOKE(intc, unmask, irq);
 	  
 	  goto success;
 	}
