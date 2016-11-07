@@ -300,6 +300,20 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
   return 0;
 }
 
+void _switch(struct kthread * from, struct kthread * to, void * _cpu_state) {
+
+  struct cpu_state_struct * cpu_state = (struct cpu_state_struct *)_cpu_state;
+  
+  // if we are switching task, or from task is un-initialised,
+  // then store current cpu state in from.
+  if(from!=to || !from->cpu_state.CPSR)
+    memcpy(&from->cpu_state, cpu_state, sizeof(struct cpu_state_struct));
+
+  // if wea re switching, then write next cpu state.
+  if(from!=to)
+    memcpy(cpu_state, &to->cpu_state, sizeof(struct cpu_state_struct));
+}
+
 void _arm_irq_task_switch(void * _cpu_state) {
 
   if(run_queue) {
@@ -314,17 +328,9 @@ void _arm_irq_task_switch(void * _cpu_state) {
     spinlock_unlock(&run_queue->spinlock);
 
     _BUG_ON(!n);
+    _BUG_ON(!c);
 
-    // UGLY - Must still copy CPU states on switch to self because of the yield-to-populate hack in kthread_init.
-    if(n /* && (c!=n) */)
-      {
-	struct cpu_state_struct * cpu_state = (struct cpu_state_struct *)_cpu_state;
-	
-	// if current is null, then this thread has just exited... DONT store its state!
-	if(c)
-	  memcpy(&c->cpu_state, cpu_state, sizeof(struct cpu_state_struct)); // store interrupted tasks CPU state.
-	memcpy(cpu_state, &n->cpu_state, sizeof(struct cpu_state_struct)); // replace with cpu state of next task to run.
-      }
+    _switch(c,n,_cpu_state);
     
     // schedule next switch.
     _sched_next_task(NULL);
