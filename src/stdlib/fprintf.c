@@ -6,12 +6,13 @@
 
 static int32_t _putc(file_itf file, char c) {
 
-	return (*file)->write(file, &c, 1);
+  INVOKE(file,write,&c,1);
 }
 
 static int32_t _puts(file_itf file, const char * str) {
 
-	return (*file)->write(file, str, strlen(str));
+  int l = strlen(str);
+  INVOKE(file,write,str,l);
 }
 
 static sint32_t _nstrlen(sint64_t n, sint64_t base) {
