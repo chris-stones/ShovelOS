@@ -6,7 +6,7 @@
 #include <interrupt_controller/controller.h>
 #include <console/console.h>
 #include <asm.h>
-#include <concurrency/kthread.h>
+#include <sched/sched.h>
 
 #include "regs.h"
 
@@ -119,7 +119,7 @@ static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
 	// TIMER0 ON OMAP36XX drives task-scheduler. //////
 	if(irq == (37+0)) { // GPTIMER_IRQ_BASE_OMAP36XX+0
-		_arm_irq_task_switch(cpu_state);
+		_arch_irq_task_switch(cpu_state);
 	}
 	///////////////////////////////////////////////////
 

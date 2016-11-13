@@ -13,7 +13,7 @@
 #include <file/file.h>
 #include <drivers/lib/uart_buffer.h>
 #include <concurrency/spinlock.h>
-#include <concurrency/kthread.h>
+#include <sched/sched.h>
 #include <exceptions/exceptions.h>
 
 #include <console/console.h>

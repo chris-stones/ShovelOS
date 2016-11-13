@@ -94,7 +94,7 @@ _arm_set_INT_MODE_SP_and_LR:
 _my_IRQ_handler:
     clrex                             @ invalidate any mutex lock attempts.
 
-	@ build a struct kthread on the stack, pass it to _arm_irq_task_switch. See kthread.c
+	@ build a struct kthread on the stack, pass it to _arch_irq_task_switch. See kthread.c
     push {R0-R12}                     @ push R0..R12 on the stack.
     mov  R4, LR                       @ R4 = address of instruction after interrupted instruction.
 
@@ -135,7 +135,7 @@ _svc_yield:
     cps  #18                              @ switch to IRQ mode.
     push {R0-R3}                          @ push interrupted CPSR,PC,SP,LR to IRQ stack.
     mov   R0, SP                          @ set R0 to pointer to cpu-state struct.
-    bl _arm_irq_task_switch               @ call task scheduller.
+    bl _arch_irq_task_switch              @ call task scheduller.
     b  ___irq_wake_task_on_stack          @ wake on yield code is same as IRQ task switch.
 
 .global _my_SVC_handler
