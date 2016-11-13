@@ -67,8 +67,10 @@ SHOV_KERN_CORE = \
   drivers/lib/uart_buffer.h \
   drivers/drivers.h \
   drivers/drivers.c \
+  sched/sched_priv.h \
   sched/sched.h \
-  sched/sched.c
+  sched/sched.c \
+  sched/sched_sleep.c
 
 SHOV_KERN_ARM_CORE = \
   arch/arm/entry.S \

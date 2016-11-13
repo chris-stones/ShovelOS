@@ -6,7 +6,6 @@
 #include <stdlib/stdlib.h>
 #include <concurrency/spinlock.h>
 #include <concurrency/kthread.h>
-
 #include <timer/timer.h>
 #include <timer/system_time.h>
 #include <interrupt_controller/controller.h>
@@ -16,22 +15,7 @@
 #include <arch.h>
 #include <bug.h>
 
-enum kthread_flags {
-  KTHREAD_JOINABLE = (1<<0),
-  KTHREAD_SLEEP_UNTIL_TIME = (1<<1),
-};
-
-struct kthread {
-
-  struct cpu_state_struct cpu_state;
-
-  size_t stack_base;
-  size_t stack_pages;
-
-  uint32_t flags;
-
-  struct timespec sleep_until_time;
-};
+#include "sched_priv.h"
 
 struct run_queue_struct {
 
@@ -103,13 +87,19 @@ static struct kthread * run_queue_next() {
   }
 }
 
-static struct kthread * run_queue_current() {
+struct kthread * run_queue_current() {
 
-  struct kthread * current = 0;
+  return run_queue->kthreads[run_queue->running];
+}
 
-  current = run_queue->kthreads[run_queue->running];
+void sched_enter_critical() {
+  
+  spinlock_lock(&run_queue->spinlock);
+}
 
-  return current;
+void sched_leave_critical() {
+  
+  spinlock_unlock(&run_queue->spinlock);
 }
 
 static int run_queue_add(struct kthread * kthread) {
@@ -336,39 +326,4 @@ void kthread_join(kthread_t thread) {
   _free_kthread(thread);
 }
 
-void kthread_sleep_ts(const struct timespec * ts) {
 
-  struct timespec system_time;
-  get_system_time(&system_time);
-  add_system_time(&system_time, ts);
-
-  spinlock_lock(&run_queue->spinlock);
-  
-  struct kthread * thr = run_queue_current();
-  
-  if(thr) {
-    thr->flags |= KTHREAD_SLEEP_UNTIL_TIME;
-    thr->sleep_until_time = system_time;
-  }
-  spinlock_unlock(&run_queue->spinlock);
-
-  kthread_yield();
-}
-
-void kthread_sleep_ms(uint32_t ms) {
-  uint64_t s = ms/1000LL;
-  uint64_t n = 1000LL * (ms - (s*1000LL));
-  struct timespec ts;
-  ts.seconds = s;
-  ts.nanoseconds = n;
-  kthread_sleep_ts(&ts);
-}
-
-void kthread_sleep_ns(uint64_t ns) {
-  uint64_t s = ns/1000000000LL;
-  uint64_t n = ns - (s*1000000000LL);
-  struct timespec ts;
-  ts.seconds = s;
-  ts.nanoseconds = n;
-  kthread_sleep_ts(&ts);
-}
