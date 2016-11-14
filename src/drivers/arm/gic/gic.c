@@ -13,6 +13,8 @@
 #include <coprocessor_asm.h>
 #include <asm.h>
 
+#include <sched/sched.h>
+
 #include "regs.h"
 
 struct context {
