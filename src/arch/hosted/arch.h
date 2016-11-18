@@ -11,6 +11,8 @@ static inline void exceptions_setup() {
 
 }
 
+void *_asm_idle_task();
+
 ssize_t _debug_out( const char * string );
 ssize_t _debug_out_uint( uint32_t i );
 

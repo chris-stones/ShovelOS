@@ -13,12 +13,12 @@ int  mutex_trylock(mutex_t * lock);
 void mutex_unlock(mutex_t * lock);
 
 // delegate thread implementation to OS.
-struct kthread;
-typedef struct kthread* kthread_t;
-int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(void *), void * args);
-int kthread_init();
-void kthread_yield();
-void kthread_join(kthread_t thread);
+struct hosted_kthread;
+typedef struct hosted_kthread* hosted_kthread_t;
+int hosted_kthread_create(hosted_kthread_t * thread, int gfp_flags, void * (*start_routine)(void *), void * args);
+int hosted_kthread_init();
+void hosted_kthread_yield();
+void hosted_kthread_join(hosted_kthread_t thread);
 
 int  host_os_kbhit();
 int  host_os_getchar();

@@ -47,6 +47,7 @@ SHOV_KERN_CORE = \
   file/file.h \
   chardevice/devices.c \
   chardevice/chardevice.h \
+  stdlib/bug.h \
   stdlib/stdarg.h \
   stdlib/stdlib.h \
   stdlib/stdlib.c \
@@ -65,7 +66,15 @@ SHOV_KERN_CORE = \
   interrupt_controller/controller.c \
   drivers/lib/uart_buffer.h \
   drivers/drivers.h \
-  drivers/drivers.c
+  drivers/drivers.c \
+  sched/sched_priv.h \
+  sched/sched.h
+
+if !CONFIG_SHOV_HOSTED_PLATFORM
+  SHOV_KERN_CORE += \
+    sched/sched.c \
+    sched/sched_sleep.c
+endif
 
 SHOV_KERN_ARM_CORE = \
   arch/arm/entry.S \
@@ -84,7 +93,9 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/system_control_register.h \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \
-  arch/arm/context/context.S
+  arch/arm/context/context.S \
+  arch/arm/cpu_state.h \
+  arch/arm/cpu_state.c
 
 SHOV_KERN_HOSTED_CORE = \
   arch/hosted/host_os_glue.h \
@@ -98,7 +109,9 @@ SHOV_KERN_HOSTED_CORE = \
   arch/hosted/concurrency/mutex.h \
   arch/hosted/concurrency/spinlock.c \
   arch/hosted/concurrency/spinlock.h \
-  arch/hosted/exceptions/exceptions.h
+  arch/hosted/exceptions/exceptions.h \
+  arch/hosted/cpu_state.h \
+  sched/sched_hosted.c
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
   arch/arm/mm/VMSAv7/page_tables.c \

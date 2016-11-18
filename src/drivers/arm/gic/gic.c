@@ -13,6 +13,8 @@
 #include <coprocessor_asm.h>
 #include <asm.h>
 
+#include <sched/sched.h>
+
 #include "regs.h"
 
 struct context {
@@ -142,7 +144,7 @@ static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
 	// TIMER0 ON OMAP36XX drives task-scheduler. //////
 	if(irq == (37+0)) { // GPTIMER_IRQ_BASE+0 // FIXME: ASSUMING OMAP543X
-		_arm_irq_task_switch(cpu_state);
+		_arch_irq_task_switch(cpu_state);
 	}
 	///////////////////////////////////////////////////
 
