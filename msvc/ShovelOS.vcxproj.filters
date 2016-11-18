@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -112,8 +112,12 @@
     </Filter>
     <Filter Include="Source Files\drivers\hosted\timer">
       <UniqueIdentifier>{7bc4fd70-d207-4d3d-a70f-1c08e5939d69}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\drivers\ti\omap\disk">
       <UniqueIdentifier>{fe8452e3-f9e0-4bad-8155-ae1dc47e00ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sched">
+      <UniqueIdentifier>{6709efe8-2200-4805-8ada-a3a01f061d8e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -241,8 +245,18 @@
     </ClCompile>
     <ClCompile Include="..\src\drivers\drivers.c">
       <Filter>Source Files\drivers</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\drivers\ti\omap\disk\disk.c">
       <Filter>Source Files\drivers\ti\omap\disk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sched\sched.c">
+      <Filter>Source Files\sched</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sched\sched_sleep.c">
+      <Filter>Source Files\sched</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\arch\arm\cpu_state.c">
+      <Filter>Source Files\arch\arm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -413,8 +427,24 @@
     </ClInclude>
     <ClInclude Include="..\src\timer\timespec.h">
       <Filter>Source Files\timer</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\drivers\ti\omap\disk\regs.h">
       <Filter>Source Files\drivers\ti\omap\disk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stdlib\bug.h">
+      <Filter>Source Files\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sched\sched.h">
+      <Filter>Source Files\sched</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sched\sched_priv.h">
+      <Filter>Source Files\sched</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\arm\cpu_state.h">
+      <Filter>Source Files\arch\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\arch\hosted\cpu_state.h">
+      <Filter>Source Files\arch\hosted</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

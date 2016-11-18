@@ -93,6 +93,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\arch\arm\cpu_state.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\arch\arm\exceptions\exceptions.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -144,6 +148,8 @@
     <ClCompile Include="..\src\memory\kmalloc.c" />
     <ClCompile Include="..\src\memory\mem_cache.c" />
     <ClCompile Include="..\src\memory\page.c" />
+    <ClCompile Include="..\src\sched\sched.c" />
+    <ClCompile Include="..\src\sched\sched_sleep.c" />
     <ClCompile Include="..\src\stdlib\fgets.c" />
     <ClCompile Include="..\src\stdlib\fprintf.c" />
     <ClCompile Include="..\src\stdlib\stdlib.c" />
@@ -159,6 +165,7 @@
     <ClInclude Include="..\src\arch\arm\concurrency\spinlock.h" />
     <ClInclude Include="..\src\arch\arm\context\context.h" />
     <ClInclude Include="..\src\arch\arm\coprocessor_asm.h" />
+    <ClInclude Include="..\src\arch\arm\cpu_state.h" />
     <ClInclude Include="..\src\arch\arm\exceptions\exceptions.h" />
     <ClInclude Include="..\src\arch\arm\mm\VMSAv6\coarse_page_table.h" />
     <ClInclude Include="..\src\arch\arm\mm\VMSAv6\extended_small_page.h" />
@@ -178,6 +185,7 @@
     <ClInclude Include="..\src\arch\hosted\concurrency\kthread.h" />
     <ClInclude Include="..\src\arch\hosted\concurrency\mutex.h" />
     <ClInclude Include="..\src\arch\hosted\concurrency\spinlock.h" />
+    <ClInclude Include="..\src\arch\hosted\cpu_state.h" />
     <ClInclude Include="..\src\arch\hosted\default_config.h" />
     <ClInclude Include="..\src\arch\hosted\exceptions\exceptions.h" />
     <ClInclude Include="..\src\arch\hosted\host_os_glue.h" />
@@ -202,6 +210,9 @@
     <ClInclude Include="..\src\memory\mem_cache.h" />
     <ClInclude Include="..\src\memory\page.h" />
     <ClInclude Include="..\src\memory\vm\vm.h" />
+    <ClInclude Include="..\src\sched\sched.h" />
+    <ClInclude Include="..\src\sched\sched_priv.h" />
+    <ClInclude Include="..\src\stdlib\bug.h" />
     <ClInclude Include="..\src\stdlib\stdarg.h" />
     <ClInclude Include="..\src\stdlib\stdlib.h" />
     <ClInclude Include="..\src\timer\sync_timer.h" />
