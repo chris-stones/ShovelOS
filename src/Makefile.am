@@ -111,7 +111,7 @@ SHOV_KERN_HOSTED_CORE = \
   arch/hosted/concurrency/spinlock.h \
   arch/hosted/exceptions/exceptions.h \
   arch/hosted/cpu_state.h \
-  arch/sched/sched_hosted.c
+  sched/sched_hosted.c
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
   arch/arm/mm/VMSAv7/page_tables.c \

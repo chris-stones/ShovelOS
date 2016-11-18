@@ -9,7 +9,7 @@ int kthread_init() {
 }
 
 int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(void *), void * args) {
-  return hosted_kthread_create(thread, gfp_flags, start_routine, args);
+  return hosted_kthread_create((hosted_kthread_t*)thread, gfp_flags, start_routine, args);
 }
 
 void kthread_yield() {
@@ -17,7 +17,7 @@ void kthread_yield() {
 }
 
 void kthread_join(kthread_t thread) {
-  hosted_kthread_join(thread);
+  hosted_kthread_join((hosted_kthread_t)thread);
 }
 
 void kthread_sleep_ts(const struct timespec * ts) {
