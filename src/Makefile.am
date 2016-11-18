@@ -68,9 +68,13 @@ SHOV_KERN_CORE = \
   drivers/drivers.h \
   drivers/drivers.c \
   sched/sched_priv.h \
-  sched/sched.h \
-  sched/sched.c \
-  sched/sched_sleep.c
+  sched/sched.h
+
+if !CONFIG_SHOV_HOSTED_PLATFORM
+  SHOV_KERN_CORE += \
+    sched/sched.c \
+    sched/sched_sleep.c
+endif
 
 SHOV_KERN_ARM_CORE = \
   arch/arm/entry.S \
@@ -106,7 +110,8 @@ SHOV_KERN_HOSTED_CORE = \
   arch/hosted/concurrency/spinlock.c \
   arch/hosted/concurrency/spinlock.h \
   arch/hosted/exceptions/exceptions.h \
-  arch/hosted/cpu_state.h
+  arch/hosted/cpu_state.h \
+  arch/sched/sched_hosted.c
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
   arch/arm/mm/VMSAv7/page_tables.c \

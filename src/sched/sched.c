@@ -223,15 +223,13 @@ int kthread_init() {
     if(run_queue->kthreads[boot_task]) {
       irq_itf irq;
       if(timer_open(&run_queue->timer, &irq, 0)==0) {
-	
-	interrupt_controller_itf intc;
-	if(interrupt_controller(&intc) == 0) {
-
-	  INVOKE(intc, register_handler, irq);
-	  INVOKE(intc, unmask, irq);
+        interrupt_controller_itf intc;
+        if(interrupt_controller(&intc) == 0) {
+          INVOKE(intc, register_handler, irq);
+          INVOKE(intc, unmask, irq);
 	  
-	  goto success;
-	}
+          goto success;
+        }
       }
     }
   }

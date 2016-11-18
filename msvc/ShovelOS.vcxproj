@@ -148,8 +148,15 @@
     <ClCompile Include="..\src\memory\kmalloc.c" />
     <ClCompile Include="..\src\memory\mem_cache.c" />
     <ClCompile Include="..\src\memory\page.c" />
-    <ClCompile Include="..\src\sched\sched.c" />
-    <ClCompile Include="..\src\sched\sched_sleep.c" />
+    <ClCompile Include="..\src\sched\sched.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\sched\sched_hosted.c" />
+    <ClCompile Include="..\src\sched\sched_sleep.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\stdlib\fgets.c" />
     <ClCompile Include="..\src\stdlib\fprintf.c" />
     <ClCompile Include="..\src\stdlib\stdlib.c" />

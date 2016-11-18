@@ -258,6 +258,9 @@
     <ClCompile Include="..\src\arch\arm\cpu_state.c">
       <Filter>Source Files\arch\arm</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\sched\sched_hosted.c">
+      <Filter>Source Files\sched</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\arch\arm\arch.h">

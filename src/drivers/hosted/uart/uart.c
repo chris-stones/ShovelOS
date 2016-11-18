@@ -15,6 +15,7 @@
 #include <concurrency/spinlock.h>
 #include <concurrency/kthread.h>
 #include <exceptions/exceptions.h>
+#include <sched/sched.h>
 
 #include <console/console.h>
 

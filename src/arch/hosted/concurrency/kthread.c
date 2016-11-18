@@ -1,23 +1,13 @@
 
 #include <_config.h>
+#include "host_os_glue.h"
+#include <sched/sched.h>
 
-#include <sched/sched.c>
-#include <timer/system_time.h>
-
-/*
-void kthread_sleep_ts(const struct timespec * ts) {
-
-  struct timespec future_time;
-  struct timespec now_time;
-  
-  get_system_time(&now_time);
-  future_time = now_time;
-  add_system_time(&future_time, ts);
-
-  while(compare_system_time(&now_time,  &future_time) < 0) {
-    
-    _arch_kthread_yield();
-    get_system_time(&now_time);
-  }
+void _arch_kthread_yield() {
+	hosted_kthread_yield();
 }
-*/
+
+void *_asm_idle_task() {
+	for (;;)
+		kthread_sleep_ms(60000);
+}

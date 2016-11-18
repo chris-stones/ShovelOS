@@ -34,7 +34,7 @@ void mutex_unlock(mutex_t * lock) {
 	ReleaseMutex(*lock);
 }
 
-int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(void *), void * args)
+int hosted_kthread_create(hosted_kthread_t * thread, int gfp_flags, void * (*start_routine)(void *), void * args)
 {
 	HANDLE handle = CreateThread(
 		NULL, 
@@ -52,16 +52,16 @@ int kthread_create(kthread_t * thread, int gfp_flags, void * (*start_routine)(vo
 	return -1;
 }
 
-int kthread_init()
+int hosted_kthread_init()
 {
 	return 0;
 }
-void kthread_yield()
+void hosted_kthread_yield()
 {
 	Sleep(0);
 }
 
-void kthread_join(kthread_t thread)
+void hosted_kthread_join(hosted_kthread_t thread)
 {
 	WaitForSingleObject(thread, INFINITE);
 }
