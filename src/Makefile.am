@@ -20,12 +20,11 @@ else
   kernel_CFLAGS += \
     -nostdlib \
     -mno-unaligned-access \
-    -ffreestanding \
-    -marm
+    -ffreestanding
 
   kernel_LDFLAGS = \
     -Wl,-Map,link.map,--nmagic \
-    -T $(top_srcdir)/src/link.script \
+    -T link.script \
     -static \
     -nodefaultlibs \
     -nostdlib
