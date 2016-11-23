@@ -7,6 +7,10 @@
 
 #pragma once
 
+#include<cpu_caps.h>
+
+#if defined(__CONFIG_ARM_CP__)
+
 #include<stdint.h>
 
 // TEMPLATE for generating function to write to an ARM CP.
@@ -175,3 +179,4 @@ ARM_CP_WO(TLBIALLNSNH,  p15, 4, c8, c7, 4);
 ARM_CP_RO(CBAR,			p15, 4,c15, c0, 0); // Configuration Base Address Register.
 ARM_CP_RW(VBAR,			p15, 0,c12, c0, 0); // Vector Base address Register.
 
+#endif /*** __CONFIG_ARM_CP__ ***/
