@@ -16,5 +16,5 @@ static inline void isb() {
 }
 
 #include "system_control_register.h"
-#include "program_status_register.h"
+#include "special/special.h"
 #include "coprocessor_asm.h"

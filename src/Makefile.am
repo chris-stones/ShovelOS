@@ -67,6 +67,10 @@ SHOV_KERN_CORE = \
   drivers/drivers.c
 
 SHOV_KERN_ARM_CORE = \
+  arch/arm/cpu_caps.h \
+  arch/arm/special/special.h \
+  arch/arm/special/cpsr.h \
+  arch/arm/special/primask.h \
   arch/arm/entry.S \
   arch/arm/arm.c \
   arch/arm/exceptions/exceptions.c \
@@ -79,7 +83,6 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/arch.h \
   arch/arm/asm.h \
   arch/arm/coprocessor_asm.h \
-  arch/arm/program_status_register.h \
   arch/arm/system_control_register.h \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \

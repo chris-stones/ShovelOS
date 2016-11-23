@@ -7,7 +7,7 @@
 #include "kthread.h"
 
 #include<console/console.h>
-#include<program_status_register.h>
+#include<special/special.h>
 #include<timer/timer.h>
 #include<timer/system_time.h>
 #include<interrupt_controller/controller.h>
