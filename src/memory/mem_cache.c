@@ -13,6 +13,7 @@
 
 #include<_config.h>
 #include<arch.h>
+#include<bug.h>
 
 #if defined(MC_USERLAND_DEBUG) && !defined(MC_USERLAND)
 	#define MC_USERLAND

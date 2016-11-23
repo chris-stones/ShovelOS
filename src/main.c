@@ -11,7 +11,7 @@
 #include<interrupt_controller/controller.h>
 #include<concurrency/spinlock.h>
 #include<concurrency/mutex.h>
-#include<concurrency/kthread.h>
+#include<sched/sched.h>
 
 void * setup_boot_pages() {
 

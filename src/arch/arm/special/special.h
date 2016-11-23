@@ -1,5 +1,9 @@
 
+#pragma once
+
 #include <cpu_caps.h>
+#include <stdint.h>
+#include <asm.h>
 
 #define _ARM_ENABLE_SPECIAL_H 1
 
