@@ -1,11 +1,14 @@
 #pragma once
 
 #include <stdint.h>
+#include <cpu_caps.h>
 
 // NOTE - THIS STRUCT COUPLED TIGHTLY WITH _my_IRQ_handler in context.S
 // cpu_state must be first
 struct cpu_state_struct {
+#if defined(__CONFIG_ARM_CPSR__) 
 	uint32_t CPSR;
+#endif 
 	uint32_t PC;
 	uint32_t SP;
 	uint32_t LR;
