@@ -1,4 +1,5 @@
 
+#include<_config.h>
 
 #include "asm.h"
 #include <arch.h>
@@ -21,18 +22,20 @@ void _break(const char * file, const char * func, int line) {
 
 
 void _bug(const char * file, const char * func, int line) {
-	_arm_disable_interrupts();
-
-	uint32_t sctlr = _arm_cp_read_SCTLR();
-	_arm_cp_write_SCTLR(sctlr & ~SCTLR_M); // DISABLE MMU
-	dsb();
-	isb();
+  _arm_disable_interrupts();
+  
+#if !defined(CONFIG_NOMMU)	
+  uint32_t sctlr = _arm_cp_read_SCTLR();
+  _arm_cp_write_SCTLR(sctlr & ~SCTLR_M); // DISABLE MMU
+  dsb();
+  isb();
+#endif /* CONFIG_NOMMU */
 	
-	_debug_out(">>>BUG!\r\n");
-	_debug_out(file);_debug_out("\r\n");
-	_debug_out(func);_debug_out("\r\n");
-	_debug_out_uint(line);_debug_out("\r\n");
-	for(;;);
+  _debug_out(">>>BUG!\r\n");
+  _debug_out(file);_debug_out("\r\n");
+  _debug_out(func);_debug_out("\r\n");
+  _debug_out_uint(line);_debug_out("\r\n");
+  for(;;);
 }
 
 extern int __BSS_BEGIN;
