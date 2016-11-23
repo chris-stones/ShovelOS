@@ -4,7 +4,7 @@
 
 #include "drivers.h"
 
-#if !defined(HOSTED_PLATFORM)
+#if !defined(HOSTED_PLATFORM) && !defined(CONFIG_NOMMU)
 extern int __REGISTER_DEVICE_ADDRESS_BEGIN;
 extern int __REGISTER_DEVICE_ADDRESS_END;
 
