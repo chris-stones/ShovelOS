@@ -2,6 +2,7 @@
 #include <_config.h>
 #include <cpu_state.h>
 #include <cpu_caps.h>
+#include <special/special.h>
 
 int cpu_state_build(struct cpu_state_struct * cpuss,
 		    void *(*start)(void*),
