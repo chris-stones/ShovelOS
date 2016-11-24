@@ -55,6 +55,7 @@ bbc_microbit)
   AC_DEFINE([CONFIG_UNICORE], [1], [UNICORE ot SMP])
   AC_DEFINE([PAGE_SIZE], [4096], [PAGE SIZE])
   AC_DEFINE([CONFIG_NOMMU], [1], [NO MMU])
+  AC_DEFINE([ARM_M_INIT_STACK], [0x20004000], [initial PC value])
   AC_SUBST([SHOV_CONFIG_ARCH_DIR],[arm])
   AC_SUBST([LS_FLASH_ORIGIN],[0x00000000])
   AC_SUBST([LS_FLASH_LENGTH],[0x00040000])
@@ -63,7 +64,9 @@ bbc_microbit)
   AC_SUBST([LS_TEXT_MEMORY],[FLASH])
   AC_SUBST([LS_RODATA_MEMORY],[FLASH])
   AC_SUBST([LS_START_TEXT],[0x00000000])
+  nrf51822=yes
   arm_v6m=yes
+  arm_m=yes
   CFLAGS="$CFLAGS -mthumb -mtune=cortex-m0 -mcpu=cortex-m0"
   ;;
 beaglexm)
@@ -84,6 +87,7 @@ beaglexm)
   omap_major_ver=3  
   omap_soc=yes
   arm_v7a=yes
+  arm_a=yes
   CFLAGS="$CFLAGS -marm -mtune=cortex-a8 -mcpu=cortex-a8"
   ;;
 iGEPv5)
@@ -105,6 +109,7 @@ iGEPv5)
   omap_soc=yes
   config_shov_arch_is_arm_gic=yes
   arm_v7a=yes
+  arm_a=yes
   CFLAGS="$CFLAGS -marm -mtune=cortex-a15 -mcpu=cortex-a15"
   ;;
 hosted)
@@ -126,8 +131,11 @@ esac
 AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARM],      [test "x$config_shov_arch_is_arm" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARMv7A],   [test "x$arm_v7a" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARMv6M],   [test "x$arm_v6m" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARM_A],    [test "x$arm_a" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARM_M],    [test "x$arm_m" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP],      [test "x$omap_soc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP3],     [test "x$omap_major_ver" = "x3"])
+AM_CONDITIONAL([CONFIG_SHOV_DRIVER_NRF51822],  [test "x$nrf51822" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_GIC],   [test "x$config_shov_arch_is_arm_gic" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes"])
 

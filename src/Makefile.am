@@ -69,6 +69,14 @@ SHOV_KERN_CORE = \
   sched/sched_priv.h \
   sched/sched.h
 
+if CONFIG_SHOV_ARCH_IS_ARM_A
+  SHOV_KERN_CORE += arch/arm/entry_a.S
+endif
+
+if CONFIG_SHOV_ARCH_IS_ARM_M
+  SHOV_KERN_CORE += arch/arm/entry_m.S
+endif
+
 if !CONFIG_SHOV_HOSTED_PLATFORM
   SHOV_KERN_CORE += \
     sched/sched.c \
@@ -80,7 +88,6 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/special/special.h \
   arch/arm/special/cpsr.h \
   arch/arm/special/primask.h \
-  arch/arm/entry.S \
   arch/arm/arm.c \
   arch/arm/exceptions/exceptions.c \
   arch/arm/concurrency/kthread.c \
@@ -138,6 +145,9 @@ SHOV_KERN_DRIVER_OMAP3 = \
   drivers/ti/omap/omap3/interrupt_controller/regs.h \
   drivers/ti/omap/omap3/interrupt_controller/interrupt_controller.c
 
+SHOV_KERN_DRIVER_NRF51822 = \
+  drivers/ns/nRF51822/uart/uart.c
+
 SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
   drivers/arm/gic/gic.c
@@ -170,6 +180,10 @@ endif
 
 if CONFIG_SHOV_DRIVER_OMAP3
   kernel_SOURCES += $(SHOV_KERN_DRIVER_OMAP3)
+endif
+
+if CONFIG_SHOV_DRIVER_NRF51822
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_NRF51822)
 endif
 
 if CONFIG_SHOV_DRIVER_ARM_GIC
