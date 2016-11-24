@@ -1,7 +1,7 @@
 #include<_config.h>
 
-#include <asm.h>
-#include <arch.h>
+#include<special/special.h>
+#include<arch.h>
 
 void _arch_kthread_yield() {
 

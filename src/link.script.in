@@ -1,0 +1,47 @@
+ENTRY(_start)
+
+MEMORY
+{
+  FLASH (rx)  : ORIGIN = @LS_FLASH_ORIGIN@, LENGTH = @LS_FLASH_LENGTH@
+  RAM   (rwx) : ORIGIN = @LS_RAM_ORIGIN@,   LENGTH = @LS_RAM_LENGTH@
+}
+
+SECTIONS
+{
+  . = @LS_START_TEXT@;
+
+  PROVIDE_HIDDEN (__KERNEL_BEGIN = .);
+
+  .text : AT(@LS_START_TEXT@)
+  {
+    *(.start_text);	
+    *(.text);
+  } > @LS_TEXT_MEMORY@
+
+  .rodata :
+  {
+    PROVIDE_HIDDEN (__REGISTER_DRIVERS_BEGIN = .);
+    KEEP (*(.register_drivers))
+    PROVIDE_HIDDEN (__REGISTER_DRIVERS_END = .);
+    	
+    PROVIDE_HIDDEN (__REGISTER_DEVICE_ADDRESS_BEGIN = .);
+    KEEP (*(.register_device_address))
+    PROVIDE_HIDDEN (__REGISTER_DEVICE_ADDRESS_END = .);
+
+    *(.rodata)
+  } > @LS_RODATA_MEMORY@
+
+  .data :
+  {
+    *(.data)
+  } > RAM
+	
+  .bss :
+  {
+    PROVIDE_HIDDEN (__BSS_BEGIN = .);
+    *(.bss)
+    PROVIDE_HIDDEN (__BSS_END = .);
+  } > RAM
+
+  PROVIDE_HIDDEN (__KERNEL_END = .);
+}

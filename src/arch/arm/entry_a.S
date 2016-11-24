@@ -1,20 +1,27 @@
 
+#include<config.h>
+	
 .equ pre_gpf_stacksize, 128		@ stack size ( before real memory manager takes over )
 
-.arm
 .text
 .section .start_text				@ put this function at the start of .text!
 .global _start
 _start:
-
 	clrex
 
 	ldr r0, .__pre_gfp_stack_base 	@ get address of temporary stack.
-	add r0, #pre_gpf_stacksize		@ find top address.
-	mov sp, r0						@ set as booststrap stack
-	bl setup_boot_pages				@ setup early boot allocator.
-	mov sp, r0						@ setup_boot_pages returns a better stack.
-	bl setup_memory					@ setup memory
+	add r0, #pre_gpf_stacksize	@ find top address.
+	mov sp, r0			@ set as booststrap stack
+	bl _zero_bss                    @ clear the BSS section.
+
+	@ Get one page from early allocator 'get_goot_pages'
+	@ and use it as the new stack.
+	mov r0, #1			@ 1 page
+	mov r1, #0			@ 0 flags
+	bl get_boot_pages		@ get a page.
+	add sp, r0, #PAGE_SIZE		@ set top of page as stack.
+
+	bl setup_memory			@ setup memory
 
 	@ Allocate stacks for exception CPU modes.
 	bl  get_exception_stack
@@ -53,18 +60,15 @@ _start:
 	.word __pre_gfp_stack
 	.comm __pre_gfp_stack, pre_gpf_stacksize
 
-@ exception vector.
 .text
 .align 8
 .global __EXCEPTION_VECTOR_BASE
 __EXCEPTION_VECTOR_BASE:
 	b __EXCEPTION_VECTOR_BASE      @ RESET
 	b _arm_isr_UNDEFINED           @ UNDEFINED INSTRUCTION
-@	b _arm_isr_SVC                 @ SUPERVISOR CALL
 	b _my_SVC_handler              @ SUPERVISOR CALL
 	b _arm_isr_PREFETCH_ABORT      @ PREFETCH ABORT
 	b _arm_isr_DATA_ABORT          @ DATA ABORT
 	b __EXCEPTION_VECTOR_BASE      @ NOT USED
-    b _my_IRQ_handler              @ IRQ
+	b _my_IRQ_handler              @ IRQ
 	b _arm_isr_FIQ                 @ FIQ
-

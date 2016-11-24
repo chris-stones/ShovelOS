@@ -5,7 +5,6 @@
 @   Switches to the SPSR mode and back again, so SPSR mode must be privilaged!
 @   On return R0=LR, R1=SP.
 @
-.arm
 .text
 _arm_get_SPSR_MODE_SP_and_LR:
     mrs R0,    SPSR                  @ store SPSR in R0
@@ -23,7 +22,6 @@ _arm_get_SPSR_MODE_SP_and_LR:
 @ Get the banked LR and SP from the USER mode.
 @   On return R0=LR, R1=SP.
 @
-.arm
 .text
 _arm_get_USER_MODE_SP_and_LR:
     ldmdb SP!, {SP,LR}^				@ push user-mode SP and LR onto te current mode stack.
@@ -34,7 +32,6 @@ _arm_get_USER_MODE_SP_and_LR:
 @ Get the banked LR and SP from the INTERRUPTED mode. (supervisor or user)
 @   On return R0=LR, R1=SP.
 @
-.arm
 .text
 _arm_get_INT_MODE_SP_and_LR:
     mrs R0,    SPSR                  @ store SPSR in R0
@@ -50,7 +47,6 @@ _arm_get_INT_MODE_SP_and_LR:
 @   Switches to the SPSR mode and back again, so SPSR mode must be privilaged!
 @   parameters - R0=LR, R1=SP.
 @
-.arm
 .text
 _arm_set_SPSR_MODE_SP_and_LR:
     push {R4}                        @ callee preserved registers
@@ -70,7 +66,6 @@ _arm_set_SPSR_MODE_SP_and_LR:
 @ Set the banked LR and SP for the USER mode.
 @   parameters - R0=LR, R1=SP.
 @
-.arm
 .text
 _arm_set_USER_MODE_SP_and_LR:
 	ldmdb SP!, {R0,R1}				@ push new user-mode SP and LR onto te current mode stack.
@@ -81,7 +76,6 @@ _arm_set_USER_MODE_SP_and_LR:
 @ Set the banked LR and SP for the INTERRUPTED mode.
 @   parameters - R0=LR, R1=SP.
 @
-.arm
 .text
 _arm_set_INT_MODE_SP_and_LR:
     mrs R2,    SPSR                  @ store SPSR in R2

@@ -1,11 +1,13 @@
 
+#pragma once
+
+#if !defined(_ARM_ENABLE_SPECIAL_H)
+#error DONT INCLUDE THIS HEADER DIRECTLY, INCLUDE <special/special.h>
+#endif
+
 /****
  * B1.3 ARM processor modes and ARM core registers
  ****/
-
-#pragma once
-
-//0b11000000000000000000000110      10011
 
 /* CPSR/SPSR */
 #define PSR_M(m5)   (m5<<0)     // Mode
@@ -39,26 +41,7 @@ typedef enum program_status_register_mode {
 
 } program_status_register_enum_t;
 
-
-static inline void _arm_cpsr_write(uint32_t _register) {
-	__asm__ __volatile__ (
-		"msr cpsr, %[_register] ;\n"
-		:
-		: [_register] "r" (_register)
-		:
-	);
-}
-
-static inline uint32_t _arm_cpsr_read() {
-	uint32_t _register;
-	__asm__ __volatile__ (
-		"mrs %[_register], cpsr;\n"
-			: [_register] "=r" (_register)
-			:
-			:
-	);
-	return _register;
-}
+_ARM_DEFINE_SPECIAL_REG(cpsr);
 
 static inline uint32_t _arm_disable_interrupts() {
 
@@ -86,4 +69,3 @@ static inline void _arm_restore_interrupts(uint32_t flags) {
 
 	_arm_cpsr_write( (cpsr & ~(PSR_I(1) | PSR_F(1))) | flags);
 }
-

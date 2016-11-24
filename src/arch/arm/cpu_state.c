@@ -1,7 +1,8 @@
 
 #include <_config.h>
 #include <cpu_state.h>
-#include <asm.h>
+#include <cpu_caps.h>
+#include <special/special.h>
 
 int cpu_state_build(struct cpu_state_struct * cpuss,
 		    void *(*start)(void*),
@@ -14,11 +15,13 @@ int cpu_state_build(struct cpu_state_struct * cpuss,
   cpuss->LR = (uint32_t)(end);
   cpuss->R0 = (uint32_t)(args);
   cpuss->SP = (uint32_t)(stack);
-  
+
+#if defined(__CONFIG_ARM_CPSR__) 
   cpuss->CPSR =
     PSR_M(PSR_MODE_svc) |  // supervisor mode.
     PSR_E(0)		|  // little-endian.
     PSR_A(1)		;  // asynchronous abort mask.   
+#endif /* __CONFIG_ARM_CPSR__ */
   
   return 0;
 }

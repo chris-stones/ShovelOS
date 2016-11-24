@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include<_config.h>
-
 #include <stdint.h>
 
 // driver module constructor.
@@ -45,7 +43,11 @@ struct vm_device_region {
   const size_t size;
 };
 
-#define VM_DEVICE_REGION(_GUID, _PHY, _SIZE)					\
-  const struct vm_device_region _GUID ## _vm_device_region ATTRIBUTE_REGISTER_DEVICE_ADDRESS = {(_PHY),(_SIZE)}
+#if !defined(CONFIG_NOMMU)
+  #define VM_DEVICE_REGION(_GUID, _PHY, _SIZE)\
+    const struct vm_device_region _GUID ## _vm_device_region ATTRIBUTE_REGISTER_DEVICE_ADDRESS = {(_PHY),(_SIZE)}
+#else
+  #define VM_DEVICE_REGION(_GUID, _PHY, _SIZE)
+#endif
 
 void vm_map_device_regions();
