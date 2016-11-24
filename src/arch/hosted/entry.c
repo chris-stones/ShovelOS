@@ -5,7 +5,7 @@ void setup_memory();
 
 int main() {
 
-	setup_boot_pages();
-	setup_memory();
-	Main();
+  //setup_boot_pages();
+  setup_memory();
+  Main();
 }
