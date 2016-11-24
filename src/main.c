@@ -13,18 +13,6 @@
 #include<concurrency/mutex.h>
 #include<sched/sched.h>
 
-void * setup_boot_pages() {
-
-	// need to clear '_boot_pages' in boot_pages.c
-	// clearing the BSS section should do that!
-	_zero_bss();
-
-	// return a boot stack.. ( is 1 page enough!? )
-	size_t boot_stack_pages = 1;
-	size_t new_stack_base = (size_t)get_boot_pages(boot_stack_pages, GFP_ZERO);
-	return (void*)(new_stack_base + PAGE_SIZE *  boot_stack_pages);
-}
-
 void * get_exception_stack() {
 
 	size_t pages = 1;
@@ -34,10 +22,12 @@ void * get_exception_stack() {
 
 void setup_memory() {
 
+#if !defined(CONFIG_NOMMU)
 	init_page_tables(
 		PHYSICAL_MEMORY_BASE_ADDRESS,
 		VIRTUAL_MEMORY_BASE_ADDRESS,
 		PHYSICAL_MEMORY_LENGTH);
+#endif
 
 	/************************************************************
 	 * retire get_boot_pages() and setup main memory management.
@@ -52,7 +42,9 @@ void setup_memory() {
 
 	kmalloc_setup();
 
+#if !defined(CONFIG_NOMMU)
 	vm_map_device_regions();
+#endif
 }
 
 
