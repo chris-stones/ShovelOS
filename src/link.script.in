@@ -8,6 +8,12 @@ MEMORY
 
 SECTIONS
 {
+  /DISCARD/ :
+  {
+    *(.ARM.exidx*)
+    *(.ARM.extab*)
+  }
+  
   . = @LS_START_TEXT@;
 
   PROVIDE_HIDDEN (__KERNEL_BEGIN = .);
@@ -29,11 +35,17 @@ SECTIONS
     PROVIDE_HIDDEN (__REGISTER_DEVICE_ADDRESS_END = .);
 
     *(.rodata)
+    *(.rodata.*)
+    
   } > @LS_RODATA_MEMORY@
 
-  .data :
+  __SOURCE_DATA = .;
+
+  .data : AT(__SOURCE_DATA)
   {
+    PROVIDE_HIDDEN (__DATA_BEGIN = .);
     *(.data)
+    PROVIDE_HIDDEN (__DATA_END = .);
   } > RAM
 	
   .bss :
