@@ -20,7 +20,9 @@ else
   kernel_CFLAGS += \
     -nostdlib \
     -mno-unaligned-access \
-    -ffreestanding
+    -ffreestanding \
+    -fno-unwind-tables \
+    -fno-exceptions
 
   kernel_LDFLAGS = \
     -Wl,-Map,link.map,--nmagic \
