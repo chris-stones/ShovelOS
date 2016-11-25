@@ -39,6 +39,7 @@ SECTIONS
     
   } > @LS_RODATA_MEMORY@
 
+  . = ALIGN(4);
   __SOURCE_DATA = .;
 
   .data : AT(__SOURCE_DATA)
