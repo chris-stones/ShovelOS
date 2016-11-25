@@ -40,9 +40,17 @@ void _bug(const char * file, const char * func, int line) {
 
 extern int __BSS_BEGIN;
 extern int __BSS_END;
-void _zero_bss() {
+extern int __SOURCE_DATA;
+extern int __DATA_BEGIN;
+extern int __DATA_END;
+void _init_ram() {
 
-	memset(&__BSS_BEGIN, 0, ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
+  memset(&__BSS_BEGIN, 0,
+	 ((size_t)&__BSS_END) - ((size_t)&__BSS_BEGIN));
+  
+  memcpy(&__DATA_BEGIN,
+	 &__SOURCE_DATA,
+	 ((size_t)&__DATA_END) - ((size_t)&__DATA_BEGIN));
 }
 
 extern int __REGISTER_DRIVERS_BEGIN;

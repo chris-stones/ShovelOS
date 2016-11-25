@@ -12,7 +12,7 @@ _start:
 	ldr r0, .__pre_gfp_stack_base 	@ get address of temporary stack.
 	add r0, #pre_gpf_stacksize	@ find top address.
 	mov sp, r0			@ set as booststrap stack
-	bl _zero_bss                    @ clear the BSS section.
+	bl _init_ram                    @ clear the BSS section and init .data section
 
 	@ Get one page from early allocator 'get_goot_pages'
 	@ and use it as the new stack.

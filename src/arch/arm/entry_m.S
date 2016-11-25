@@ -12,8 +12,8 @@ _start:
 	.word _start_real		@ start function.
 	
 _start_real:
-	
-	bl _zero_bss                    @ clear the BSS section.
+
+	bl _init_ram                    @ clear the BSS section and init .data section
 
 	@ Get one page from early allocator 'get_goot_pages'
 	@ and use it as the new stack.

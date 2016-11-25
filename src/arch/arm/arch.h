@@ -13,7 +13,6 @@ void icache_invalidate();
 
 void _arm_svc(int r0, ...);
 
-void _zero_bss();
 void register_drivers();
 
 void halt();
