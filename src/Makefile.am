@@ -63,6 +63,8 @@ SHOV_KERN_CORE = \
   timer/sync_timer.c \
   timer/system_time.h \
   timer/system_time.c \
+  gpio/gpio.h \
+  gpio/gpio.c \
   interrupt_controller/controller.h \
   interrupt_controller/controller.c \
   drivers/lib/uart_buffer.h \
@@ -148,7 +150,9 @@ SHOV_KERN_DRIVER_OMAP3 = \
   drivers/ti/omap/omap3/interrupt_controller/interrupt_controller.c
 
 SHOV_KERN_DRIVER_NRF51822 = \
-  drivers/ns/nRF51822/uart/uart.c
+  drivers/ns/nRF51822/uart/uart.c \
+  drivers/ns/nRF51822/gpio/regs.h \
+  drivers/ns/nRF51822/gpio/gpio.c
 
 SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
