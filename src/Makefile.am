@@ -151,6 +151,7 @@ SHOV_KERN_DRIVER_OMAP3 = \
 
 SHOV_KERN_DRIVER_NRF51822 = \
   drivers/ns/nRF51822/uart/uart.c \
+  drivers/ns/nRF51822/uart/regs.h \
   drivers/ns/nRF51822/gpio/regs.h \
   drivers/ns/nRF51822/gpio/gpio.c
 
