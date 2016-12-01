@@ -12,6 +12,50 @@
 #include<concurrency/spinlock.h>
 #include<concurrency/mutex.h>
 #include<sched/sched.h>
+#include<gpio/gpio.h>
+
+static void BBCMicroBitTest() {
+
+  gpio_itf gpio;
+
+  gpio_open(&gpio);
+
+  const int btn_a = 17;
+  const int btn_b = 26;
+
+  const int led_c1 =  4; // p4
+  const int led_r1 = 13; // p13
+
+  int phase = 1;
+
+#define GPIOFUNC(__func, ...) INVOKE(gpio,__func, ##__VA_ARGS__)
+
+  // INPUT - BUTTONS A/B.
+  GPIOFUNC(set_dir, btn_a, GPIO_DIR_IN);
+  GPIOFUNC(set_dir, btn_b, GPIO_DIR_IN);
+
+  // OUTPUT - SOME LED ROW/COLS ???
+  GPIOFUNC(set_dir, led_c1, GPIO_DIR_OUT);
+  GPIOFUNC(set_dir, led_r1, GPIO_DIR_OUT);
+
+  for(;;) {
+    phase = ~phase;
+
+    if(phase&1) {
+      GPIOFUNC(out, led_c1, GPIO_OFF);
+      GPIOFUNC(out, led_r1, GPIO_ON);
+    }
+    else {
+      GPIOFUNC(out, led_c1, GPIO_ON);
+      GPIOFUNC(out, led_r1, GPIO_OFF);
+    }
+
+    for(;;);
+    
+    while(!(GPIOFUNC(in, btn_a) || GPIOFUNC(in, btn_b)));
+  }
+#undef GPIOFUNC
+}
 
 void * get_exception_stack() {
 
@@ -134,6 +178,15 @@ static irq_t __dummy_sgi_handler_get_irq_number(irq_itf itf) {
 }
 
 void Main() {
+
+  {
+    // Testing the BBC micro:bit.
+    register_drivers();
+    BBCMicroBitTest();
+    for(;;);
+  }
+
+  
 
 	DRIVER_INIT_INTERFACE((&__dummy_sgi_handler_context), irq_interface);
 	__dummy_sgi_handler_context.irq_interface->IRQ = &__dummy_sgi_handler_IRQ;

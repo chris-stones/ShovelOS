@@ -17,14 +17,49 @@ struct context _ctx = { 0, };
 
 #define REGS (((struct GPIO_REGS *)(GPIO_REGS_BASE)))
 
+#define PIN_CNF_IN               (0<< 0)
+#define PIN_CNF_OUT              (1<< 0)
+#define PIN_CNF_INPUT_CONNECT    (0<< 1)
+#define PIN_CNF_INPUT_DISCONNECT (1<< 1)
+#define PIN_CNF_PULL_DISABLED    (0<< 2)
+#define PIN_CNF_PULL_DOWN        (1<< 2)
+#define PIN_CNF_PULL_UP          (3<< 2)
+#define PIN_CNF_DRIVE_S0S1       (0<< 8)
+#define PIN_CNF_DRIVE_H0S1       (1<< 8)
+#define PIN_CNF_DRIVE_S0H1       (2<< 8)
+#define PIN_CNF_DRIVE_H0H1       (3<< 8)
+#define PIN_CNF_DRIVE_D0S1       (4<< 8)
+#define PIN_CNF_DRIVE_D0H1       (5<< 8)
+#define PIN_CNF_DRIVE_S0D1       (6<< 8)
+#define PIN_CNF_DRIVE_H0D1       (7<< 8)
+#define PIN_CNF_SENSE_DISABLE    (0<<16)
+#define PIN_CNF_SENSE_HIGH       (2<<16)
+#define PIN_CNF_SENSE_LOW        (3<<16)
+
+
 static int _set_dir(gpio_itf self, int gpio, int dir) {
   // optimisation - ignore 'self'. there is only one GPIO controler.
   //  it is static and global to preserve precious heap!
-  const int mask = 1 << gpio;
-  if(dir == GPIO_DIR_IN)
+  
+  const uint32_t mask = 1 << gpio;
+  
+  if(dir == GPIO_DIR_IN) {
     REGS->DIRCLR = mask;
-  else
+    REGS->PIN_CNF[gpio] =
+      PIN_CNF_IN |
+      PIN_CNF_INPUT_CONNECT
+      ;
+  }
+  else {
     REGS->DIRSET = mask;
+    REGS->PIN_CNF[gpio] =
+      PIN_CNF_OUT |
+      PIN_CNF_INPUT_DISCONNECT |
+      PIN_CNF_SENSE_DISABLE |
+      PIN_CNF_DRIVE_S0S1
+      ;
+  }
+
   return 0;
 }
 
