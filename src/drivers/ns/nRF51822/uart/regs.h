@@ -19,9 +19,9 @@
 
 #define STARTRX        U32_RW_REG(STARTRX_ADDR)
 #define STOPRX         U32_RW_REG(STOPRX_ADDR)
-#define STARTTX        U32_RW_REG(STARTTX)
-#define STOPTX         U32_RW_REG(STOPTX)
-#define SUSPEND        U32_RW_REG(SUSPEND)
+#define STARTTX        U32_RW_REG(STARTTX_ADDR)
+#define STOPTX         U32_RW_REG(STOPTX_ADDR)
+#define SUSPEND        U32_RW_REG(SUSPEND_ADDR)
 
 // EVENTS
 #define CTS_ADDR       (UART_BASE+0x100)
