@@ -42,6 +42,8 @@ _start:
 	.word _EI15+1                   @ 31 - External Interrupt 15
 
 _RESET:
+	ldr r0, =bbc_microbit_setup_uart
+	mov pc, r0 @ DELETE ME - TEST UART
 
 	bl _init_ram                    @ clear the BSS section and init .data section
 
