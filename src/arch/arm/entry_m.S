@@ -42,20 +42,19 @@ _start:
 	.word _EI15+1                   @ 31 - External Interrupt 15
 
 _RESET:
-	ldr r0, =bbc_microbit_setup_uart
-	mov pc, r0 @ DELETE ME - TEST UART
+	bl ___nrf51822_debug_startup    @ FIXME-HACK - GET UART WORKING ASAP!
 
 	bl _init_ram                    @ clear the BSS section and init .data section
 
 	@ Get one page from early allocator 'get_goot_pages'
 	@ and use it as the new stack.
-	mov r0, #1			@ 1 page
-	mov r1, #0			@ 0 flags
-	bl get_boot_pages		@ get a page.
+@	mov r0, #1			@ 1 page
+@	mov r1, #0			@ 0 flags
+@	bl get_boot_pages		@ get a page.
 
-	ldr r1, =PAGE_SIZE
-	add r0, r1			@ set top of page as stack.
-	mov sp, r0
+@	ldr r1, =PAGE_SIZE
+@	add r0, r1			@ set top of page as stack.
+@	mov sp, r0
 
 	bl setup_memory			@ setup memory
 
