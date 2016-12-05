@@ -16,6 +16,12 @@
 
 static void BBCMicroBitTest() {
 
+  
+  {
+    for(;;)
+      _debug_out("Z\r\n");
+  }
+  
   gpio_itf gpio;
 
   gpio_open(&gpio);
@@ -182,6 +188,7 @@ void Main() {
   {
     // Testing the BBC micro:bit.
     register_drivers();
+    console_setup_dev(); // DEPENDS ON DRIVERS.
     BBCMicroBitTest();
     for(;;);
   }
