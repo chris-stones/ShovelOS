@@ -35,6 +35,7 @@
 #else
 #include "page.h"
 #include <arch.h>
+#include <stdint.h>
 #endif
 
 #include "memory.h"
@@ -50,31 +51,33 @@ struct order {
 	size_t * p;
 };
 
-struct orders {
+#define WORDBYTES (__SIZEOF_SIZE_T__)
+#define WORDBITS  (8*WORDBYTES)
 
-	struct order order[13];	// 1 bit  =   1 PAGE	(   4k )
-							// 1 bit  =   2 PAGES 	(   8k )
-							// 1 bit  =   4 PAGES	(  16k )
-							// 1 bit  =   8 PAGES	(  32k )
-							// 1 bit  =  16 PAGES   (  64k )
-							// 1 bit  =  32 PAGES   ( 128k )
-							// 1 bit  =  64 PAGES   ( 256k )
-							// 1 bit  = 128 PAGES   ( 512k )
-							// 1 bit  = 256 PAGES   (   1M )
-							// 1 bit  = 512 PAGES   (   2M )
-							// 1 bit  =1024 PAGES   (   4M )
-							// 1 bit  =2048 PAGES   (   8M )
-							// 1 bit  =4096 PAGES   (  16M )
+// TODO: FIX THIS - save memory on devices with very little memory.
+#define NB_ORDERS 13
+
+struct orders {  
+	struct order order[NB_ORDERS];
+  // 1 bit  =   1 PAGE	  (   4k )
+  // 1 bit  =   2 PAGES   (   8k )
+  // 1 bit  =   4 PAGES	  (  16k )
+  // 1 bit  =   8 PAGES	  (  32k )
+  // 1 bit  =  16 PAGES   (  64k )
+  // 1 bit  =  32 PAGES   ( 128k )
+  // 1 bit  =  64 PAGES   ( 256k )
+  // 1 bit  = 128 PAGES   ( 512k )
+  // 1 bit  = 256 PAGES   (   1M )
+  // 1 bit  = 512 PAGES   (   2M )
+  // 1 bit  =1024 PAGES   (   4M )
+  // 1 bit  =2048 PAGES   (   8M )
+  // 1 bit  =4096 PAGES   (  16M )
 };
 
 struct buddy {
 
 	struct orders orders;
 };
-
-#define NB_ORDERS (sizeof(struct orders)/sizeof(struct order))
-#define WORDBYTES (sizeof(size_t))
-#define WORDBITS  (WORDBYTES*8)
 
 // get the buddy order to search for allocating given number of blocks.
 static int buddy_order(size_t nb) {
