@@ -27,7 +27,16 @@ static ssize_t __debug(const void * _vbuffer, ssize_t count)
   uint8_t * vbuffer = (uint8_t *)_vbuffer;
 
   while(count) {
+
+    // wait for TX ready.
+    while(TXDRDY != 1);
+
+    // clear TX ready.
+    TXDRDY = 0;
+
+    // start TX.
     TXD = (uint32_t)*vbuffer++;
+    
     --count;
   }
   return (size_t)vbuffer - (size_t)_vbuffer;
@@ -63,16 +72,32 @@ void ___nrf51822_debug_startup() {
   
   BAUDRATE = 0x004EA000; // 19200
   PSELRXD  = 25; // pin select RXD.
-  PSELTXD  = 24; // pin select TXD.
   ENABLE   = 4;  // enable UART
   STARTTX  = 1;  // START TX
+
+  // with TX pin disconnected - do a dummy write.
+  //  hacky-way of setting TX-READY flag.
+  TXDRDY = 0;
+  TXD = 0;
+  while(TXDRDY != 1);
+  
+  PSELTXD  = 24; // pin select TXD.
 }
 
 static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 
   uint8_t * vbuffer = (uint8_t *)_vbuffer;
   while(count) {
+
+    // wait for TX ready.
+    while(TXDRDY != 1);
+
+    // clear TX ready.
+    TXDRDY = 0;
+
+    // start TX.
     TXD = (uint32_t)*vbuffer++;
+    
     --count;
   }
   return (size_t)vbuffer - (size_t)_vbuffer;
