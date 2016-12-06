@@ -68,6 +68,7 @@ bbc_microbit)
   nrf51822=yes
   arm_v6m=yes
   arm_m=yes
+  config_shov_arch_is_arm_nvic=yes
   CFLAGS="$CFLAGS -mthumb -mtune=cortex-m0 -mcpu=cortex-m0"
   ;;
 beaglexm)
@@ -140,6 +141,7 @@ AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP],      [test "x$omap_soc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP3],     [test "x$omap_major_ver" = "x3"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_NRF51822],  [test "x$nrf51822" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_GIC],   [test "x$config_shov_arch_is_arm_gic" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_NVIC],  [test "x$config_shov_arch_is_arm_nvic" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes"])
 
 AC_CONFIG_FILES([

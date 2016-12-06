@@ -159,6 +159,10 @@ SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
   drivers/arm/gic/gic.c
 
+SHOV_KERN_DRIVER_ARM_NVIC = \
+  drivers/arm/nvic/regs.h \
+  drivers/arm/nvic/nvic.c
+
 SHOV_KERN_DRIVER_HOSTED = \
   drivers/hosted/uart/uart.c \
   drivers/hosted/timer/sync_timer.c
@@ -195,6 +199,10 @@ endif
 
 if CONFIG_SHOV_DRIVER_ARM_GIC
   kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_GIC)
+endif
+
+if CONFIG_SHOV_DRIVER_ARM_NVIC
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_NVIC)
 endif
 
 if CONFIG_SHOV_HOSTED_PLATFORM
