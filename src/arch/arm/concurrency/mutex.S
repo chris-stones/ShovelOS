@@ -1,10 +1,9 @@
 
-.arm
 .text
 .global mutex_lock
 mutex_lock:                      @ void mutex_lock(mutex_t * lock);
     push {LR}
-	mov   R2, #1                 @ R2 = LOCKED
+    mov   R2, #1                 @ R2 = LOCKED
 _mutex_lock_try:
     ldrex R3, [R0]               @ read mutex to R3 and mark exclusive access.
     cmp   R3, R2                 @ check if mutex is locked.
@@ -21,11 +20,10 @@ _mutex_lock_yield:
 _mutex_lock_yield_ret:
     b   _mutex_lock_try          @ on thread re-awoken, re-try to lock.
 
-.arm
 .text
 .global mutex_trylock
 mutex_trylock:                   @ int mutex_trylock(mutex_t * lock)
-	mov   R2, #1                 @ R2 = LOCKED
+    mov   R2, #1                 @ R2 = LOCKED
 _mutex_trylock_try:
     ldrex R3, [R0]               @ read mutex to R3 and mark exclusive access.
     cmp   R3, R2                 @ check if mutex is locked.
