@@ -65,11 +65,11 @@ bbc_microbit)
   AC_SUBST([LS_TEXT_MEMORY],[FLASH])
   AC_SUBST([LS_RODATA_MEMORY],[FLASH])
   AC_SUBST([LS_START_TEXT],[0x00000000])
+  AC_SUBST([CPU_ARCH_FLAGS], ["-mthumb -mtune=cortex-m0 -mcpu=cortex-m0"])
   nrf51822=yes
   arm_v6m=yes
   arm_m=yes
   config_shov_arch_is_arm_nvic=yes
-  CFLAGS="$CFLAGS -mthumb -mtune=cortex-m0 -mcpu=cortex-m0"
   ;;
 beaglexm)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x80200000],[physical base])
@@ -87,11 +87,11 @@ beaglexm)
   AC_SUBST([LS_TEXT_MEMORY],[RAM])
   AC_SUBST([LS_RODATA_MEMORY],[RAM])
   AC_SUBST([LS_START_TEXT],[0x80200000])
+  AC_SUBST([CPU_ARCH_FLAGS], [-marm -mtune=cortex-a8 -mcpu=cortex-a8])
   omap_major_ver=3  
   omap_soc=yes
   arm_v7a=yes
   arm_a=yes
-  CFLAGS="$CFLAGS -marm -mtune=cortex-a8 -mcpu=cortex-a8"
   ;;
 iGEPv5)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x80200000],[physical base])
@@ -109,12 +109,12 @@ iGEPv5)
   AC_SUBST([LS_TEXT_MEMORY],[RAM])
   AC_SUBST([LS_RODATA_MEMORY],[RAM])
   AC_SUBST([LS_START_TEXT],[0x80200000])
+  AC_SUBST([CPU_ARCH_FLAGS], [-marm -mtune=cortex-a15 -mcpu=cortex-a15])
   omap_major_ver=5
   omap_soc=yes
   config_shov_arch_is_arm_gic=yes
   arm_v7a=yes
   arm_a=yes
-  CFLAGS="$CFLAGS -marm -mtune=cortex-a15 -mcpu=cortex-a15"
   ;;
 hosted)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x0],[physical base])

@@ -11,7 +11,11 @@ kernel_CFLAGS = \
   -Werror \
   -std=gnu99 \
   -Os \
-  -nostdinc
+  -nostdinc \
+  @CPU_ARCH_FLAGS@
+
+kernel_CCASFLAGS = \
+  @CPU_ARCH_FLAGS@
 
 if CONFIG_SHOV_HOSTED_PLATFORM
   kernel_CFLAGS += \
