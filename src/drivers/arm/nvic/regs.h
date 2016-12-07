@@ -5,6 +5,8 @@
 #include <stdint.h>
 #endif
 
+#define INTERRUPTS_MAX 32
+
 #define NVIC_BASE (0xE000E100)
 
 #define U32_RW_REG(a)       (*(      volatile uint32_t*)(a))
