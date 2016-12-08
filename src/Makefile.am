@@ -80,13 +80,15 @@ SHOV_KERN_CORE = \
 if CONFIG_SHOV_ARCH_IS_ARM_A
   SHOV_KERN_CORE += \
     arch/arm/entry_a.S \
-    arch/arm/concurrency/mutex.S
+    arch/arm/concurrency/mutex.S \
+    arch/arm/context/context_a.S
 endif
 
 if CONFIG_SHOV_ARCH_IS_ARM_M
   SHOV_KERN_CORE += \
     arch/arm/entry_m.S \
-    arch/arm/concurrency/mutex_m0.S
+    arch/arm/concurrency/mutex_m0.S \
+    arch/arm/context/context_m.S
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
@@ -113,7 +115,6 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/system_control_register.h \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \
-  arch/arm/context/context.S \
   arch/arm/cpu_state.h \
   arch/arm/cpu_state.c
 
