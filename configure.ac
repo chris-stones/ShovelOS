@@ -87,7 +87,7 @@ beaglexm)
   AC_SUBST([LS_TEXT_MEMORY],[RAM])
   AC_SUBST([LS_RODATA_MEMORY],[RAM])
   AC_SUBST([LS_START_TEXT],[0x80200000])
-  AC_SUBST([CPU_ARCH_FLAGS], [-marm -mtune=cortex-a8 -mcpu=cortex-a8])
+  AC_SUBST([CPU_ARCH_FLAGS], ["-marm -mtune=cortex-a8 -mcpu=cortex-a8"])
   omap_major_ver=3  
   omap_soc=yes
   arm_v7a=yes
@@ -109,7 +109,7 @@ iGEPv5)
   AC_SUBST([LS_TEXT_MEMORY],[RAM])
   AC_SUBST([LS_RODATA_MEMORY],[RAM])
   AC_SUBST([LS_START_TEXT],[0x80200000])
-  AC_SUBST([CPU_ARCH_FLAGS], [-marm -mtune=cortex-a15 -mcpu=cortex-a15])
+  AC_SUBST([CPU_ARCH_FLAGS], ["-marm -mtune=cortex-a15 -mcpu=cortex-a15"])
   omap_major_ver=5
   omap_soc=yes
   config_shov_arch_is_arm_gic=yes

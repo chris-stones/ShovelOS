@@ -1,6 +1,7 @@
 
-.text
-.global mutex_lock
+	
+	.text
+	.global mutex_lock
 mutex_lock:                      @ void mutex_lock(mutex_t * lock);
     push {LR}
     mov   R2, #1                 @ R2 = LOCKED

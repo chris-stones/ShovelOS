@@ -78,11 +78,15 @@ SHOV_KERN_CORE = \
   sched/sched.h
 
 if CONFIG_SHOV_ARCH_IS_ARM_A
-  SHOV_KERN_CORE += arch/arm/entry_a.S
+  SHOV_KERN_CORE += \
+    arch/arm/entry_a.S \
+    arch/arm/concurrency/mutex.S
 endif
 
 if CONFIG_SHOV_ARCH_IS_ARM_M
-  SHOV_KERN_CORE += arch/arm/entry_m.S
+  SHOV_KERN_CORE += \
+    arch/arm/entry_m.S \
+    arch/arm/concurrency/mutex_m0.S
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
@@ -101,7 +105,6 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/concurrency/kthread.c \
   arch/arm/concurrency/kthread.h \
   arch/arm/concurrency/mutex.h \
-  arch/arm/concurrency/mutex.S \
   arch/arm/concurrency/spinlock.c \
   arch/arm/concurrency/spinlock.h \
   arch/arm/arch.h \
