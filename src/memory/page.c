@@ -39,11 +39,11 @@
 #endif
 
 #include "memory.h"
+#include "boot_pages.h"
 
-static size_t _phy_base;
-static size_t _page_offset;
-static size_t _total_memory;
-static size_t _total_allocated;
+static size_t _heap_virt_base = 0;
+static size_t _total_memory = 0;
+static size_t _total_allocated = 0;
 
 struct order {
 
@@ -271,7 +271,7 @@ void * get_free_pages(size_t pages, int flags) {
 	if(block == (size_t)-1)
 		return NULL;
 
-	p = (void*)(block * PAGE_SIZE + _phy_base + _page_offset);
+	p = (void*)(block * PAGE_SIZE + _heap_virt_base);
 
 	if( flags & GFP_ZERO )
 		memset(p, 0, pages * PAGE_SIZE);
@@ -290,16 +290,17 @@ void * get_free_page(int flags) {
 }
 
 // free blocks previously allocated with get_free_pages().
-void free_pages(void * addr, size_t pages) {
+void free_pages(void * _addr, size_t pages) {
 
-	if(addr) {
+  if(_addr) {
+    
+    _total_allocated -= pages; // TODO: double-free!?
 
-		_total_allocated -= pages; // TODO: double-free!?
+    const size_t addr = (size_t)_addr;
+    const size_t block = (addr - _heap_virt_base)/PAGE_SIZE;
 
-		size_t block = ((size_t)((((size_t)addr) - _page_offset) - _phy_base)) / PAGE_SIZE;
-
-		buddy_free( normal_buddy, (int)block, pages );
-	}
+    buddy_free( normal_buddy, (int)block, pages );
+  }
 }
 
 // free pages previously allocated with get_free_page().
@@ -311,65 +312,27 @@ void free_page(void * addr) {
 
 int get_free_page_teardown() {
 
-#if defined(GFP_USERLAND)
-	if(normal_buddy)
-	{
-		int order_idx;
-		for(order_idx=0;order_idx<NB_ORDERS;order_idx++)
-			free( normal_buddy->orders.order[order_idx].p );
-	}
-
-	free((void*)normal_buddy);
-	free((void*)_page_offset);
-#endif
-	return 0;
+  return 0;
 }
 
 // setup get_free_pages.
-//	virtual_base should be PAGE_OFFSET, or a malloc'ed buffer for testing!
-//	NOTE: Assumes the buddy structure will fit in memory... Test that it does?
-int get_free_page_setup(
-	size_t virtual_base,	// virtual base address.
-	size_t phy_base,		// physical memory base.
-	size_t preallocated,	// memory already in use.
-	size_t size)			// amount of ram in bytes.
+static int _get_free_page_setup(
+	size_t heap_base,
+	size_t heap_size)
 {
 	int order_idx;
 	uint8_t * free_base;
 	struct buddy * buddy0;
-	size_t pages = size / PAGE_SIZE;
+	size_t pages = heap_size / PAGE_SIZE;
 	_total_memory = pages * PAGE_SIZE;
 	_total_allocated = 0;
 
-#if defined(GFP_USERLAND)
-	posix_memalign((void**)&virtual_base, PAGE_SIZE, _total_memory);
-	phy_base = 0;
-#endif
-
-#if defined(HOSTED_PLATFORM)
-	static uint8_t ___hosted_raw_base[PHYSICAL_MEMORY_LENGTH + (PAGE_SIZE*2)];
-	virtual_base = (size_t)___hosted_raw_base;
-	if (virtual_base & (PAGE_SIZE - 1))
-		virtual_base = ((virtual_base + PAGE_SIZE) & ~(PAGE_SIZE - 1));
-	phy_base = virtual_base;
-	preallocated = 0; // on hosted, operates on a different pool to boot_pages!
-#endif
-
-	_phy_base    = phy_base;
-	_page_offset = virtual_base - phy_base;
-
-	// bump up 'preallocated' to next word boundary.
-	if(preallocated & (WORDBYTES-1))
-		preallocated = (preallocated + WORDBYTES) & ~(WORDBYTES-1);
-
-	free_base = (uint8_t*)(virtual_base + preallocated);
+	_heap_virt_base = heap_base;
+	free_base = (uint8_t*)(_heap_virt_base);
 
 	// allocate buddy!
 	buddy0 = (struct buddy*)free_base;
 	free_base += sizeof(struct buddy);
-#if defined(GFP_USERLAND)
-	buddy0 = malloc(sizeof(struct buddy));
-#endif
 
 	// initialise buddy structure.
 	for(order_idx=0;order_idx<NB_ORDERS;order_idx++) {
@@ -389,25 +352,32 @@ int get_free_page_setup(
 		order->p = (size_t*)free_base;
 		free_base += bmp_size;
 
-#if defined(GFP_USERLAND)
-		order->p = malloc(bmp_size);
-#endif
-
 		// set free!
 		memset(order->p, 0, bmp_size);
 	}
 
 	// now, mark as used all memory between 'virtual_base' and 'free_base'
-	{
-		size_t pages_used =
-			(((size_t)free_base + (PAGE_SIZE-1)) - virtual_base) / PAGE_SIZE;
-
-		buddy_set_used(buddy0, 0, pages_used);
-	}
+       {
+	 size_t pages_used =
+	   (((size_t)free_base + (PAGE_SIZE-1)) - virtual_base) / PAGE_SIZE;
+	 
+	 buddy_set_used(buddy0, 0, pages_used);
+       }
 
 	normal_buddy = buddy0;
 
 	return 0;
+}
+
+int get_free_page_setup() {
+
+  // HACK - get zero boot pages returns current heap pointer without allocating anything.
+  size_t heap_begin  = (size_t)get_boot_pages(0,0);
+  size_t heap_length = (VIRTUAL_MEMORY_BASE_ADDRESS + PHYSICAL_MEMORY_LENGTH) - heap_begin;
+
+  end_boot_pages();
+
+  return _get_free_page_setup(heap_begin, heap_length);
 }
 
 size_t get_total_pages_allocated() {

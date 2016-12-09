@@ -87,10 +87,6 @@ void * get_aligned_boot_pages(size_t alignment, size_t pages, int flags) {
 }
 
 // Disables any future allocations by get_boot_pages.
-//	Returns the number of pages allocated during startup.
-size_t end_boot_pages() {
-
-  size_t bp = _boot_pages;
+void end_boot_pages() {
   _boot_pages = _heap_pages();
-  return bp;
 }
