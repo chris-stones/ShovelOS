@@ -30,11 +30,9 @@ static const size_t _heap_pages() {
 
 #else
 
-#define __HOSTED_BOOT_PAGES 16
-
 size_t _heap_virtual_begin() {
   
-  static uint8_t ___hosted_raw_base[PAGE_SIZE * (__HOSTED_BOOT_PAGES + 2)];
+  static uint8_t ___hosted_raw_base[PHYSICAL_MEMORY_LENGTH + PAGE_SIZE];
   size_t virtual_base = (size_t)(___hosted_raw_base);
   if (virtual_base & (PAGE_SIZE - 1))
     virtual_base = ((virtual_base + PAGE_SIZE) & ~(PAGE_SIZE - 1));
@@ -42,7 +40,7 @@ size_t _heap_virtual_begin() {
 }
 
 static const size_t _heap_pages() {
-  return __HOSTED_BOOT_PAGES;
+  return PHYSICAL_MEMORY_LENGTH/PAGE_SIZE;
 }
 #endif
 

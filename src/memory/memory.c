@@ -4,6 +4,8 @@
 #include "page.h"
 #include "mem_cache.h"
 #include "kmalloc.h"
+#include "memory.h"
+#include <drivers/drivers.h>
 
 
 void setup_memory() {
