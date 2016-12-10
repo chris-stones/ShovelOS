@@ -359,7 +359,7 @@ static int _get_free_page_setup(
 	// now, mark as used all memory between 'virtual_base' and 'free_base'
        {
 	 size_t pages_used =
-	   (((size_t)free_base + (PAGE_SIZE-1)) - virtual_base) / PAGE_SIZE;
+	   (((size_t)free_base + (PAGE_SIZE-1)) - heap_base) / PAGE_SIZE;
 	 
 	 buddy_set_used(buddy0, 0, pages_used);
        }

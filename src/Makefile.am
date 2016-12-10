@@ -47,6 +47,7 @@ SHOV_KERN_CORE = \
   memory/vm/vm.h \
   memory/mem_cache.h \
   memory/boot_pages.h \
+  memory/memory.c \
   memory/memory.h \
   memory/page.h \
   file/file.h \
