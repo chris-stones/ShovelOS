@@ -11,7 +11,11 @@ kernel_CFLAGS = \
   -Werror \
   -std=gnu99 \
   -Os \
-  -nostdinc
+  -nostdinc \
+  @CPU_ARCH_FLAGS@
+
+kernel_CCASFLAGS = \
+  @CPU_ARCH_FLAGS@
 
 if CONFIG_SHOV_HOSTED_PLATFORM
   kernel_CFLAGS += \
@@ -43,6 +47,7 @@ SHOV_KERN_CORE = \
   memory/vm/vm.h \
   memory/mem_cache.h \
   memory/boot_pages.h \
+  memory/memory.c \
   memory/memory.h \
   memory/page.h \
   file/file.h \
@@ -74,11 +79,17 @@ SHOV_KERN_CORE = \
   sched/sched.h
 
 if CONFIG_SHOV_ARCH_IS_ARM_A
-  SHOV_KERN_CORE += arch/arm/entry_a.S
+  SHOV_KERN_CORE += \
+    arch/arm/entry_a.S \
+    arch/arm/concurrency/mutex.S \
+    arch/arm/context/context_a.S
 endif
 
 if CONFIG_SHOV_ARCH_IS_ARM_M
-  SHOV_KERN_CORE += arch/arm/entry_m.S
+  SHOV_KERN_CORE += \
+    arch/arm/entry_m.S \
+    arch/arm/concurrency/mutex_m0.S \
+    arch/arm/context/context_m.S
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
@@ -97,7 +108,6 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/concurrency/kthread.c \
   arch/arm/concurrency/kthread.h \
   arch/arm/concurrency/mutex.h \
-  arch/arm/concurrency/mutex.S \
   arch/arm/concurrency/spinlock.c \
   arch/arm/concurrency/spinlock.h \
   arch/arm/arch.h \
@@ -106,7 +116,6 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/system_control_register.h \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \
-  arch/arm/context/context.S \
   arch/arm/cpu_state.h \
   arch/arm/cpu_state.c
 
@@ -159,6 +168,10 @@ SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
   drivers/arm/gic/gic.c
 
+SHOV_KERN_DRIVER_ARM_NVIC = \
+  drivers/arm/nvic/regs.h \
+  drivers/arm/nvic/nvic.c
+
 SHOV_KERN_DRIVER_HOSTED = \
   drivers/hosted/uart/uart.c \
   drivers/hosted/timer/sync_timer.c
@@ -195,6 +208,10 @@ endif
 
 if CONFIG_SHOV_DRIVER_ARM_GIC
   kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_GIC)
+endif
+
+if CONFIG_SHOV_DRIVER_ARM_NVIC
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_NVIC)
 endif
 
 if CONFIG_SHOV_HOSTED_PLATFORM

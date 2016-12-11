@@ -71,34 +71,6 @@ void * get_exception_stack() {
 	return (void*)(stack_base + PAGE_SIZE * pages);
 }
 
-void setup_memory() {
-
-#if !defined(CONFIG_NOMMU)
-	init_page_tables(
-		PHYSICAL_MEMORY_BASE_ADDRESS,
-		VIRTUAL_MEMORY_BASE_ADDRESS,
-		PHYSICAL_MEMORY_LENGTH);
-#endif
-
-	/************************************************************
-	 * retire get_boot_pages() and setup main memory management.
-	 */
-	get_free_page_setup(
-		VIRTUAL_MEMORY_BASE_ADDRESS,
-		PHYSICAL_MEMORY_BASE_ADDRESS,
-		PAGE_SIZE * end_boot_pages(),
-		PHYSICAL_MEMORY_LENGTH);
-
-	mem_cache_setup();
-
-	kmalloc_setup();
-
-#if !defined(CONFIG_NOMMU)
-	vm_map_device_regions();
-#endif
-}
-
-
 volatile int _test_mutex_int = 0;
 volatile int _test_mutex_failed = 0;
 mutex_t _test_mutex_mutex;

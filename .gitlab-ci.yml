@@ -2,6 +2,24 @@
 stages:
   - build
 
+build:bbc_microbit:
+  stage: build
+  script:
+    - mkdir build
+    - ./autogen.sh
+    - cd build
+    - ../configure --with-machine=bbc_microbit --host=arm-none-eabi
+    - make
+    - arm-none-eabi-objcopy -O binary src/kernel src/kernel.bin
+    - arm-none-eabi-objcopy -O ihex src/kernel src/kernel.hex
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
+    paths:
+      - build/src/kernel
+      - build/src/kernel.bin
+      - build/src/kernel.hex
+    expire_in: 1 day
+
 build:beaglexm:
   stage: build
   script:
@@ -10,7 +28,7 @@ build:beaglexm:
     - cd build
     - ../configure --with-machine=beaglexm --host=arm-none-eabi
     - make
-    - arm-none-eabi-objcopy src/kernel src/kernel.bin
+    - arm-none-eabi-objcopy -O binary src/kernel src/kernel.bin
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
@@ -26,7 +44,7 @@ build:iGEPv5:
     - cd build
     - ../configure --with-machine=iGEPv5 --host=arm-none-eabi
     - make
-    - arm-none-eabi-objcopy src/kernel src/kernel.bin
+    - arm-none-eabi-objcopy -O binary src/kernel src/kernel.bin
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:

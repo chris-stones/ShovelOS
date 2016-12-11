@@ -4,12 +4,7 @@
 #include<stdint.h>
 
 // setup get_free_pages.
-//	virtual_base should be PAGE_OFFSET, or a malloc'ed buffer for testing!
-int get_free_page_setup(
-	size_t virtual_base,	// virtual base address.
-	size_t physical_base,	// physical base address.
-	size_t preallocated,	// memory already in use. ( page tables / kernel image )
-	size_t size);			// amount of ram in bytes.
+int get_free_page_setup();
 
 // only needed for testing leaks in the user-land test.
 int get_free_page_teardown();
