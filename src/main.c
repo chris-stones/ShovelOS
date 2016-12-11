@@ -18,8 +18,9 @@ static void BBCMicroBitTest() {
 
   
   {
-    for(;;)
-      _debug_out("Z\r\n");
+    uint32_t i=0;
+    for(;;i++)
+      kprintf("Hello world From ShovelOS %d\r\n", i);
   }
   
   gpio_itf gpio;
