@@ -17,6 +17,7 @@
 void BBCMicroBitTest() {
 
   gpio_itf gpio;
+  struct timespec now;
   
   gpio_open(&gpio);
 
@@ -26,7 +27,7 @@ void BBCMicroBitTest() {
   const int led_c1 =  4; // p4
   const int led_r1 = 13; // p13
 
-  int phase = 1;
+  int phase = 0;
 
 #define GPIOFUNC(__func, ...) INVOKE(gpio,__func, ##__VA_ARGS__)
   
@@ -42,8 +43,9 @@ void BBCMicroBitTest() {
 
     int a = GPIOFUNC(in, btn_a);
     int b = GPIOFUNC(in, btn_b);
-    
-    kprintf("Hello world From ShovelOS %6d, %d, %d\r\n", i,a,b);
+
+    get_system_time(&now);
+    kprintf("Hello world From ShovelOS %d:%d\r\n", now.seconds, now.nanoseconds);
 
     if((a&1)==0)
       phase = 1;
@@ -164,6 +166,7 @@ void Main() {
     // Testing the BBC micro:bit.
     register_drivers();
     console_setup_dev(); // DEPENDS ON DRIVERS.
+    start_system_time(); // DEPENDS ON DRIVERS.
     BBCMicroBitTest();
     for(;;);
   }
