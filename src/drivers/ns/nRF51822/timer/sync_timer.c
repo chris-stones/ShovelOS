@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <timer/sync_timer.h>
 #include <console/console.h>
+#include <drivers/ns/nRF51822/clock/clock_management.h>
 
 #include "sync_regs.h"
 
@@ -19,11 +20,6 @@ static struct context _ctx = {0,};
 
 static uint64_t _cur(sync_timer_itf self) {
 
-  kprintf("sync_timer %x %x %d\r\n",
-	  &SYNC_TIMER->COUNTER,
-	  &SYNC_TIMER->START,
-	  SYNC_TIMER->COUNTER);
-  
   return SYNC_TIMER->COUNTER;
 }
 
@@ -39,6 +35,8 @@ static uint64_t _wrap(sync_timer_itf self) {
 
 static int _open(sync_timer_itf * i_sync_timer) {
 
+  _nrf51822_start_16Mhz_crystal();
+  
   DRIVER_INIT_INTERFACE((&_ctx), sync_timer_interface);
 
   _ctx.sync_timer_interface->cur = &_cur;

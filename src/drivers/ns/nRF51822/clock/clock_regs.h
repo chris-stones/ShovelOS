@@ -18,10 +18,10 @@
 #define CTSTOP        U32_WO_REG(0x018)
 
 // EVENTS
-#define HFCLKSTARTED  U32_RO_REG(0x100)
-#define LFCLKSTARTED  U32_RO_REG(0x104)
-#define DONE          U32_RO_REG(0x10C)
-#define CTTO          U32_RO_REG(0x110)
+#define HFCLKSTARTED  U32_RW_REG(0x100)
+#define LFCLKSTARTED  U32_RW_REG(0x104)
+#define DONE          U32_RW_REG(0x10C)
+#define CTTO          U32_RW_REG(0x110)
 
 // REGISTERS
 #define INTENSET      U32_RW_REG(0x304)
@@ -35,3 +35,13 @@
 #define CTIV          U32_RW_REG(0x538)
 #define XTALFREQ      U32_RW_REG(0x550)
 
+enum xtal_freq {
+  XTALFREQ_16Mhz = 0x000000ff,
+  XTALFREQ_32Mhz = 0x00000000,
+};
+
+enum lfclksrc_src {
+  LFCLKCRC_RC    = 0,
+  LFCLKCRC_XTAL  = 1,
+  LFCLKCRC_SYNTH = 2,
+};
