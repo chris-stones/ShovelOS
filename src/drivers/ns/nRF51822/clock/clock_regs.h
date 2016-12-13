@@ -33,3 +33,5 @@
 #define LFCLKSRCCOPY  U32_RW_REG(0x41C)
 #define LFCLKSRC      U32_RW_REG(0x518)
 #define CTIV          U32_RW_REG(0x538)
+#define XTALFREQ      U32_RW_REG(0x550)
+
