@@ -64,17 +64,22 @@ _RESET:
 
 	@ Get one page from early allocator 'get_goot_pages'
 	@ and use it as the new stack.
-	mov r0, #1			@ 1 page
+	mov r0, #2			@ 2 pages
 	mov r1, #0			@ 0 flags
 	bl get_boot_pages		@ get a page.
 
 	ldr r1, =PAGE_SIZE
-	add r0, r1			@ set top of page as stack.
-	mov sp, r0
+	add r0, r0, r1			@ r0 = top of first page for thread-stack.
+	add r1, r0, r1                  @ r1 = top of second page for handler-stack.
+	mov sp, r0                      @ set sp_main.
+
+	mov r2, #2
+	msr CONTROL, r2                 @ set thread-mode to use sp_process.
+	mov sp, r1                      @ set sp_process.
+	mov r2, #0
+	msr CONTROL, r2                 @ set thread-mode to use sp_main.
 
 	bl setup_memory			@ setup memory
-
-@ TODO: FIXME: SETUP STACKS!
 
 	@ run kernel main in supervisor mode
 	b  Main              @ run main!!!
