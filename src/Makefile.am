@@ -82,14 +82,16 @@ if CONFIG_SHOV_ARCH_IS_ARM_A
   SHOV_KERN_CORE += \
     arch/arm/entry_a.S \
     arch/arm/concurrency/mutex.S \
-    arch/arm/context/context_a.S
+    arch/arm/context/context_a.S \
+    arch/arm/cpu_state.c
 endif
 
 if CONFIG_SHOV_ARCH_IS_ARM_M
   SHOV_KERN_CORE += \
     arch/arm/entry_m.S \
     arch/arm/concurrency/mutex_m0.S \
-    arch/arm/context/context_m.S
+    arch/arm/context/context_m.S \
+    arch/arm/cpu_state_m.c
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
@@ -117,7 +119,7 @@ SHOV_KERN_ARM_CORE = \
   arch/arm/exceptions/exceptions.h \
   arch/arm/stdint.h \
   arch/arm/cpu_state.h \
-  arch/arm/cpu_state.c
+  arch/arm/cpu_state_m.h
 
 SHOV_KERN_HOSTED_CORE = \
   arch/hosted/host_os_glue.h \
