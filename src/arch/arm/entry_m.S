@@ -64,13 +64,13 @@ _RESET:
 
 	@ Get one page from early allocator 'get_goot_pages'
 	@ and use it as the new stack.
-@	mov r0, #1			@ 1 page
-@	mov r1, #0			@ 0 flags
-@	bl get_boot_pages		@ get a page.
+	mov r0, #1			@ 1 page
+	mov r1, #0			@ 0 flags
+	bl get_boot_pages		@ get a page.
 
-@	ldr r1, =PAGE_SIZE
-@	add r0, r1			@ set top of page as stack.
-@	mov sp, r0
+	ldr r1, =PAGE_SIZE
+	add r0, r1			@ set top of page as stack.
+	mov sp, r0
 
 	bl setup_memory			@ setup memory
 
