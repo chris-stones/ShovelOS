@@ -75,9 +75,11 @@ _RESET:
 
 	mov r2, #2
 	msr CONTROL, r2                 @ set thread-mode to use sp_process.
+	isb				@ arm recommends ISB here.
 	mov sp, r1                      @ set sp_process.
 	mov r2, #0
 	msr CONTROL, r2                 @ set thread-mode to use sp_main.
+	isb                             @ arm recommends ISB here.
 
 	bl setup_memory			@ setup memory
 
