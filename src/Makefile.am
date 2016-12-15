@@ -80,18 +80,50 @@ SHOV_KERN_CORE = \
 
 if CONFIG_SHOV_ARCH_IS_ARM_A
   SHOV_KERN_CORE += \
-    arch/arm/entry_a.S \
-    arch/arm/concurrency/mutex.S \
-    arch/arm/context/context_a.S \
-    arch/arm/cpu_state.c
+    arch/arm_a/entry.S \
+    arch/arm_a/concurrency/mutex.S \
+    arch/arm_a/context/context_a.S \
+    arch/arm_a/cpu_state.c \
+    arch/arm_a/cpu_state.h \
+    arch/arm_a/cpu_caps.h \
+    arch/arm_a/special/special.h \
+    arch/arm_a/special/cpsr.h \
+    arch/arm_a/arm.c \
+    arch/arm_a/exceptions/exceptions.c \
+    arch/arm_a/exceptions/exceptions.h \
+    arch/arm_a/concurrency/kthread.c \
+    arch/arm_a/concurrency/kthread.h \
+    arch/arm_a/concurrency/mutex.h \
+    arch/arm_a/concurrency/spinlock.c \
+    arch/arm_a/concurrency/spinlock.h \
+    arch/arm_a/arch.h \
+    arch/arm_a/asm.h \
+    arch/arm_a/coprocessor_asm.h \
+    arch/arm_a/system_control_register.h \
+    arch/arm_a/stdint.h
 endif
 
 if CONFIG_SHOV_ARCH_IS_ARM_M
   SHOV_KERN_CORE += \
-    arch/arm/entry_m.S \
-    arch/arm/concurrency/mutex_m0.S \
-    arch/arm/context/context_m.S \
-    arch/arm/cpu_state_m.c
+    arch/arm_m/arch.h \
+    arch/arm_m/asm.h \
+    arch/arm_m/stdint.h \
+    arch/arm_m/entry.S \
+    arch/arm_m/arm.c \
+    arch/arm_m/special/primask.h \
+    arch/arm_m/special/xpsr.h \
+    arch/arm_m/special/special.h \
+    arch/arm_m/concurrency/mutex.h \
+    arch/arm_m/concurrency/mutex.S \
+    arch/arm_a/concurrency/kthread.c \
+    arch/arm_m/concurrency/kthread.h \
+    arch/arm_m/context/context.S \
+    arch/arm_m/cpu_state.c \
+    arch/arm_m/cpu_state.h \
+    arch/arm_m/exceptions/exceptions.c \
+    arch/arm_m/exceptions/exceptions.h \
+    arch/arm_m/concurrency/spinlock.c \
+    arch/arm_m/concurrency/spinlock.h 
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
@@ -99,27 +131,6 @@ if !CONFIG_SHOV_HOSTED_PLATFORM
     sched/sched.c \
     sched/sched_sleep.c
 endif
-
-SHOV_KERN_ARM_CORE = \
-  arch/arm/cpu_caps.h \
-  arch/arm/special/special.h \
-  arch/arm/special/cpsr.h \
-  arch/arm/special/primask.h \
-  arch/arm/arm.c \
-  arch/arm/exceptions/exceptions.c \
-  arch/arm/concurrency/kthread.c \
-  arch/arm/concurrency/kthread.h \
-  arch/arm/concurrency/mutex.h \
-  arch/arm/concurrency/spinlock.c \
-  arch/arm/concurrency/spinlock.h \
-  arch/arm/arch.h \
-  arch/arm/asm.h \
-  arch/arm/coprocessor_asm.h \
-  arch/arm/system_control_register.h \
-  arch/arm/exceptions/exceptions.h \
-  arch/arm/stdint.h \
-  arch/arm/cpu_state.h \
-  arch/arm/cpu_state_m.h
 
 SHOV_KERN_HOSTED_CORE = \
   arch/hosted/host_os_glue.h \
@@ -138,14 +149,14 @@ SHOV_KERN_HOSTED_CORE = \
   sched/sched_hosted.c
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
-  arch/arm/mm/VMSAv7/page_tables.c \
-  arch/arm/mm/VMSAv7/cache.c \
-  arch/arm/mm/VMSAv7/init_page_tables.c \
-  arch/arm/mm/VMSAv7/pagetable.h \
-  arch/arm/mm/VMSAv7/section.h \
-  arch/arm/mm/VMSAv7/large_page.h \
-  arch/arm/mm/VMSAv7/supersection.h \
-  arch/arm/mm/VMSAv7/small_page.h
+  arch/arm_a/mm/VMSAv7/page_tables.c \
+  arch/arm_a/mm/VMSAv7/cache.c \
+  arch/arm_a/mm/VMSAv7/init_page_tables.c \
+  arch/arm_a/mm/VMSAv7/pagetable.h \
+  arch/arm_a/mm/VMSAv7/section.h \
+  arch/arm_a/mm/VMSAv7/large_page.h \
+  arch/arm_a/mm/VMSAv7/supersection.h \
+  arch/arm_a/mm/VMSAv7/small_page.h
 
 SHOV_KERN_DRIVER_OMAP = \
   drivers/ti/omap/register_macros.h \
@@ -193,9 +204,6 @@ if CONFIG_SHOV_HOSTED_PLATFORM
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
-if CONFIG_SHOV_ARCH_IS_ARM
-    kernel_SOURCES += $(SHOV_KERN_ARM_CORE)
-endif
 if CONFIG_SHOV_ARCH_IS_ARMv7A
     kernel_SOURCES += $(SHOV_KERN_ARM_VMSAv7_CORE)
 endif

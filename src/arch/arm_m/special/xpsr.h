@@ -1,10 +1,6 @@
 
 #pragma once
 
-#if !defined(_ARM_ENABLE_SPECIAL_H)
-#error DONT INCLUDE THIS HEADER DIRECTLY, INCLUDE <special/special.h>
-#endif
-
 #define IPSR_EXCEPTION_NUMBER (0x3f)
 
 _ARM_DEFINE_SPECIAL_REG(apsr);

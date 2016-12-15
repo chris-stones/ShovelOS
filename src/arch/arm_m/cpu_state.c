@@ -1,6 +1,6 @@
 
 #include <_config.h>
-#include <cpu_state_m.h>
+#include <cpu_state.h>
 
 int cpu_state_build(struct cpu_state_struct * cpuss,
 		    void *(*start)(void*),
