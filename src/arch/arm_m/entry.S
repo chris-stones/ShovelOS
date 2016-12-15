@@ -62,11 +62,11 @@ _RESET:
 
 	bl _init_ram                    @ clear the BSS section and init .data section
 
-	@ Get one page from early allocator 'get_goot_pages'
-	@ and use it as the new stack.
+	@ Setup stack.
+#if(ARM_M_USE_SP_PROCESS)
 	mov r0, #2			@ 2 pages
 	mov r1, #0			@ 0 flags
-	bl get_boot_pages		@ get a page.
+	bl get_boot_pages		@ get boot stack pages.
 
 	ldr r1, =PAGE_SIZE
 	add r0, r0, r1			@ r0 = top of first page for thread-stack.
@@ -80,10 +80,17 @@ _RESET:
 	mov r2, #0
 	msr CONTROL, r2                 @ set thread-mode to use sp_main.
 	isb                             @ arm recommends ISB here.
-
+#else
+	mov r0, #1			@ 1 page
+	mov r1, #0			@ 0 flags
+	bl get_boot_pages		@ get boot stack pages.
+	ldr r1, =PAGE_SIZE		@ get stack size
+	add r0, r0, r1			@ get top of stack.
+	mov sp, r0			@ set new stack.
+#endif
 	bl setup_memory			@ setup memory
 
-	@ run kernel main in supervisor mode
+	@ run kernel main.
 	b  Main              @ run main!!!
 
 
