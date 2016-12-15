@@ -149,6 +149,7 @@ SHOV_KERN_HOSTED_CORE = \
   sched/sched_hosted.c
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
+  arch/arm_a/mm/VMSAv7/tlb.h \
   arch/arm_a/mm/VMSAv7/page_tables.c \
   arch/arm_a/mm/VMSAv7/cache.c \
   arch/arm_a/mm/VMSAv7/init_page_tables.c \
