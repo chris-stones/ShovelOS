@@ -161,10 +161,10 @@ SHOV_KERN_ARM_VMSAv7_CORE = \
 SHOV_KERN_DRIVER_OMAP = \
   drivers/ti/omap/register_macros.h \
   drivers/ti/omap/uart/uart.c \
+  drivers/ti/omap/uart/regs.h \
   drivers/ti/omap/timer/timer.c \
   drivers/ti/omap/timer/sync_timer.c \
-  drivers/ti/omap/timer/sync_timer.h \
-  drivers/ti/omap/uart/regs.h \
+  drivers/ti/omap/timer/sync_regs.h \
   drivers/ti/omap/timer/regs.h
 
 SHOV_KERN_DRIVER_OMAP3 = \
@@ -177,7 +177,7 @@ SHOV_KERN_DRIVER_NRF51822 = \
   drivers/ns/nRF51822/gpio/regs.h \
   drivers/ns/nRF51822/gpio/gpio.c \
   drivers/ns/nRF51822/timer/sync_timer.c \
-  drivers/ns/nRF51822/timer/sync_timer.h \
+  drivers/ns/nRF51822/timer/sync_regs.h \
   drivers/ns/nRF51822/clock/clock_regs.h \
   drivers/ns/nRF51822/clock/clock_management.c \
   drivers/ns/nRF51822/clock/clock_management.h
