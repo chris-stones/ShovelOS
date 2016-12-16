@@ -188,14 +188,18 @@ static int _kthread_create(kthread_t * thread,
   if(*thread) {
     
     (*thread)->stack_pages = 1;
-    (*thread)->stack_base = (size_t)get_free_pages((*thread)->stack_pages, gfp_flags);
+
+    size_t stack_base = (size_t)get_free_pages((*thread)->stack_pages, gfp_flags);    
+    (*thread)->stack_base = stack_base;
 
     if((*thread)->stack_base) {
+
+      size_t stack_top = stack_base + PAGE_SIZE * (*thread)->stack_pages;
 
       cpu_state_build(&((*thread)->cpu_state),
 		      start_routine,
 		      args,
-		      (void*)((*thread)->stack_base),
+		      (void*)(stack_top),
 		      &_exited_kthread);
     }
     else {
