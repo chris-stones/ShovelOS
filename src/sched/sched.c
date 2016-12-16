@@ -194,7 +194,7 @@ static int _kthread_create(kthread_t * thread,
 
     if((*thread)->stack_base) {
 
-      size_t stack_top = stake_base + PAGE_SIZE * (*thread)->stack_pages;
+      size_t stack_top = stack_base + PAGE_SIZE * (*thread)->stack_pages;
 
       cpu_state_build(&((*thread)->cpu_state),
 		      start_routine,
