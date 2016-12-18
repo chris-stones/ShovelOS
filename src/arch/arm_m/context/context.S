@@ -3,7 +3,7 @@
 	.text
 	.global _arm_svc
 _arm_svc:
-	mov pc, lr	@ TODO:
+	svc #0
 	
 	.text
 	.global _asm_idle_task
@@ -13,6 +13,7 @@ _asm_idle_task:
 
 
 	.global _arm_task_switch_ISR
+_svc_yield:
 _arm_task_switch_ISR:
 
 	push {r4-r7, lr}		@ store cpu state. (anything not in exception frame)
@@ -34,4 +35,10 @@ _arm_task_switch_ISR:
 	mov r9, r1
 	mov r10, r2
 	mov r11, r3
-	pop {r4-r7, pc}
+	pop {r4-r7, pc}	
+	
+	.global _my_SVC_handler
+_my_SVC_handler:	
+	cmp r0, #0
+	beq _svc_yield
+	mov pc, lr
