@@ -319,7 +319,7 @@ static int ___install___() {
 	int e = 0;
 
 	for(i=0;i<TIMERS_MAX && i<11; i++)
-		if(timer_install(&_open, 0) != 0)
+		if(timer_install(&_open, i) != 0)
 			e = -1;
 
 	return e;
