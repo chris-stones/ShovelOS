@@ -41,6 +41,18 @@
 #include "memory.h"
 #include "boot_pages.h"
 
+#if !defined(DEBUG_TRACE)
+#include <console/console.h>
+#define DEBUG_TRACE(___str, ...)				\
+  do {								\
+    kprintf("@%s:%s:d\r\n",__FILE__,__FUNCTION__,__LINE__);	\
+    kprintf("    " ___str "\r\n", ##__VA_ARGS__);		\
+  }while(0)
+#endif
+#if !defined(DEBUG_TRACE)
+#define DEBUG_TRACE(___str, ...) do {} while(0)
+#endif
+
 static size_t _heap_virt_base = 0;
 static size_t _total_memory = 0;
 static size_t _total_allocated = 0;
@@ -320,6 +332,7 @@ static int _get_free_page_setup(
 	size_t heap_base,
 	size_t heap_size)
 {
+  DEBUG_TRACE("heap_base = 0x%x, heap_size = 0x%x", heap_base, heap_size);
 	int order_idx;
 	uint8_t * free_base;
 	struct buddy * buddy0;
@@ -329,10 +342,12 @@ static int _get_free_page_setup(
 
 	_heap_virt_base = heap_base;
 	free_base = (uint8_t*)(_heap_virt_base);
+	DEBUG_TRACE("free_base = %x", free_base);
 
 	// allocate buddy!
 	buddy0 = (struct buddy*)free_base;
 	free_base += sizeof(struct buddy);
+	DEBUG_TRACE("free_base = %x", free_base);
 
 	// initialise buddy structure.
 	for(order_idx=0;order_idx<NB_ORDERS;order_idx++) {
@@ -351,6 +366,7 @@ static int _get_free_page_setup(
 		bmp_size = words * WORDBYTES;
 		order->p = (size_t*)free_base;
 		free_base += bmp_size;
+		DEBUG_TRACE("free_base = %x (allocated %d)", free_base, bmp_size);
 
 		// set free!
 		memset(order->p, 0, bmp_size);
@@ -360,6 +376,8 @@ static int _get_free_page_setup(
        {
 	 size_t pages_used =
 	   (((size_t)free_base + (PAGE_SIZE-1)) - heap_base) / PAGE_SIZE;
+
+	 DEBUG_TRACE("pages_used = %d", pages_used);
 	 
 	 buddy_set_used(buddy0, 0, pages_used);
        }
