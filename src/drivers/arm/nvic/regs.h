@@ -5,7 +5,7 @@
 #include <stdint.h>
 #endif
 
-#define INTERRUPTS_MAX 32
+#define INTERRUPTS_MAX 48
 
 #define NVIC_BASE (0xE000E100)
 
