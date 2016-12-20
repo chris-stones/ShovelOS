@@ -16,6 +16,9 @@ struct context {
 
 struct context _ctx = {0,};
 
+// USE RTC-1 AS THE MAIN TIMER.
+#define TIMER (((struct RTC_REGS *)(RTC1_BASE_ADDR)))
+
 static uint32_t _getfreq(timer_itf itf) {
 
   return 32768;
@@ -23,7 +26,7 @@ static uint32_t _getfreq(timer_itf itf) {
 
 static uint32_t _read32(timer_itf itf) {
 
-  return 0;
+  return SYNC_TIMER->COUNTER;
 }
 
 static uint64_t _read64(timer_itf itf) {
@@ -38,11 +41,24 @@ static irq_t _get_irq_number(irq_itf itf) {
 
 static int _close(timer_itf *itf) {
 
+  TIMER->STOP = 1;
   return 0;
 }
 
 static int _oneshot(timer_itf itf, const struct timespec * timespec) {
 
+  TIMER->STOP = 1;
+
+  uint64_t ns_per_tick = 1000000000ULL / (uint64_t)_getfreq();
+  uint64_t ns = (uint64_t)timespec->seconds * 1000000000ULL + (uint64_t)timespec->nanoseconds;
+  uint64_t ticks = ns / ns_per_tick;
+
+  if(ticks > 0x00FFFFFF)
+    return -1;
+  
+  TIMER->CC[0] = (uint32_t)ticks;
+  TIMER->START = 1;
+  
   return -1;
 }
 
@@ -53,7 +69,7 @@ static int _debug_dump(timer_itf itf) {
 
 static int _IRQ(irq_itf itf) {
 
-  return -1;
+  return 0;
 }
 
 static int _open(
@@ -81,7 +97,10 @@ static int _open(
   *i_timer = (timer_itf)&(_ctx.timer_interface);
   if(i_irq)
     *i_irq = (irq_itf)&(_ctx.irq_interface);
-	
+
+  TIMER->EVTENSET = 1<<16; // enable event routing on CC0
+  TIMER->INTENSET = 1<<16; // enable interrupt on CC0
+  
   return 0;
 }
 
@@ -91,4 +110,3 @@ static int ___install___() {
 }
 
 const driver_install_func_ptr __nrf51822_timer_install_ptr ATTRIBUTE_REGISTER_DRIVER = &___install___;
-
