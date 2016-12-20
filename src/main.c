@@ -187,6 +187,7 @@ void Main() {
     register_drivers();
     console_setup_dev(); // DEPENDS ON DRIVERS.
     start_system_time(); // DEPENDS ON DRIVERS.
+    interrupt_controller_open(0); // DEPENDS ON SYSTEM TIME
     BBCMicroBitTest();
     for(;;);
   }
