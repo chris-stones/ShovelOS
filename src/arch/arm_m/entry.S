@@ -19,7 +19,7 @@ _start:
 	.word _RESERVED+1		@  8
 	.word _RESERVED+1		@  9
 	.word _RESERVED+1		@ 10
-	.word _SVCALL+1			@ 11
+	.word _my_SVC_handler+1		@ 11
 	.word _RESERVED+1		@ 12
 	.word _RESERVED+1		@ 13
 	.word _PENDSV+1			@ 14
@@ -98,7 +98,6 @@ _HALT:
 _NMI:	
 _HARDFAULT:
 _RESERVED:
-_SVCALL:
 _PENDSV:
 _SYSTICK:	
 	wfi
