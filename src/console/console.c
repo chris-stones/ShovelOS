@@ -41,12 +41,17 @@ int32_t kprintf(const char * format, ...) {
 
 	int32_t r = -1;
 
-	if(_console_file) {
-		va_list va;
-		va_start(va, format);
-		r = vfprintf(_console_file, format, va);
-		va_end(va);
-	}
+	file_itf __console_file;
+	if(_console_file)
+	  __console_file = _console_file;
+	else
+	  __console_file = (file_itf)-1; // HACK - use _debug_out to write output.
+
+	va_list va;
+	va_start(va, format);
+	r = vfprintf(__console_file, format, va);
+	va_end(va);
+  
 	return r;
 }
 
