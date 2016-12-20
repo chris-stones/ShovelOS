@@ -45,7 +45,7 @@
 #include <console/console.h>
 #define DEBUG_TRACE(___str, ...)				\
   do {								\
-    kprintf("@%s:%s:d\r\n",__FILE__,__FUNCTION__,__LINE__);	\
+    kprintf("@%s:%s:%d\r\n",__FILE__,__FUNCTION__,__LINE__);	\
     kprintf("    " ___str "\r\n", ##__VA_ARGS__);		\
   }while(0)
 #endif
@@ -228,7 +228,7 @@ static int _fast_forward( size_t word ) {
 
 // allocate given number of blocks from given buddy.
 static int buddy_alloc(struct buddy * buddy, size_t nb) {
-
+  
 	int order = buddy_order(nb);
 
 	if(order>=0) {
@@ -260,11 +260,13 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 
 						buddy_set_used(buddy, block, nb);
 
+						DEBUG_TRACE("block = %d", block);
 						return block;
 					}
 			}
 		}
 	}
+	DEBUG_TRACE("OUT OF MEMORY");
 	return -1;
 }
 
@@ -332,7 +334,9 @@ static int _get_free_page_setup(
 	size_t heap_base,
 	size_t heap_size)
 {
+
   DEBUG_TRACE("heap_base = 0x%x, heap_size = 0x%x", heap_base, heap_size);
+  
 	int order_idx;
 	uint8_t * free_base;
 	struct buddy * buddy0;
