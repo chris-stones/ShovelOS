@@ -26,7 +26,7 @@ static uint32_t _getfreq(timer_itf itf) {
 
 static uint32_t _read32(timer_itf itf) {
 
-  return SYNC_TIMER->COUNTER;
+  return TIMER->COUNTER;
 }
 
 static uint64_t _read64(timer_itf itf) {
@@ -49,7 +49,7 @@ static int _oneshot(timer_itf itf, const struct timespec * timespec) {
 
   TIMER->STOP = 1;
 
-  uint64_t ns_per_tick = 1000000000ULL / (uint64_t)_getfreq();
+  uint64_t ns_per_tick = 1000000000ULL / (uint64_t)_getfreq(itf);
   uint64_t ns = (uint64_t)timespec->seconds * 1000000000ULL + (uint64_t)timespec->nanoseconds;
   uint64_t ticks = ns / ns_per_tick;
 
