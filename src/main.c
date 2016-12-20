@@ -14,8 +14,28 @@
 #include<sched/sched.h>
 #include<gpio/gpio.h>
 
+
+void * BBC_Thread() {
+
+  for(;;) {
+    _debug_out("BBC_THREAD\r\n");
+    kthread_yield();
+  }
+  return NULL;
+}
+
 void BBCMicroBitTest() {
 
+  kthread_init();
+  kthread_t t0;
+  kthread_create(&t0, GFP_KERNEL, &BBC_Thread, NULL);
+  {
+    for(;;) {
+      _debug_out("MAIN THREAD\r\n");
+      kthread_yield();
+    }
+  }
+  
   gpio_itf gpio;
   struct timespec now;
   
