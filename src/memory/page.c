@@ -41,17 +41,8 @@
 #include "memory.h"
 #include "boot_pages.h"
 
-#if !defined(DEBUG_TRACE)
 #include <console/console.h>
-#define DEBUG_TRACE(___str, ...)				\
-  do {								\
-    kprintf("@%s:%s:%d\r\n",__FILE__,__FUNCTION__,__LINE__);	\
-    kprintf("    " ___str "\r\n", ##__VA_ARGS__);		\
-  }while(0)
-#endif
-#if !defined(DEBUG_TRACE)
-#define DEBUG_TRACE(___str, ...) do {} while(0)
-#endif
+#include <debug_trace.h>
 
 static size_t _heap_virt_base = 0;
 static size_t _total_memory = 0;

@@ -14,18 +14,7 @@
 #include<_config.h>
 #include<arch.h>
 #include<bug.h>
-
-#if !defined(DEBUG_TRACE)
 #include <console/console.h>
-#define DEBUG_TRACE(___str, ...)				\
-  do {								\
-    kprintf("@%s:%s:%d\r\n",__FILE__,__FUNCTION__,__LINE__);	\
-    kprintf("    " ___str "\r\n", ##__VA_ARGS__);		\
-  }while(0)
-#endif
-#if !defined(DEBUG_TRACE)
-#define DEBUG_TRACE(___str, ...) do {} while(0)
-#endif
 
 #if defined(MC_USERLAND_DEBUG) && !defined(MC_USERLAND)
 	#define MC_USERLAND
@@ -39,6 +28,8 @@
 #endif
 
 #include "memory.h"
+
+#include <debug_trace.h>
 
 #if defined(MC_USERLAND)
 

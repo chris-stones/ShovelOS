@@ -53,6 +53,7 @@ SHOV_KERN_CORE = \
   file/file.h \
   chardevice/devices.c \
   chardevice/chardevice.h \
+  stdlib/debug_trace.h \
   stdlib/bug.h \
   stdlib/stdarg.h \
   stdlib/stdlib.h \

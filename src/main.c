@@ -26,6 +26,7 @@ void * BBC_Thread() {
 
 void BBCMicroBitTest() {
 
+  
   kthread_init();
   kthread_t t0;
   kthread_create(&t0, GFP_KERNEL, &BBC_Thread, NULL);
