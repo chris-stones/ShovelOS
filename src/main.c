@@ -14,11 +14,13 @@
 #include<sched/sched.h>
 #include<gpio/gpio.h>
 
+#define __ENABLE_DEBUG_TRACE 1
+#include<debug_trace.h>
 
 void * BBC_Thread() {
 
   for(;;) {
-    _debug_out("BBC_THREAD\r\n");
+    kprintf("BBC_THREAD\r\n");
     kthread_yield();
   }
   return NULL;
@@ -26,13 +28,15 @@ void * BBC_Thread() {
 
 void BBCMicroBitTest() {
 
-  
+  DEBUG_TRACE("");
   kthread_init();
+  DEBUG_TRACE("");
   kthread_t t0;
   kthread_create(&t0, GFP_KERNEL, &BBC_Thread, NULL);
+  DEBUG_TRACE("");
   {
     for(;;) {
-      _debug_out("MAIN THREAD\r\n");
+      kprintf("MAIN THREAD\r\n");
       kthread_yield();
     }
   }

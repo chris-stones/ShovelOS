@@ -17,6 +17,9 @@
 
 #include "sched_priv.h"
 
+#define __ENABLE_DEBUG_TRACE 1
+#include<debug_trace.h>
+
 struct run_queue_struct {
 
   spinlock_t spinlock;
@@ -215,7 +218,7 @@ int kthread_init() {
 
   const int idle_task=0;
   const int boot_task=1;
-  
+
   if((run_queue = kmalloc(sizeof *run_queue, GFP_KERNEL | GFP_ZERO))) {
 
     spinlock_init(&run_queue->spinlock);
@@ -225,10 +228,13 @@ int kthread_init() {
     run_queue->kthreads[boot_task] = _kmalloc_kthread();
 		
     if(run_queue->kthreads[boot_task]) {
+
       irq_itf irq;
       if(timer_open(&run_queue->timer, &irq, 0)==0) {
+
         interrupt_controller_itf intc;
         if(interrupt_controller(&intc) == 0) {
+
           INVOKE(intc, register_handler, irq);
           INVOKE(intc, unmask, irq);
 	  
@@ -243,13 +249,15 @@ int kthread_init() {
 success:
   // start idle-task.
   if(_kthread_create(&run_queue->kthreads[idle_task], GFP_KERNEL, &_asm_idle_task, 0)==0)
-  {
+  {      
       _BUG_ON(!run_queue->kthreads[idle_task]);
 
       // UGLY - yield to self! current task is first, and only runnable thread right now.
       // we NEED to do this to populate the empty kthread we allocated for ourselves earier.
+      DEBUG_TRACE(">>> yield");
       kthread_yield();
-      
+      DEBUG_TRACE("<<< yield");
+
       return _sched_next_task(NULL);
     }
 err:
@@ -291,6 +299,8 @@ static void _switch(struct kthread * from, struct kthread * to, void * _cpu_stat
 
 void _arch_irq_task_switch(void * _cpu_state) {
 
+  DEBUG_TRACE("XXX");
+  
   if(run_queue) {
 
     spinlock_lock(&run_queue->spinlock);
@@ -314,6 +324,7 @@ void _arch_irq_task_switch(void * _cpu_state) {
 
 void kthread_yield() {
 
+  DEBUG_TRACE("");
   _arch_kthread_yield();
 }
 
