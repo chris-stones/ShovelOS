@@ -116,7 +116,7 @@ if CONFIG_SHOV_ARCH_IS_ARM_M
     arch/arm_m/special/special.h \
     arch/arm_m/concurrency/mutex.h \
     arch/arm_m/concurrency/mutex.S \
-    arch/arm_a/concurrency/kthread.c \
+    arch/arm_m/concurrency/kthread.c \
     arch/arm_m/concurrency/kthread.h \
     arch/arm_m/context/context.S \
     arch/arm_m/cpu_state.c \
