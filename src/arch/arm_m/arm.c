@@ -6,6 +6,23 @@
 #include <stdlib.h>
 #include <console/console.h>
 #include <special/special.h>
+#include <cpu_state.h>
+
+
+void _hardfault(const struct exception_frame *s) {
+
+  kprintf("ARM-M HARDFAULT!!!\r\n");
+  kprintf("  stack        = 0x%x (%d)\r\n",     s,               s);
+  kprintf("  r0           = 0x%x (%d)\r\n", s->R0,           s->R0);
+  kprintf("  r1           = 0x%x (%d)\r\n", s->R1,           s->R1);
+  kprintf("  r2           = 0x%x (%d)\r\n", s->R2,           s->R2);
+  kprintf("  r3           = 0x%x (%d)\r\n", s->R3,           s->R3);
+  kprintf("  r12          = 0x%x (%d)\r\n", s->R12,          s->R12);
+  kprintf("  lr           = 0x%x (%d)\r\n", s->LR,           s->LR);
+  kprintf("  pc           = 0x%x (%d)\r\n", s->PC,           s->PC);
+  kprintf("  xPSR_fpalign = 0x%x (%d)\r\n", s->xPSR_fpalign, s->xPSR_fpalign);
+  for(;;);
+}
 
 void _break(const char * file, const char * func, int line) {
 	_debug_out(">>>BREAK!\r\n");
