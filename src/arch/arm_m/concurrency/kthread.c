@@ -2,6 +2,7 @@
 
 #include<special/special.h>
 #include<arch.h>
+#include<bug.h>
 
 #define __ENABLE_DEBUG_TRACE 1
 #include <debug_trace.h>
