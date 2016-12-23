@@ -8,9 +8,14 @@
 
 void _arch_kthread_yield() {
 
-  uint32_t imask = _arm_disable_interrupts();
+  // DEBUG - ARM-M WILL HARDFAULT IF SVC IS ISSUED WITH INTERRUPTS DISABLED
+  {
+    uint32_t primask = _arm_primask_read();
+    if(primask & 1)
+      _BUG();
+  }
+  
   DEBUG_TRACE(">>> svc#0 r0=0");
   _arm_svc(0);
   DEBUG_TRACE("<<< svc");
-  _arm_enable_interrupts(imask);
 }
