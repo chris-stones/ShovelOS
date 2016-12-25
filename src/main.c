@@ -14,7 +14,7 @@
 #include<sched/sched.h>
 #include<gpio/gpio.h>
 
-#define __ENABLE_DEBUG_TRACE 1
+//#define __ENABLE_DEBUG_TRACE 1
 #include<debug_trace.h>
 
 void * BBC_Thread() {

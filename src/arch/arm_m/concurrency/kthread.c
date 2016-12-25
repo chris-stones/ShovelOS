@@ -4,7 +4,7 @@
 #include<arch.h>
 #include<bug.h>
 
-#define __ENABLE_DEBUG_TRACE 1
+//#define __ENABLE_DEBUG_TRACE 1
 #include <debug_trace.h>
 
 void _arch_kthread_yield() {
