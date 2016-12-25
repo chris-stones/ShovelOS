@@ -135,4 +135,4 @@ _EI28:
 _EI29:
 _EI30:
 _EI31:
-	b _HALT
+	mov pc, lr
