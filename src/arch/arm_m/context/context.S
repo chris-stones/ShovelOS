@@ -4,6 +4,7 @@
 	.global _arm_svc
 _arm_svc:
 	svc #0
+	mov pc, lr
 	
 	.text
 	.global _asm_idle_task
@@ -38,7 +39,7 @@ _arm_task_switch_ISR:
 	pop {r4-r7, pc}	
 	
 	.global _my_SVC_handler
-_my_SVC_handler:	
+_my_SVC_handler:
 	cmp r0, #0
 	beq _svc_yield
 	mov pc, lr
