@@ -59,7 +59,7 @@ static int _oneshot(timer_itf itf, const struct timespec * timespec) {
   TIMER->CC[0] = (uint32_t)ticks;
   TIMER->START = 1;
   
-  return -1;
+  return 0;
 }
 
 static int _debug_dump(timer_itf itf) {
