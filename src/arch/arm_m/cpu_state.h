@@ -29,3 +29,17 @@ struct exception_frame {
   uint32_t PC;
   uint32_t xPSR_fpalign; // bit-9 is a alignment flag (reserved in xPSR)
 };
+
+// NOTE - Extra cpu state info that is NOT stored on the exception frame.
+//  see _arm_task_switch_ISR.
+struct task_state_struct {
+  uint32_t r8;
+  uint32_t r9;
+  uint32_t r10;
+  uint32_t r11;
+  uint32_t r4;
+  uint32_t r5;
+  uint32_t r6;
+  uint32_t r7;
+  uint32_t exception_return;
+};
