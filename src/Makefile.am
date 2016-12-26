@@ -183,6 +183,7 @@ SHOV_KERN_DRIVER_NRF51822 = \
   drivers/ns/nRF51822/timer/sync_regs.h \
   drivers/ns/nRF51822/timer/timer.h \
   drivers/ns/nRF51822/timer/timer.c \
+  drivers/ns/nRF51822/timer/timer_exception.S \
   drivers/ns/nRF51822/clock/clock_regs.h \
   drivers/ns/nRF51822/clock/clock_management.c \
   drivers/ns/nRF51822/clock/clock_management.h
