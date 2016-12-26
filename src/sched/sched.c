@@ -253,10 +253,8 @@ success:
       _BUG_ON(!run_queue->kthreads[idle_task]);
 
       // UGLY - yield to self! current task is first, and only runnable thread right now.
-      // we NEED to do this to populate the empty kthread we allocated for ourselves earier.
-      DEBUG_TRACE(">>> yield");
+      // we NEED to do this to populate the empty kthread we allocated for ourselves earier
       kthread_yield();
-      DEBUG_TRACE("<<< yield");
 
       return _sched_next_task(NULL);
     }
@@ -299,7 +297,7 @@ static void _switch(struct kthread * from, struct kthread * to, void * _cpu_stat
 
 void _arch_irq_task_switch(void * _cpu_state) {
 
-  DEBUG_TRACE("XXX");
+  DEBUG_TRACE("_arch_irq_task_switch");
   
   if(run_queue) {
 
@@ -324,7 +322,6 @@ void _arch_irq_task_switch(void * _cpu_state) {
 
 void kthread_yield() {
 
-  DEBUG_TRACE("");
   _arch_kthread_yield();
 }
 
