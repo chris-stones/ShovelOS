@@ -5,6 +5,7 @@
 #include <interrupt_controller/controller.h>
 #include <console/console.h>
 #include <stdlib/stdlib.h>
+#include <bug.h>
 
 #include <special/special.h>
 
@@ -36,6 +37,11 @@ static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
 static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
 
   irq_t irq_num = INVOKE(i_irq, get_irq_number);
+
+  // HACK - NVIC index vs external interrupt number
+  _BUG_ON(irq_num < 16);
+  irq_num -= 16;
+  
   NVIC_ISER = (1<<irq_num);
   return 0;
 }
