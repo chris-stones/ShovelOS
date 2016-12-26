@@ -23,25 +23,26 @@ struct RTC_REGS {
   PADDING(p0, 0x00C, 0x100);
   
   // EVENTS.
-  U32_RO_REG(TICK);       // 0x100
-  U32_RO_REG(OVRFLW);     // 0x104
+  U32_RW_REG(TICK);       // 0x100
+  U32_RW_REG(OVRFLW);     // 0x104
 
   PADDING(p1,0x104, 0x140); 
 
-  U32_RO_REG(COMPARE[4]); // 0x140
+  U32_RW_REG(COMPARE[4]); // 0x140
                           // 0x144
                           // 0x148
                           // 0x14C
 
   PADDING(p2,0x14C,0x300);
 
+  // REGISTERS.
+  
   U32_RW_REG(INTEN);    // 0x300
   U32_RW_REG(INTENSET); // 0x304
   U32_RW_REG(INTENCLR); // 0x308
 
   PADDING(p3, 0x308, 0x340);
 
-  // REGISTERS.
   
   U32_RW_REG(EVTEN);    // 0x340
   U32_RW_REG(EVTENSET); // 0x344
