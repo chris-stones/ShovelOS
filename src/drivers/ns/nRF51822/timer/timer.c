@@ -48,6 +48,7 @@ static int _close(timer_itf *itf) {
 static int _oneshot(timer_itf itf, const struct timespec * timespec) {
 
   TIMER->STOP = 1;
+  TIMER->COMPARE[0] = 0;
 
   uint64_t ns_per_tick = 1000000000ULL / (uint64_t)_getfreq(itf);
   uint64_t ns = (uint64_t)timespec->seconds * 1000000000ULL + (uint64_t)timespec->nanoseconds;
@@ -55,7 +56,11 @@ static int _oneshot(timer_itf itf, const struct timespec * timespec) {
 
   if(ticks > 0x00FFFFFF)
     return -1;
-  
+
+  if(ticks < 2)
+    ticks = 2;
+
+  TIMER->CLEAR = 1;
   TIMER->CC[0] = (uint32_t)ticks;
   TIMER->START = 1;
   
@@ -69,6 +74,7 @@ static int _debug_dump(timer_itf itf) {
 
 static int _IRQ(irq_itf itf) {
 
+  // TODO: call IRQ via NVIC on interrupt.
   return 0;
 }
 
