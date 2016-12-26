@@ -41,7 +41,7 @@ _start:
 	.word _EI14+1                   @ 30 - External Interrupt 14
 	.word _EI15+1                   @ 31 - External Interrupt 15
 	.word _EI16+1                   @ 32 - External Interrupt 16
-	.word _EI17+1                   @ 33 - External Interrupt 17
+	.word _arm_m_external_interrupt_17+1 @ 33 - External Interrupt 17
 	.word _EI18+1                   @ 34 - External Interrupt 18
 	.word _EI19+1                   @ 35 - External Interrupt 19
 	.word _EI20+1                   @ 36 - External Interrupt 20
@@ -120,7 +120,8 @@ _EI13:
 _EI14:
 _EI15:
 _EI16:
-_EI17:
+	.weak _arm_m_external_interrupt_17
+_arm_m_external_interrupt_17:	
 _EI18:
 _EI19:
 _EI20:
