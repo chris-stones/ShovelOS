@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpu_state.h>
+#include <memory/stack.h>
 
 enum kthread_flags {
   KTHREAD_JOINABLE = (1<<0),
@@ -11,8 +12,7 @@ struct kthread {
 
   struct cpu_state_struct cpu_state;
 
-  size_t stack_base;
-  size_t stack_pages;
+  struct stack_struct stack;
 
   uint32_t flags;
 
