@@ -14,12 +14,18 @@ _start:
 	mov sp, r0			@ set as booststrap stack
 	bl _init_ram                    @ clear the BSS section and init .data section
 
-	@ Get one page from early allocator 'get_goot_pages'
-	@ and use it as the new stack.
-	mov r0, #1			@ 1 page
-	mov r1, #0			@ 0 flags
-	bl get_boot_pages		@ get a page.
-	add sp, r0, #PAGE_SIZE		@ set top of page as stack.
+	@ Setup stack.
+
+	sub sp, #8			@ allocate stack_struct on the stack.
+	mov r0, sp			@ pointer to stack_struct.
+	mov r9, sp			@ also in r9, for later!
+	ldr r1, =512			@ size of new stack.
+	mov r2, #0			@ flags for new stack.
+	bl  boot_stack                  @ get a boot-stack.
+	ldr r0, [sp]			@ load new stack base
+	ldr r1, [sp, #4]		@ load new stack size.
+	mov sp, r0			@ set ner stack pointer.
+	add sp, r1			@ move to top of stack.
 
 	bl setup_memory			@ setup memory
 
@@ -50,6 +56,15 @@ _start:
 
 	cps #19
 	mov sp,   r8         @ set Supervisor stack.
+
+	bl exceptions_setup
+	bl register_drivers
+	bl start_system_time
+	mov r0, #0
+	bl interrupt_controller_open
+	mov r0, r9                      @ pass struct stack_struct to kthread_init.
+	bl kthread_init
+	bl console_setup
 
 	@ run kernel main in supervisor mode
 	b  Main              @ run main!!!

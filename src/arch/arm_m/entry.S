@@ -74,8 +74,7 @@ _RESET:
 	ldr r1, [sp, #4]		@ load new stack size.
 	mov sp, r0			@ set ner stack pointer.
 	add sp, r1			@ move to top of stack.
-	
-		
+
 	bl setup_memory
 	bl exceptions_setup
 	bl register_drivers
