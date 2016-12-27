@@ -388,7 +388,7 @@ int get_free_page_setup() {
 
   // HACK - get zero boot pages returns current heap pointer without allocating anything.
   size_t heap_begin  = (size_t)get_boot_pages(0,0);
-  size_t heap_length = (VIRTUAL_MEMORY_BASE_ADDRESS + PHYSICAL_MEMORY_LENGTH) - heap_begin;
+  size_t heap_length = get_boot_pages_remaining();
 
   end_boot_pages();
 

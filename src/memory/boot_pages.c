@@ -65,6 +65,17 @@ void * get_boot_pages(size_t pages, int flags) {
   return p;
 }
 
+size_t get_boot_pages_remaining() {
+
+  size_t heap_begin  = (size_t)get_boot_pages(0,0);
+#if !defined(HOSTED_PLATFORM)
+  return (VIRTUAL_MEMORY_BASE_ADDRESS + PHYSICAL_MEMORY_LENGTH) - heap_begin;
+#else
+  size_t heap_end = _heap_virtual_begin() + PHYSICAL_MEMORY_LENGTH;
+  return heap_end - heap_begin;
+#endif
+}
+
 void * get_aligned_boot_pages(size_t alignment, size_t pages, int flags) {
 
   size_t base;
