@@ -4,7 +4,7 @@
 #include <host_os_glue.h>
 #include <timer/system_time.h>
 
-int kthread_init() {
+int kthread_init(const struct stack_struct * ss) {
   return hosted_kthread_init();
 }
 
