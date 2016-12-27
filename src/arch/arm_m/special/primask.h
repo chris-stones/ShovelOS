@@ -1,9 +1,8 @@
 
 #pragma once
 
-#if !defined(_ARM_ENABLE_SPECIAL_H)
-#error DONT INCLUDE THIS HEADER DIRECTLY, INCLUDE <special/special.h>
-#endif
+#include<asm.h>
+#include<stdint.h>
 
 _ARM_DEFINE_SPECIAL_REG(primask)
 

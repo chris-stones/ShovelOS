@@ -35,14 +35,20 @@
 #else
 #include "page.h"
 #include <arch.h>
+#include <stdint.h>
 #endif
 
 #include "memory.h"
+#include "boot_pages.h"
 
-static size_t _phy_base;
-static size_t _page_offset;
-static size_t _total_memory;
-static size_t _total_allocated;
+#include <console/console.h>
+
+//#define __ENABLE_DEBUG_TRACE 1
+#include <debug_trace.h>
+
+static size_t _heap_virt_base = 0;
+static size_t _total_memory = 0;
+static size_t _total_allocated = 0;
 
 struct order {
 
@@ -50,31 +56,33 @@ struct order {
 	size_t * p;
 };
 
-struct orders {
+#define WORDBYTES (__SIZEOF_SIZE_T__)
+#define WORDBITS  (8*WORDBYTES)
 
-	struct order order[13];	// 1 bit  =   1 PAGE	(   4k )
-							// 1 bit  =   2 PAGES 	(   8k )
-							// 1 bit  =   4 PAGES	(  16k )
-							// 1 bit  =   8 PAGES	(  32k )
-							// 1 bit  =  16 PAGES   (  64k )
-							// 1 bit  =  32 PAGES   ( 128k )
-							// 1 bit  =  64 PAGES   ( 256k )
-							// 1 bit  = 128 PAGES   ( 512k )
-							// 1 bit  = 256 PAGES   (   1M )
-							// 1 bit  = 512 PAGES   (   2M )
-							// 1 bit  =1024 PAGES   (   4M )
-							// 1 bit  =2048 PAGES   (   8M )
-							// 1 bit  =4096 PAGES   (  16M )
+// TODO: FIX THIS - save memory on devices with very little memory.
+#define NB_ORDERS 13
+
+struct orders {  
+	struct order order[NB_ORDERS];
+  // 1 bit  =   1 PAGE	  (   4k )
+  // 1 bit  =   2 PAGES   (   8k )
+  // 1 bit  =   4 PAGES	  (  16k )
+  // 1 bit  =   8 PAGES	  (  32k )
+  // 1 bit  =  16 PAGES   (  64k )
+  // 1 bit  =  32 PAGES   ( 128k )
+  // 1 bit  =  64 PAGES   ( 256k )
+  // 1 bit  = 128 PAGES   ( 512k )
+  // 1 bit  = 256 PAGES   (   1M )
+  // 1 bit  = 512 PAGES   (   2M )
+  // 1 bit  =1024 PAGES   (   4M )
+  // 1 bit  =2048 PAGES   (   8M )
+  // 1 bit  =4096 PAGES   (  16M )
 };
 
 struct buddy {
 
 	struct orders orders;
 };
-
-#define NB_ORDERS (sizeof(struct orders)/sizeof(struct order))
-#define WORDBYTES (sizeof(size_t))
-#define WORDBITS  (WORDBYTES*8)
 
 // get the buddy order to search for allocating given number of blocks.
 static int buddy_order(size_t nb) {
@@ -213,7 +221,7 @@ static int _fast_forward( size_t word ) {
 
 // allocate given number of blocks from given buddy.
 static int buddy_alloc(struct buddy * buddy, size_t nb) {
-
+  
 	int order = buddy_order(nb);
 
 	if(order>=0) {
@@ -245,11 +253,13 @@ static int buddy_alloc(struct buddy * buddy, size_t nb) {
 
 						buddy_set_used(buddy, block, nb);
 
+						DEBUG_TRACE("block = %d", block);
 						return block;
 					}
 			}
 		}
 	}
+	DEBUG_TRACE("OUT OF MEMORY");
 	return -1;
 }
 
@@ -268,7 +278,7 @@ void * get_free_pages(size_t pages, int flags) {
 	if(block == (size_t)-1)
 		return NULL;
 
-	p = (void*)(block * PAGE_SIZE + _phy_base + _page_offset);
+	p = (void*)(block * PAGE_SIZE + _heap_virt_base);
 
 	if( flags & GFP_ZERO )
 		memset(p, 0, pages * PAGE_SIZE);
@@ -287,16 +297,17 @@ void * get_free_page(int flags) {
 }
 
 // free blocks previously allocated with get_free_pages().
-void free_pages(void * addr, size_t pages) {
+void free_pages(void * _addr, size_t pages) {
 
-	if(addr) {
+  if(_addr) {
+    
+    _total_allocated -= pages; // TODO: double-free!?
 
-		_total_allocated -= pages; // TODO: double-free!?
+    const size_t addr = (size_t)_addr;
+    const size_t block = (addr - _heap_virt_base)/PAGE_SIZE;
 
-		size_t block = ((size_t)((((size_t)addr) - _page_offset) - _phy_base)) / PAGE_SIZE;
-
-		buddy_free( normal_buddy, (int)block, pages );
-	}
+    buddy_free( normal_buddy, (int)block, pages );
+  }
 }
 
 // free pages previously allocated with get_free_page().
@@ -308,65 +319,32 @@ void free_page(void * addr) {
 
 int get_free_page_teardown() {
 
-#if defined(GFP_USERLAND)
-	if(normal_buddy)
-	{
-		int order_idx;
-		for(order_idx=0;order_idx<NB_ORDERS;order_idx++)
-			free( normal_buddy->orders.order[order_idx].p );
-	}
-
-	free((void*)normal_buddy);
-	free((void*)_page_offset);
-#endif
-	return 0;
+  return 0;
 }
 
 // setup get_free_pages.
-//	virtual_base should be PAGE_OFFSET, or a malloc'ed buffer for testing!
-//	NOTE: Assumes the buddy structure will fit in memory... Test that it does?
-int get_free_page_setup(
-	size_t virtual_base,	// virtual base address.
-	size_t phy_base,		// physical memory base.
-	size_t preallocated,	// memory already in use.
-	size_t size)			// amount of ram in bytes.
+static int _get_free_page_setup(
+	size_t heap_base,
+	size_t heap_size)
 {
+
+  DEBUG_TRACE("heap_base = 0x%x, heap_size = 0x%x", heap_base, heap_size);
+  
 	int order_idx;
 	uint8_t * free_base;
 	struct buddy * buddy0;
-	size_t pages = size / PAGE_SIZE;
+	size_t pages = heap_size / PAGE_SIZE;
 	_total_memory = pages * PAGE_SIZE;
 	_total_allocated = 0;
 
-#if defined(GFP_USERLAND)
-	posix_memalign((void**)&virtual_base, PAGE_SIZE, _total_memory);
-	phy_base = 0;
-#endif
-
-#if defined(HOSTED_PLATFORM)
-	static uint8_t ___hosted_raw_base[PHYSICAL_MEMORY_LENGTH + (PAGE_SIZE*2)];
-	virtual_base = (size_t)___hosted_raw_base;
-	if (virtual_base & (PAGE_SIZE - 1))
-		virtual_base = ((virtual_base + PAGE_SIZE) & ~(PAGE_SIZE - 1));
-	phy_base = virtual_base;
-	preallocated = 0; // on hosted, operates on a different pool to boot_pages!
-#endif
-
-	_phy_base    = phy_base;
-	_page_offset = virtual_base - phy_base;
-
-	// bump up 'preallocated' to next word boundary.
-	if(preallocated & (WORDBYTES-1))
-		preallocated = (preallocated + WORDBYTES) & ~(WORDBYTES-1);
-
-	free_base = (uint8_t*)(virtual_base + preallocated);
+	_heap_virt_base = heap_base;
+	free_base = (uint8_t*)(_heap_virt_base);
+	DEBUG_TRACE("free_base = %x", free_base);
 
 	// allocate buddy!
 	buddy0 = (struct buddy*)free_base;
 	free_base += sizeof(struct buddy);
-#if defined(GFP_USERLAND)
-	buddy0 = malloc(sizeof(struct buddy));
-#endif
+	DEBUG_TRACE("free_base = %x", free_base);
 
 	// initialise buddy structure.
 	for(order_idx=0;order_idx<NB_ORDERS;order_idx++) {
@@ -385,26 +363,36 @@ int get_free_page_setup(
 		bmp_size = words * WORDBYTES;
 		order->p = (size_t*)free_base;
 		free_base += bmp_size;
-
-#if defined(GFP_USERLAND)
-		order->p = malloc(bmp_size);
-#endif
+		DEBUG_TRACE("free_base = %x (allocated %d)", free_base, bmp_size);
 
 		// set free!
 		memset(order->p, 0, bmp_size);
 	}
 
 	// now, mark as used all memory between 'virtual_base' and 'free_base'
-	{
-		size_t pages_used =
-			(((size_t)free_base + (PAGE_SIZE-1)) - virtual_base) / PAGE_SIZE;
+       {
+	 size_t pages_used =
+	   (((size_t)free_base + (PAGE_SIZE-1)) - heap_base) / PAGE_SIZE;
 
-		buddy_set_used(buddy0, 0, pages_used);
-	}
+	 DEBUG_TRACE("pages_used = %d", pages_used);
+	 
+	 buddy_set_used(buddy0, 0, pages_used);
+       }
 
 	normal_buddy = buddy0;
 
 	return 0;
+}
+
+int get_free_page_setup() {
+
+  // HACK - get zero boot pages returns current heap pointer without allocating anything.
+  size_t heap_begin  = (size_t)get_boot_pages(0,0);
+  size_t heap_length = get_boot_pages_remaining();
+
+  end_boot_pages();
+
+  return _get_free_page_setup(heap_begin, heap_length);
 }
 
 size_t get_total_pages_allocated() {

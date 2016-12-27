@@ -1,10 +1,6 @@
 
 #pragma once
 
-#if !defined(_ARM_ENABLE_SPECIAL_H)
-#error DONT INCLUDE THIS HEADER DIRECTLY, INCLUDE <special/special.h>
-#endif
-
 /****
  * B1.3 ARM processor modes and ARM core registers
  ****/

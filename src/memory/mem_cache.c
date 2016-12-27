@@ -14,6 +14,7 @@
 #include<_config.h>
 #include<arch.h>
 #include<bug.h>
+#include <console/console.h>
 
 #if defined(MC_USERLAND_DEBUG) && !defined(MC_USERLAND)
 	#define MC_USERLAND
@@ -27,6 +28,8 @@
 #endif
 
 #include "memory.h"
+
+#include <debug_trace.h>
 
 #if defined(MC_USERLAND)
 
@@ -123,6 +126,8 @@ struct mem_cache {
 //	Actual slabs allocated will be rounded up to the next page boundary.
 static struct slab * _more_slabs(size_t slabs, int gfp_flags) {
 
+  DEBUG_TRACE("_more_slabs(%d)", slabs);
+  
 	unsigned int p,s;
 
 	struct slab *  first_slab = NULL;
@@ -149,6 +154,7 @@ static struct slab * _more_slabs(size_t slabs, int gfp_flags) {
 				FREE_PAGE(first_slab);
 				first_slab = slab1;
 			}
+			DEBUG_TRACE("OUT OF MEMORY");
 			return NULL;
 		}
 

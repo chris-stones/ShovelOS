@@ -11,7 +11,11 @@ kernel_CFLAGS = \
   -Werror \
   -std=gnu99 \
   -Os \
-  -nostdinc
+  -nostdinc \
+  @CPU_ARCH_FLAGS@
+
+kernel_CCASFLAGS = \
+  @CPU_ARCH_FLAGS@
 
 if CONFIG_SHOV_HOSTED_PLATFORM
   kernel_CFLAGS += \
@@ -43,11 +47,15 @@ SHOV_KERN_CORE = \
   memory/vm/vm.h \
   memory/mem_cache.h \
   memory/boot_pages.h \
+  memory/memory.c \
   memory/memory.h \
   memory/page.h \
+  memory/stack.c \
+  memory/stack.h \
   file/file.h \
   chardevice/devices.c \
   chardevice/chardevice.h \
+  stdlib/debug_trace.h \
   stdlib/bug.h \
   stdlib/stdarg.h \
   stdlib/stdlib.h \
@@ -63,6 +71,8 @@ SHOV_KERN_CORE = \
   timer/sync_timer.c \
   timer/system_time.h \
   timer/system_time.c \
+  gpio/gpio.h \
+  gpio/gpio.c \
   interrupt_controller/controller.h \
   interrupt_controller/controller.c \
   drivers/lib/uart_buffer.h \
@@ -72,11 +82,51 @@ SHOV_KERN_CORE = \
   sched/sched.h
 
 if CONFIG_SHOV_ARCH_IS_ARM_A
-  SHOV_KERN_CORE += arch/arm/entry_a.S
+  SHOV_KERN_CORE += \
+    arch/arm_a/entry.S \
+    arch/arm_a/concurrency/mutex.S \
+    arch/arm_a/context/context_a.S \
+    arch/arm_a/cpu_state.c \
+    arch/arm_a/cpu_state.h \
+    arch/arm_a/cpu_caps.h \
+    arch/arm_a/special/special.h \
+    arch/arm_a/special/cpsr.h \
+    arch/arm_a/arm.c \
+    arch/arm_a/exceptions/exceptions.c \
+    arch/arm_a/exceptions/exceptions.h \
+    arch/arm_a/concurrency/kthread.c \
+    arch/arm_a/concurrency/kthread.h \
+    arch/arm_a/concurrency/mutex.h \
+    arch/arm_a/concurrency/spinlock.c \
+    arch/arm_a/concurrency/spinlock.h \
+    arch/arm_a/arch.h \
+    arch/arm_a/asm.h \
+    arch/arm_a/coprocessor_asm.h \
+    arch/arm_a/system_control_register.h \
+    arch/arm_a/stdint.h
 endif
 
 if CONFIG_SHOV_ARCH_IS_ARM_M
-  SHOV_KERN_CORE += arch/arm/entry_m.S
+  SHOV_KERN_CORE += \
+    arch/arm_m/arch.h \
+    arch/arm_m/asm.h \
+    arch/arm_m/stdint.h \
+    arch/arm_m/entry.S \
+    arch/arm_m/arm.c \
+    arch/arm_m/special/primask.h \
+    arch/arm_m/special/xpsr.h \
+    arch/arm_m/special/special.h \
+    arch/arm_m/concurrency/mutex.h \
+    arch/arm_m/concurrency/mutex.S \
+    arch/arm_m/concurrency/kthread.c \
+    arch/arm_m/concurrency/kthread.h \
+    arch/arm_m/context/context.S \
+    arch/arm_m/cpu_state.c \
+    arch/arm_m/cpu_state.h \
+    arch/arm_m/exceptions/exceptions.c \
+    arch/arm_m/exceptions/exceptions.h \
+    arch/arm_m/concurrency/spinlock.c \
+    arch/arm_m/concurrency/spinlock.h 
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
@@ -84,29 +134,6 @@ if !CONFIG_SHOV_HOSTED_PLATFORM
     sched/sched.c \
     sched/sched_sleep.c
 endif
-
-SHOV_KERN_ARM_CORE = \
-  arch/arm/cpu_caps.h \
-  arch/arm/special/special.h \
-  arch/arm/special/cpsr.h \
-  arch/arm/special/primask.h \
-  arch/arm/arm.c \
-  arch/arm/exceptions/exceptions.c \
-  arch/arm/concurrency/kthread.c \
-  arch/arm/concurrency/kthread.h \
-  arch/arm/concurrency/mutex.h \
-  arch/arm/concurrency/mutex.S \
-  arch/arm/concurrency/spinlock.c \
-  arch/arm/concurrency/spinlock.h \
-  arch/arm/arch.h \
-  arch/arm/asm.h \
-  arch/arm/coprocessor_asm.h \
-  arch/arm/system_control_register.h \
-  arch/arm/exceptions/exceptions.h \
-  arch/arm/stdint.h \
-  arch/arm/context/context.S \
-  arch/arm/cpu_state.h \
-  arch/arm/cpu_state.c
 
 SHOV_KERN_HOSTED_CORE = \
   arch/hosted/host_os_glue.h \
@@ -125,22 +152,23 @@ SHOV_KERN_HOSTED_CORE = \
   sched/sched_hosted.c
 
 SHOV_KERN_ARM_VMSAv7_CORE = \
-  arch/arm/mm/VMSAv7/page_tables.c \
-  arch/arm/mm/VMSAv7/cache.c \
-  arch/arm/mm/VMSAv7/init_page_tables.c \
-  arch/arm/mm/VMSAv7/pagetable.h \
-  arch/arm/mm/VMSAv7/section.h \
-  arch/arm/mm/VMSAv7/large_page.h \
-  arch/arm/mm/VMSAv7/supersection.h \
-  arch/arm/mm/VMSAv7/small_page.h
+  arch/arm_a/mm/VMSAv7/tlb.h \
+  arch/arm_a/mm/VMSAv7/page_tables.c \
+  arch/arm_a/mm/VMSAv7/cache.c \
+  arch/arm_a/mm/VMSAv7/init_page_tables.c \
+  arch/arm_a/mm/VMSAv7/pagetable.h \
+  arch/arm_a/mm/VMSAv7/section.h \
+  arch/arm_a/mm/VMSAv7/large_page.h \
+  arch/arm_a/mm/VMSAv7/supersection.h \
+  arch/arm_a/mm/VMSAv7/small_page.h
 
 SHOV_KERN_DRIVER_OMAP = \
   drivers/ti/omap/register_macros.h \
   drivers/ti/omap/uart/uart.c \
+  drivers/ti/omap/uart/regs.h \
   drivers/ti/omap/timer/timer.c \
   drivers/ti/omap/timer/sync_timer.c \
-  drivers/ti/omap/timer/sync_timer.h \
-  drivers/ti/omap/uart/regs.h \
+  drivers/ti/omap/timer/sync_regs.h \
   drivers/ti/omap/timer/regs.h
 
 SHOV_KERN_DRIVER_OMAP3 = \
@@ -148,11 +176,27 @@ SHOV_KERN_DRIVER_OMAP3 = \
   drivers/ti/omap/omap3/interrupt_controller/interrupt_controller.c
 
 SHOV_KERN_DRIVER_NRF51822 = \
-  drivers/ns/nRF51822/uart/uart.c
+  drivers/ns/nRF51822/uart/uart.c \
+  drivers/ns/nRF51822/uart/regs.h \
+  drivers/ns/nRF51822/gpio/regs.h \
+  drivers/ns/nRF51822/gpio/gpio.c \
+  drivers/ns/nRF51822/timer/rtc_regs.h \
+  drivers/ns/nRF51822/timer/sync_timer.c \
+  drivers/ns/nRF51822/timer/sync_regs.h \
+  drivers/ns/nRF51822/timer/timer.h \
+  drivers/ns/nRF51822/timer/timer.c \
+  drivers/ns/nRF51822/timer/timer_exception.S \
+  drivers/ns/nRF51822/clock/clock_regs.h \
+  drivers/ns/nRF51822/clock/clock_management.c \
+  drivers/ns/nRF51822/clock/clock_management.h
 
 SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
   drivers/arm/gic/gic.c
+
+SHOV_KERN_DRIVER_ARM_NVIC = \
+  drivers/arm/nvic/regs.h \
+  drivers/arm/nvic/nvic.c
 
 SHOV_KERN_DRIVER_HOSTED = \
   drivers/hosted/uart/uart.c \
@@ -168,9 +212,6 @@ if CONFIG_SHOV_HOSTED_PLATFORM
 endif
 
 if !CONFIG_SHOV_HOSTED_PLATFORM
-if CONFIG_SHOV_ARCH_IS_ARM
-    kernel_SOURCES += $(SHOV_KERN_ARM_CORE)
-endif
 if CONFIG_SHOV_ARCH_IS_ARMv7A
     kernel_SOURCES += $(SHOV_KERN_ARM_VMSAv7_CORE)
 endif
@@ -190,6 +231,10 @@ endif
 
 if CONFIG_SHOV_DRIVER_ARM_GIC
   kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_GIC)
+endif
+
+if CONFIG_SHOV_DRIVER_ARM_NVIC
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_NVIC)
 endif
 
 if CONFIG_SHOV_HOSTED_PLATFORM

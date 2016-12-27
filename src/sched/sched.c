@@ -3,6 +3,7 @@
 #include <sched/sched.h>
 
 #include <memory/memory.h>
+#include <memory/stack.h>
 #include <stdlib/stdlib.h>
 #include <concurrency/spinlock.h>
 #include <concurrency/kthread.h>
@@ -14,8 +15,12 @@
 
 #include <arch.h>
 #include <bug.h>
+#include <console/console.h>
 
 #include "sched_priv.h"
+
+//#define __ENABLE_DEBUG_TRACE 1
+#include<debug_trace.h>
 
 struct run_queue_struct {
 
@@ -163,11 +168,8 @@ static void _exited_kthread() {
 
 static void _free_kthread_stack(struct kthread * t) {
 
-  if(t && t->stack_base) {
-    free_pages((void*)t->stack_base, t->stack_pages);
-    t->stack_base  = 0;
-    t->stack_pages = 0;
-  }
+  if(t) 
+    stack_free(&(t->stack));
 }
 
 static void _free_kthread(struct kthread * t) {
@@ -186,20 +188,15 @@ static int _kthread_create(kthread_t * thread,
   *thread = _kmalloc_kthread();
 
   if(*thread) {
-    
-    (*thread)->stack_pages = 1;
 
-    size_t stack_base = (size_t)get_free_pages((*thread)->stack_pages, gfp_flags);    
-    (*thread)->stack_base = stack_base;
+    if(stack_alloc(&((*thread)->stack), 512, gfp_flags)) {
 
-    if((*thread)->stack_base) {
-
-      size_t stack_top = stack_base + PAGE_SIZE * (*thread)->stack_pages;
+      void* stack_p = stack_top(&((*thread)->stack));
 
       cpu_state_build(&((*thread)->cpu_state),
 		      start_routine,
 		      args,
-		      (void*)(stack_top),
+		      (void*)(stack_p),
 		      &_exited_kthread);
     }
     else {
@@ -211,13 +208,14 @@ static int _kthread_create(kthread_t * thread,
   return 0;
 }
 
-int kthread_init() {
+int kthread_init(const struct stack_struct *ss) {
 
   const int idle_task=0;
   const int boot_task=1;
-  
+
   if((run_queue = kmalloc(sizeof *run_queue, GFP_KERNEL | GFP_ZERO))) {
 
+    DEBUG_TRACE("%d = stack_check %x %x", stack_check(ss), ss->stack_base, ss->stack_size);
     spinlock_init(&run_queue->spinlock);
     run_queue->running = boot_task; 
 		
@@ -225,10 +223,22 @@ int kthread_init() {
     run_queue->kthreads[boot_task] = _kmalloc_kthread();
 		
     if(run_queue->kthreads[boot_task]) {
+
+      DEBUG_TRACE("%d = stack_check", stack_check(ss));
+
+      // store boot_stack info.
+      run_queue->kthreads[boot_task]->stack = *ss;
+      
       irq_itf irq;
       if(timer_open(&run_queue->timer, &irq, 0)==0) {
+
+	DEBUG_TRACE("");
+
         interrupt_controller_itf intc;
         if(interrupt_controller(&intc) == 0) {
+
+	  DEBUG_TRACE("");
+
           INVOKE(intc, register_handler, irq);
           INVOKE(intc, unmask, irq);
 	  
@@ -244,14 +254,15 @@ success:
   // start idle-task.
   if(_kthread_create(&run_queue->kthreads[idle_task], GFP_KERNEL, &_asm_idle_task, 0)==0)
   {
-      _BUG_ON(!run_queue->kthreads[idle_task]);
+    DEBUG_TRACE("");
+    _BUG_ON(!run_queue->kthreads[idle_task]);
 
-      // UGLY - yield to self! current task is first, and only runnable thread right now.
-      // we NEED to do this to populate the empty kthread we allocated for ourselves earier.
-      kthread_yield();
-      
-      return _sched_next_task(NULL);
-    }
+    // UGLY - yield to self! current task is first, and only runnable thread right now.
+    // we NEED to do this to populate the empty kthread we allocated for ourselves earier
+    kthread_yield();
+
+    return _sched_next_task(NULL);
+  }
 err:
   _BUG();
   return -1;
@@ -289,8 +300,32 @@ static void _switch(struct kthread * from, struct kthread * to, void * _cpu_stat
     memcpy(cpu_state, &to->cpu_state, sizeof(struct cpu_state_struct));
 }
 
-void _arch_irq_task_switch(void * _cpu_state) {
+int kthread_stack_check() {
 
+  int i=-1;
+  spinlock_lock(&run_queue->spinlock);
+  struct kthread * c = run_queue_current();
+  if(c)
+    i = stack_check(&(c->stack));
+  spinlock_unlock(&run_queue->spinlock);
+  
+  return i;
+}
+
+int kthread_stack_remaining() {
+
+  int i=-1;
+  spinlock_lock(&run_queue->spinlock);
+  struct kthread * c = run_queue_current();
+  if(c)
+    i = stack_remaining(&(c->stack));
+  spinlock_unlock(&run_queue->spinlock);
+  
+  return i;
+}
+
+void _arch_irq_task_switch(void * _cpu_state) {
+  
   if(run_queue) {
 
     spinlock_lock(&run_queue->spinlock);
@@ -305,6 +340,9 @@ void _arch_irq_task_switch(void * _cpu_state) {
     _BUG_ON(!n);
     _BUG_ON(!c);
 
+    if(stack_check(&(c->stack))<0)
+      _BUG(); // TASK WE JUST PUT TO SLEEP BLEW ITS STACK!
+    
     _switch(c,n,_cpu_state);
     
     // schedule next switch.

@@ -3,16 +3,37 @@
 #include <stdlib.h>
 #include <file/file.h>
 #include <stdarg.h>
+#include <console/console.h>
 
 static int32_t _putc(file_itf file, char c) {
 
-  return INVOKE(file,write,&c,1);
+  if((size_t)file == (size_t)-1) {
+    // HACK - VERY EARLY kprintf support.
+    char str[] = {c,0};
+    _debug_out(str);
+    return 1;
+  }
+
+  if(file)
+    return INVOKE(file,write,&c,1);
+    
+  return 0;
 }
 
 static int32_t _puts(file_itf file, const char * str) {
 
   int l = strlen(str);
-  return INVOKE(file,write,str,l);
+
+  if((size_t)file == (size_t)-1) {
+    // HACK - VERY EARLY kprintf support.
+    _debug_out(str);
+    return l;
+  }
+
+  if(file)
+    return INVOKE(file,write,str,l);
+  
+  return 0;
 }
 
 static sint32_t _nstrlen(sint64_t n, sint64_t base) {

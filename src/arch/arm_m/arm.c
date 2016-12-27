@@ -4,12 +4,25 @@
 #include "asm.h"
 #include <arch.h>
 #include <stdlib.h>
+#include <console/console.h>
+#include <special/special.h>
+#include <cpu_state.h>
 
-#include "mm/VMSAv7/supersection.h"
-#include "mm/VMSAv7/section.h"
-#include "mm/VMSAv7/pagetable.h"
-#include "mm/VMSAv7/large_page.h"
-#include "mm/VMSAv7/small_page.h"
+
+void _hardfault(const struct exception_frame *s) {
+
+  kprintf("ARM-M HARDFAULT!!!\r\n");
+  kprintf("  stack        = 0x%x (%d)\r\n",     s,               s);
+  kprintf("  r0           = 0x%x (%d)\r\n", s->R0,           s->R0);
+  kprintf("  r1           = 0x%x (%d)\r\n", s->R1,           s->R1);
+  kprintf("  r2           = 0x%x (%d)\r\n", s->R2,           s->R2);
+  kprintf("  r3           = 0x%x (%d)\r\n", s->R3,           s->R3);
+  kprintf("  r12          = 0x%x (%d)\r\n", s->R12,          s->R12);
+  kprintf("  lr           = 0x%x (%d)\r\n", s->LR,           s->LR);
+  kprintf("  pc           = 0x%x (%d)\r\n", s->PC,           s->PC);
+  kprintf("  xPSR_fpalign = 0x%x (%d)\r\n", s->xPSR_fpalign, s->xPSR_fpalign);
+  for(;;);
+}
 
 void _break(const char * file, const char * func, int line) {
 	_debug_out(">>>BREAK!\r\n");
@@ -22,19 +35,12 @@ void _break(const char * file, const char * func, int line) {
 
 
 void _bug(const char * file, const char * func, int line) {
+  
   _arm_disable_interrupts();
   
-#if !defined(CONFIG_NOMMU)	
-  uint32_t sctlr = _arm_cp_read_SCTLR();
-  _arm_cp_write_SCTLR(sctlr & ~SCTLR_M); // DISABLE MMU
-  dsb();
-  isb();
-#endif /* CONFIG_NOMMU */
-	
-  _debug_out(">>>BUG!\r\n");
-  _debug_out(file);_debug_out("\r\n");
-  _debug_out(func);_debug_out("\r\n");
-  _debug_out_uint(line);_debug_out("\r\n");
+  kprintf(">>>BUG");
+  kprintf("  %s\r\n", file);
+  kprintf("  %s:%d\r\n", func, line);
   for(;;);
 }
 

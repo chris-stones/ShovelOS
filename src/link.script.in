@@ -16,8 +16,6 @@ SECTIONS
   
   . = @LS_START_TEXT@;
 
-  PROVIDE_HIDDEN (__KERNEL_BEGIN = .);
-
   .text : AT(@LS_START_TEXT@)
   {
     *(.start_text);	
@@ -56,5 +54,6 @@ SECTIONS
     PROVIDE_HIDDEN (__BSS_END = .);
   } > RAM
 
-  PROVIDE_HIDDEN (__KERNEL_END = .);
+  . = ALIGN(@LS_PAGE_SIZE@);
+  PROVIDE_HIDDEN (__HEAP_BEGIN = .);
 }

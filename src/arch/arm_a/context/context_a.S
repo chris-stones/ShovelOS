@@ -24,8 +24,8 @@ _arm_get_SPSR_MODE_SP_and_LR:
 @
 .text
 _arm_get_USER_MODE_SP_and_LR:
-    ldmdb SP!, {SP,LR}^				@ push user-mode SP and LR onto te current mode stack.
-    stmia SP!, {R0,R1}	            @ pop user-mode SP and LR onto return registers.
+    ldmdb SP!, {SP,LR}^			@ push user-mode SP and LR onto te current mode stack.
+    stmia SP!, {R0,R1}			@ pop user-mode SP and LR onto return registers.
     mov PC, LR
 
 @
@@ -68,8 +68,8 @@ _arm_set_SPSR_MODE_SP_and_LR:
 @
 .text
 _arm_set_USER_MODE_SP_and_LR:
-	ldmdb SP!, {R0,R1}				@ push new user-mode SP and LR onto te current mode stack.
-    stmia SP!, {SP,LR}^	            @ pop user-mode SP and LR onto user-mode banked SP and LR.
+    ldmdb SP!, {R0,R1}		@ push new user-mode SP and LR onto te current mode stack.
+    stmia SP!, {SP,LR}^		@ pop user-mode SP and LR onto user-mode banked SP and LR.
     mov PC, LR
 
 @
