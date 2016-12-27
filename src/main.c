@@ -1,6 +1,7 @@
 
 #include<_config.h>
 
+#include<memory/stack.h>
 #include<memory/memory.h>
 #include<memory/vm/vm.h>
 #include<arch.h>
@@ -13,6 +14,7 @@
 #include<concurrency/mutex.h>
 #include<sched/sched.h>
 #include<gpio/gpio.h>
+#include<bug.h>
 
 //#define __ENABLE_DEBUG_TRACE 1
 #include<debug_trace.h>
@@ -20,27 +22,14 @@
 void * BBC_Thread() {
 
   for(;;) {
-    kprintf("BBC_THREAD\r\n");
-    kthread_yield();
+    kprintf("B\r\n");
+    //kthread_yield();
   }
   return NULL;
 }
 
 void BBCMicroBitTest() {
 
-  DEBUG_TRACE("");
-  kthread_init();
-  DEBUG_TRACE("");
-  kthread_t t0;
-  kthread_create(&t0, GFP_KERNEL, &BBC_Thread, NULL);
-  DEBUG_TRACE("");
-  {
-    for(;;) {
-      kprintf("MAIN THREAD\r\n");
-      kthread_yield();
-    }
-  }
-  
   gpio_itf gpio;
   struct timespec now;
   
@@ -105,29 +94,43 @@ volatile int _test_mutex_failed = 0;
 mutex_t _test_mutex_mutex;
 void * kthread_mutex_test(void *p) {
 
+  //int stackcheck = kthread_stack_check();
+  // kprintf("STACK_CHECK = %d\r\n", stackcheck);
+  
+  //kprintf("RUNNING TEST %d\r\n", p);
+
+  //  int oldStackRem=-2;
 	for(;;) {
 
-		mutex_lock(&_test_mutex_mutex);
+	  		mutex_lock(&_test_mutex_mutex);
 		_test_mutex_int = 0;
 		for(int i=0; i<1000; i++) {
 
-			//kthread_yield(); // REALLY stress out that mutex!
+		  //kthread_yield(); // REALLY stress out that mutex!
 
 			if(_test_mutex_int++ != i) {
 				_test_mutex_failed = 1;
 			}
 		}
-		mutex_unlock(&_test_mutex_mutex);
+			mutex_unlock(&_test_mutex_mutex);
 
 		if(_test_mutex_failed) {
 			//_arm_disable_interrupts();
 			kprintf("MUTEX FAILED\r\n");
+			//_BUG();
 			for(;;);
 		}
 		else {
-			kprintf("%d\r\n",(int)(size_t)p);
+		  		  kprintf("%d\r\n",(int)(size_t)p);
+
+				  //int stackcheck = kthread_stack_check();
+		  //		  if(stackcheck != oldStackRem)
+		    {
+		      //kprintf("STACK_CHECK(%d) = %d\r\n", (size_t)p, stackcheck);
+		    //oldStackRem = stackcheck;
+		  }
 			//kgetchar();
-			kthread_yield();
+			//kthread_yield();
 		}
 	}
 	return NULL;
@@ -170,6 +173,7 @@ void * kthread_newthread(void * args) {
 	return NULL;
 }
 
+/*
 struct dummy_sgi_handler_context {
 
 	DRIVER_INTERFACE(struct irq,  irq_interface);  // implements IRQ interface.
@@ -184,9 +188,11 @@ static int __dummy_sgi_handler_IRQ(irq_itf itf) {
 static irq_t __dummy_sgi_handler_get_irq_number(irq_itf itf) {
 	return 0;
 }
+*/
 
 void Main() {
 
+  /*
   {
     // Testing the BBC micro:bit.
     register_drivers();
@@ -196,26 +202,27 @@ void Main() {
     BBCMicroBitTest();
     for(;;);
   }
+  */
 
   
 
-	DRIVER_INIT_INTERFACE((&__dummy_sgi_handler_context), irq_interface);
-	__dummy_sgi_handler_context.irq_interface->IRQ = &__dummy_sgi_handler_IRQ;
-	__dummy_sgi_handler_context.irq_interface->get_irq_number = &__dummy_sgi_handler_get_irq_number;
+  //	DRIVER_INIT_INTERFACE((&__dummy_sgi_handler_context), irq_interface);
+  //	__dummy_sgi_handler_context.irq_interface->IRQ = &__dummy_sgi_handler_IRQ;
+  //	__dummy_sgi_handler_context.irq_interface->get_irq_number = &__dummy_sgi_handler_get_irq_number;
+  //
+  	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
 
-	static const char greeting[] = "HELLO WORLD FROM ShovelOS...\r\n";
-
-	exceptions_setup();
-	register_drivers();
-	start_system_time(); // DEPENDS ON DRIVERS.
+	//	exceptions_setup();
+	//register_drivers();
+	//start_system_time(); // DEPENDS ON DRIVERS.
 	//console_setup_dev(); // DEPENDS ON DRIVERS.
-	interrupt_controller_open(0);
+	//interrupt_controller_open(0);
 	
-	kthread_init();  // DEPENDS ON INTERRUPT CONTROLLER.
-	console_setup(); // DEPENDS ON KTHREAD, DRIVERS.
+	//kthread_init();  // DEPENDS ON INTERRUPT CONTROLLER.
+	//console_setup(); // DEPENDS ON KTHREAD, DRIVERS.
 
 	const int test_busy_sleep = 0;
-	const int test_idle_sleep = 1;
+	const int test_idle_sleep = 0;
 
 	if(test_busy_sleep)
 	{
@@ -253,12 +260,15 @@ void Main() {
 	    kprintf("i: systime %d:%d\r\n",ts.seconds, ts.nanoseconds);
 	  }
 	}
-	
-	kprintf("DONE\r\n");
-	halt();
-	for (;;)
-		kthread_yield();
 
+	if(test_idle_sleep || test_busy_sleep) {
+	  kprintf("DONE\r\n");
+	  halt();
+	  for (;;)
+	    kthread_yield();
+	}
+
+	/*
 	for (uint32_t i = 0;;i++)
 	{
 		kprintf("%04d> ", i);
@@ -267,6 +277,7 @@ void Main() {
 		kgets(string, sizeof string);
 		kprintf("%04d> \"%s\"\n", i, string);
 	}
+	*/
 
 	mutex_init(&_test_mutex_mutex);
 
@@ -302,8 +313,8 @@ void Main() {
 
 	{
 		//int err;
-		kthread_t thread0 = NULL;
-		kthread_t thread1 = NULL;
+	  	  		kthread_t thread0 = NULL;
+	  			kthread_t thread1 = NULL;
 //		_debug_out("create th0\r\n");
 		kthread_create(&thread0, GFP_KERNEL, &kthread_mutex_test, (void*)1);
 //		_debug_out("create th1\r\n");
