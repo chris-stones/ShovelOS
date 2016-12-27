@@ -140,13 +140,7 @@ static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
 	int e = 0;
 	if(func)
-		e = (*func)->IRQ(func);
-
-	// TIMER0 ON OMAP36XX drives task-scheduler. //////
-	if(irq == (37+0)) { // GPTIMER_IRQ_BASE+0 // FIXME: ASSUMING OMAP543X
-		_arch_irq_task_switch(cpu_state);
-	}
-	///////////////////////////////////////////////////
+	  e = INVOKE(func, IRQ, cpu_state);
 
 	ctx->gic_cpu->GICC_EOIR = IAR; // DONE - allow next IRQ.
 
