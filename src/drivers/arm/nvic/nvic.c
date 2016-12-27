@@ -30,6 +30,11 @@ static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
 static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
 
   irq_t irq_num = INVOKE(i_irq, get_irq_number);
+
+  // HACK - NVIC index vs external interrupt number
+  _BUG_ON(irq_num < 16);
+  irq_num -= 16;
+  
   NVIC_ICER = (1<<irq_num);
   return 0;
 }
@@ -55,15 +60,10 @@ static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
   int e = -1;
   irq_t irq_num = (_arm_ipsr_read() & ((1<<6)-1));
-
-  if(irq_num >= 16) {
-    irq_num -= 16;
-    irq_itf func = _ctx.interrupt_functions[irq_num];
-    if(func)
-      e = INVOKE(func,IRQ);
-
-    
-  }
+  
+  irq_itf func = _ctx.interrupt_functions[irq_num];
+  if(func)
+    e = INVOKE(func,IRQ);
 
   return e;
 }
