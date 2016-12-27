@@ -42,6 +42,8 @@
 #include "boot_pages.h"
 
 #include <console/console.h>
+
+//#define __ENABLE_DEBUG_TRACE 1
 #include <debug_trace.h>
 
 static size_t _heap_virt_base = 0;
