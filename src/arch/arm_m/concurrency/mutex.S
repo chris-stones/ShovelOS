@@ -5,8 +5,8 @@
 	.text
 	.global mutex_lock		
 mutex_lock:				@void mutex_lock(mutex_t * lock)
-	push {lr}			@
-	mov r4, r0			@store mutex address in r4.
+	push {r4,lr}			@
+	mov  r4, r0
 _mutex_lock_try:			@
 	cpsid i				@disable interrupts.
 	dsb				@arm recommends dsb/isb here.
@@ -17,7 +17,7 @@ _mutex_lock_try:			@
 	mov r1, #1			@no.
 	str r1, [r4]			@lock it.
 	cpsie i				@enable interrupts.
-	pop {pc}			@return.
+	pop {r4, pc}			@return.
 _mutex_lock_yield:			@
 	cpsie i				@enable interrupts.
 	bl kthread_yield		@run something else for a while.
