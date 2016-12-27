@@ -207,7 +207,7 @@ static irq_t _get_irq_number(irq_itf itf) {
 	return ctx->irq_number;
 }
 
-static int _IRQ(irq_itf itf) {
+static int _IRQ(irq_itf itf, void * cpu_state) {
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, irq_interface, itf);
@@ -248,7 +248,7 @@ static void * service_IRQ(void * _ctx) {
 	irq_itf irq = (irq_itf)&(ctx->irq_interface);
 
 	while (ctx->halt_flag == 0) {
-		ctx->irq_interface->IRQ(irq);
+	  ctx->irq_interface->IRQ(irq, NULL);
 		kthread_yield();
 	}
 	return NULL;
