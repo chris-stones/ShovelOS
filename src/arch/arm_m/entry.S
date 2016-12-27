@@ -63,33 +63,29 @@ _RESET:
 	bl _init_ram                    @ clear the BSS section and init .data section
 
 	@ Setup stack.
-#if(ARM_M_USE_SP_PROCESS)
-	mov r0, #2			@ 2 pages
-	mov r1, #0			@ 0 flags
-	bl get_boot_pages		@ get boot stack pages.
 
-	ldr r1, =PAGE_SIZE
-	add r0, r0, r1			@ r0 = top of first page for thread-stack.
-	add r1, r0, r1                  @ r1 = top of second page for handler-stack.
-	mov sp, r0                      @ set sp_main.
-
-	mov r2, #2
-	msr CONTROL, r2                 @ set thread-mode to use sp_process.
-	isb				@ arm recommends ISB here.
-	mov sp, r1                      @ set sp_process.
-	mov r2, #0
-	msr CONTROL, r2                 @ set thread-mode to use sp_main.
-	isb                             @ arm recommends ISB here.
-#else
-	mov r0, #1			@ 1 page
-	mov r1, #0			@ 0 flags
-	bl get_boot_pages		@ get boot stack pages.
-	ldr r1, =PAGE_SIZE		@ get stack size
-	add r0, r0, r1			@ get top of stack.
-	mov sp, r0			@ set new stack.
-#endif
-	bl setup_memory			@ setup memory
-
+	sub sp, #8			@ allocate stack_struct on the stack.
+	mov r0, sp			@ pointer to stack_struct.
+	mov r4, sp			@ also in r4, for later!
+	ldr r1, =512			@ size of new stack.
+	mov r2, #0			@ flags for new stack.
+	bl  boot_stack                  @ get a boot-stack.
+	ldr r0, [sp]			@ load new stack base
+	ldr r1, [sp, #4]		@ load new stack size.
+	mov sp, r0			@ set ner stack pointer.
+	add sp, r1			@ move to top of stack.
+	
+		
+	bl setup_memory
+	bl exceptions_setup
+	bl register_drivers
+	bl start_system_time
+	mov r0, #0
+	bl interrupt_controller_open
+	mov r0, r4                      @ pass struct stack_struct to kthread_init.
+	bl kthread_init
+	bl console_setup
+	
 	@ run kernel main.
 	b  Main              @ run main!!!
 
