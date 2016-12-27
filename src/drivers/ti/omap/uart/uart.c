@@ -228,7 +228,7 @@ static irq_t _get_irq_number(irq_itf itf) {
 	return ctx->irq_number;
 }
 
-static int _IRQ(irq_itf itf) {
+static int _IRQ(irq_itf itf, void * cpu_state) {
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, irq_interface, itf);

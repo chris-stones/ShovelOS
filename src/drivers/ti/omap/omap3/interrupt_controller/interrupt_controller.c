@@ -93,7 +93,7 @@ static int _sgi(interrupt_controller_itf itf, irq_itf i_irq) {
 	if(func) {
 		uint32_t imask = _arm_disable_interrupts();
 
-		e = (*func)->IRQ(func);
+		e = INVOKE(func, IRQ, NULL);
 
 		_arm_enable_interrupts(imask);
 	}

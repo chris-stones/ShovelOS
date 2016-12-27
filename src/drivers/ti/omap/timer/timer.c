@@ -7,6 +7,7 @@
 #include <memory/vm/vm.h>
 #include <timer/timer.h>
 #include <console/console.h>
+#include <sched/sched.h>
 
 #include "regs.h"
 #include "sync_regs.h"
@@ -167,12 +168,10 @@ static irq_t _get_irq_number(irq_itf itf) {
 	return ctx->irq_number;
 }
 
-static int _IRQ(irq_itf itf) {
+static int _IRQ(irq_itf itf, void *cpu_state) {
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, irq_interface, itf);
-
-//	kprintf("timer.c _IRQ\n");
 
 #if(TI_OMAP_MAJOR_VER==3)
 	ctx->regs->TISR = OVF_IT_FLAG; // clear interrupt status register. (OMAP3)
@@ -182,6 +181,10 @@ static int _IRQ(irq_itf itf) {
 #error omap version not supported
 #endif
 
+	// HACK - which timer is scheduler driver? HARD CODED HERE!
+	if(cpu_state && _get_irq_number(itf) == 37)
+	  _arch_irq_task_switch(cpu_state);
+	
 	return 0;
 }
 
