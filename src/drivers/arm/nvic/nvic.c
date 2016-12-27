@@ -63,8 +63,8 @@ static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
   
   irq_itf func = _ctx.interrupt_functions[irq_num];
   if(func)
-    e = INVOKE(func,IRQ);
-
+    e = INVOKE(func,IRQ, cpu_state);
+  
   return e;
 }
 

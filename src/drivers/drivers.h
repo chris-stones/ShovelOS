@@ -34,7 +34,7 @@ typedef const struct irq * const * irq_itf;
 
 struct irq {
 
-	int   (*IRQ)(irq_itf self);
+  int   (*IRQ)(irq_itf self, void * cpu_state);
 	irq_t (*get_irq_number)(irq_itf self);
 };
 

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <timer/timer.h>
 #include <console/console.h>
+#include <sched/sched.h>
 
 #include "timer.h"
 
@@ -47,7 +48,7 @@ static int _close(timer_itf *itf) {
 
 static int _oneshot(timer_itf itf, const struct timespec * timespec) {
 
-  TIMER->STOP = 1;
+  TIMER->CLEAR = 1;
   TIMER->COMPARE[0] = 0;
 
   uint64_t ns_per_tick = 1000000000ULL / (uint64_t)_getfreq(itf);
@@ -60,7 +61,6 @@ static int _oneshot(timer_itf itf, const struct timespec * timespec) {
   if(ticks < 2)
     ticks = 2;
 
-  TIMER->CLEAR = 1;
   TIMER->CC[0] = (uint32_t)ticks;
   TIMER->START = 1;
   
@@ -72,9 +72,13 @@ static int _debug_dump(timer_itf itf) {
   return 0;
 }
 
-static int _IRQ(irq_itf itf) {
+static int _IRQ(irq_itf itf, void * cpu_state) {
 
-  // TODO: call IRQ via NVIC on interrupt.
+  TIMER->STOP = 1;
+    
+  if(cpu_state)
+    _arch_irq_task_switch(cpu_state);
+    
   return 0;
 }
 

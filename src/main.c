@@ -122,6 +122,7 @@ void * kthread_mutex_test(void *p) {
 		}
 		else {
 		  		  kprintf("%d\r\n",(int)(size_t)p);
+				  kthread_yield();
 
 				  //int stackcheck = kthread_stack_check();
 		  //		  if(stackcheck != oldStackRem)
