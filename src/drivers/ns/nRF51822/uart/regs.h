@@ -66,3 +66,6 @@
 #define TXD            U32_RW_REG(TXD_ADDR)
 #define BAUDRATE       U32_RW_REG(BAUDRATE_ADDR)
 #define CONFIG         U32_RW_REG(CONFIG_ADDR)
+
+#define INTEN_RX_READY 1<<2
+#define INTEN_TX_READY 1<<7

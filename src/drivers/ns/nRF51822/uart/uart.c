@@ -6,8 +6,11 @@
 #include <chardevice/chardevice.h>
 #include <file/file.h>
 #include <stdlib/stdlib.h>
+#include <drivers/lib/uart_buffer.h>
 
 #include "regs.h"
+
+#define _WITH_BUFFERED_UART 1
 
 typedef enum {
 	_NONBLOCK = 1<<0,
@@ -18,6 +21,14 @@ typedef enum {
 struct context {
 
   DRIVER_INTERFACE(struct file, file_interface); // implements FILE interface.
+  DRIVER_INTERFACE(struct irq,  irq_interface);  // implements IRQ interface.
+
+#if defined(_WITH_BUFFERED_UART)
+  spinlock_t spinlock;
+  struct uart_buffer read_buffer;
+  struct uart_buffer write_buffer;
+#endif
+  
   int flags;
 };
 static struct context _ctx = { 0, };
@@ -84,6 +95,27 @@ void ___nrf51822_debug_startup() {
   PSELTXD  = 24; // pin select TXD.
 }
 
+static irq_t _get_irq_number(irq_itf itf) {
+
+  return 2;
+}
+
+static int _IRQ(irq_itf itf, void * cpu_state) {
+
+  if(RXDRDY) {
+
+
+    RXDRDY = 0;
+  }
+
+  if(TXDRDY) {
+
+    TXDRDY = 0;
+  }
+  
+  return 0;
+}
+
 static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 
   uint8_t * vbuffer = (uint8_t *)_vbuffer;
@@ -127,10 +159,31 @@ static int ___open___(file_itf *ifile,
     _ctx.flags |= _DEV;
 
   DRIVER_INIT_INTERFACE((&_ctx), file_interface );
+  DRIVER_INIT_INTERFACE((&_ctx), irq_interface  );
 
+#if defined(_WITH_BUFFERED_UART)
+  if(!(_ctx.flags & _DEV)) {
+    
+    spinlock_init(&_ctx.spinlock);
+
+    if(0 != uart_buffer_create(&_ctx.read_buffer, PAGE_SIZE))
+      return -1;
+
+    if(0 != uart_buffer_create(&_ctx.write_buffer, PAGE_SIZE)) {
+      uart_buffer_destroy(&_ctx.read_buffer);
+      return -1;
+    }
+  }
+#endif
+  
+  // initialise function pointers for FILE interface.
   _ctx.file_interface->close = &_close;
   _ctx.file_interface->read  = &_read;
   _ctx.file_interface->write = &_write;
+
+  // initialise function pointers for IRQ interface.
+  _ctx.irq_interface->IRQ = &_IRQ;
+  _ctx.irq_interface->get_irq_number = &_get_irq_number;
 
   BAUDRATE = 0x004EA000; // 19200
   PSELRXD  = 25; // pin select RXD.
@@ -139,7 +192,14 @@ static int ___open___(file_itf *ifile,
   STARTTX  = 1;  // START TX
 
   *ifile = (file_itf)&(_ctx.file_interface);
-  *iirq  = ( irq_itf)NULL;
+
+  if(iirq)
+    *iirq  = (irq_itf )&(_ctx.irq_interface);
+
+#if defined(_WITH_BUFFERED_UART)
+  if(!(_ctx.flags & _DEV))
+    INTENSET = INTEN_RX_READY;
+#endif
   
   return 0;
 }
