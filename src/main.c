@@ -191,8 +191,17 @@ static irq_t __dummy_sgi_handler_get_irq_number(irq_itf itf) {
 }
 */
 
+uint32_t temperature_debug();
+
 void Main() {
 
+  {
+    for(;;) {
+      uint32_t t = temperature_debug();
+      kprintf("%d (%d)\r\n", t/4, t);
+    }
+  }
+  
   /*
   {
     // Testing the BBC micro:bit.

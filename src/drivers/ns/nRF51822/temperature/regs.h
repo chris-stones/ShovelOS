@@ -6,7 +6,7 @@
 #define TEMP_BASE (0x4000C000)
 
 #define U32_RW_REG(o) (*(      volatile uint32_t*)(o))
-#define U32_WO_REG(o) (*(const volatile uint32_t*)(o))
+#define U32_WO_REG(o) (*(      volatile uint32_t*)(o))
 #define U32_RO_REG(o) (*(const volatile uint32_t*)(o))
 
 // TASKS

@@ -187,7 +187,9 @@ SHOV_KERN_DRIVER_NRF51822 = \
   drivers/ns/nRF51822/timer/timer.c \
   drivers/ns/nRF51822/clock/clock_regs.h \
   drivers/ns/nRF51822/clock/clock_management.c \
-  drivers/ns/nRF51822/clock/clock_management.h
+  drivers/ns/nRF51822/clock/clock_management.h \
+  drivers/ns/nRF51822/temperature/regs.h \
+  drivers/ns/nRF51822/temperature/temperature.c
 
 SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
