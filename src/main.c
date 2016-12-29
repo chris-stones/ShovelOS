@@ -191,8 +191,17 @@ static irq_t __dummy_sgi_handler_get_irq_number(irq_itf itf) {
 }
 */
 
+uint8_t busy_random_byte();
 void Main() {
 
+  {
+    for(;;)
+      kprintf("%02x%02x%02x%02x\r\n",
+	      busy_random_byte(),
+	      busy_random_byte(),
+	      busy_random_byte(),
+	      busy_random_byte());
+  }
   /*
   {
     // Testing the BBC micro:bit.
