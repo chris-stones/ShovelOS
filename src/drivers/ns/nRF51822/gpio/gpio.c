@@ -13,7 +13,7 @@ struct context {
   DRIVER_INTERFACE(struct gpio, gpio_interface); // Implements GPIO interface.
 };
 
-static struct context _ctx = { 0, };
+static struct context _ctx;
 
 #define REGS (((struct GPIO_REGS *)(GPIO_REGS_BASE)))
 

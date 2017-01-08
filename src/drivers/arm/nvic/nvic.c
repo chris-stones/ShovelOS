@@ -18,7 +18,7 @@ struct context {
   irq_itf interrupt_functions[INTERRUPTS_MAX];
 };
 
-static struct context _ctx = {0,};
+static struct context _ctx;
 
 static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
 
