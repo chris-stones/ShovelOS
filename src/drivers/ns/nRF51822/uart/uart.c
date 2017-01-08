@@ -20,7 +20,7 @@ struct context {
   DRIVER_INTERFACE(struct file, file_interface); // implements FILE interface.
   int flags;
 };
-static struct context _ctx = { 0, };
+static struct context _ctx;
 
 static ssize_t __debug(const void * _vbuffer, ssize_t count)
 {
