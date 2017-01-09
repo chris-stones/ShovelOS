@@ -7,10 +7,9 @@
 #include <file/file.h>
 #include <stdlib/stdlib.h>
 #include <drivers/lib/uart_buffer.h>
+#include <sched/sched.h>
 
 #include "regs.h"
-
-#define _WITH_BUFFERED_UART 1
 
 typedef enum {
 	_NONBLOCK = 1<<0,
@@ -23,11 +22,9 @@ struct context {
   DRIVER_INTERFACE(struct file, file_interface); // implements FILE interface.
   DRIVER_INTERFACE(struct irq,  irq_interface);  // implements IRQ interface.
 
-#if defined(_WITH_BUFFERED_UART)
   spinlock_t spinlock;
   struct uart_buffer read_buffer;
   struct uart_buffer write_buffer;
-#endif
   
   int flags;
 };
@@ -103,14 +100,20 @@ static irq_t _get_irq_number(irq_itf itf) {
 static int _IRQ(irq_itf itf, void * cpu_state) {
 
   if(RXDRDY) {
-
-
+    
     RXDRDY = 0;
   }
 
   if(TXDRDY) {
-
+    uint8_t b;
     TXDRDY = 0;
+    if(uart_buffer_getb(&_ctx.write_buffer, &b) == UART_BUFFER_GET_SUCCESS) {
+      TXD = b;
+    }
+    else {
+      // Disable transmit interrupts - no more data to send.
+      INTENCLR = INTEN_TX_READY;
+    } 
   }
   
   return 0;
@@ -118,19 +121,48 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
 
 static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 
+  int flags = _ctx.flags;
+  if(in_interrupt())
+    flags |= _NONBLOCK; // HACK - kprintf in an interrupt? use non-blocking.
+
   uint8_t * vbuffer = (uint8_t *)_vbuffer;
+
+  //////// DEVELOPMENT - MINIMALISTIC WRITE - INTERRUPTS MAY NOT BE WORKING ////////
+  if(flags & _DEV) {
+    while(count) {
+      if(TXDRDY == 1) {
+	TXD = (uint32_t)*vbuffer++;
+	--count;
+      }
+    }
+    while(TXDRDY != 1); // flush TX
+    return (size_t)vbuffer - (size_t)_vbuffer;
+  }
+  /////////////////////////////////////////////////////////////////////////////////
+
   while(count) {
 
-    // wait for TX ready.
-    while(TXDRDY != 1);
+    spinlock_lock_irqsave(&_ctx.spinlock);
 
-    // clear TX ready.
-    TXDRDY = 0;
+    // ENABLE TRANSMIT INTERRUPTS - WE HAVE DATA TO TRANSMIT!
+    INTENSET = INTEN_TX_READY;
 
-    // start TX.
-    TXD = (uint32_t)*vbuffer++;
+    while(count) {
+
+      if(uart_buffer_putb(&_ctx.write_buffer, *vbuffer) == UART_BUFFER_PUT_SUCCESS) {
+	vbuffer++;
+	count--;
+      }
+      else
+	break;
+    }
+    spinlock_unlock_irqrestore(&_ctx.spinlock);
     
-    --count;
+    if(count && !(flags & _NONBLOCK)) {
+      kthread_yield();
+    }
+    else
+      break;
   }
   return (size_t)vbuffer - (size_t)_vbuffer;
 }
@@ -161,7 +193,6 @@ static int ___open___(file_itf *ifile,
   DRIVER_INIT_INTERFACE((&_ctx), file_interface );
   DRIVER_INIT_INTERFACE((&_ctx), irq_interface  );
 
-#if defined(_WITH_BUFFERED_UART)
   if(!(_ctx.flags & _DEV)) {
     
     spinlock_init(&_ctx.spinlock);
@@ -174,7 +205,6 @@ static int ___open___(file_itf *ifile,
       return -1;
     }
   }
-#endif
   
   // initialise function pointers for FILE interface.
   _ctx.file_interface->close = &_close;
@@ -196,10 +226,8 @@ static int ___open___(file_itf *ifile,
   if(iirq)
     *iirq  = (irq_itf )&(_ctx.irq_interface);
 
-#if defined(_WITH_BUFFERED_UART)
   if(!(_ctx.flags & _DEV))
     INTENSET = INTEN_RX_READY;
-#endif
   
   return 0;
 }
