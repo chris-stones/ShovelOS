@@ -106,16 +106,16 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
 
   if(TXDRDY) {
     uint8_t b;
-    TXDRDY = 0;
     if(uart_buffer_getb(&_ctx.write_buffer, &b) == UART_BUFFER_GET_SUCCESS) {
       TXD = b;
     }
     else {
       // Disable transmit interrupts - no more data to send.
       INTENCLR = INTEN_TX_READY;
-    } 
+    }
+    TXDRDY = 0;
   }
-  
+
   return 0;
 }
 
