@@ -15,7 +15,7 @@ struct context {
   DRIVER_INTERFACE(struct irq,   irq_interface);   // implements IRQ interface.
 };
 
-struct context _ctx = {0,};
+struct context _ctx;
 
 // USE RTC-1 AS THE MAIN TIMER.
 #define TIMER (((struct RTC_REGS *)(RTC1_BASE_ADDR)))

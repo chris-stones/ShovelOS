@@ -28,7 +28,7 @@ struct context {
   
   int flags;
 };
-static struct context _ctx = { 0, };
+static struct context _ctx;
 
 static ssize_t __debug(const void * _vbuffer, ssize_t count)
 {

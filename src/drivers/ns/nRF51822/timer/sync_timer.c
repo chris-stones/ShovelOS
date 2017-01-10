@@ -16,7 +16,7 @@ struct context {
   DRIVER_INTERFACE(struct sync_timer, sync_timer_interface);
 };
 
-static struct context _ctx = {0,};
+static struct context _ctx;
 
 static uint64_t _cur(sync_timer_itf self) {
 
