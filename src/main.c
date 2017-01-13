@@ -116,8 +116,8 @@ void * kthread_mutex_test(void *p) {
 
 		if(_test_mutex_failed) {
 			//_arm_disable_interrupts();
-			kprintf("MUTEX FAILED\r\n");
-			//_BUG();
+			//kprintf("MUTEX FAILED\r\n");
+			_BUG();
 			for(;;);
 		}
 		else {

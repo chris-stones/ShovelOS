@@ -94,26 +94,27 @@ void ___nrf51822_debug_startup() {
 
 static irq_t _get_irq_number(irq_itf itf) {
 
-  return 2;
+  return 2+16;
 }
 
 static int _IRQ(irq_itf itf, void * cpu_state) {
 
   if(RXDRDY) {
-    
+    volatile uint32_t _b = RXD;
+    (void)_b;
     RXDRDY = 0;
   }
 
   if(TXDRDY) {
+
+    INTENCLR = INTEN_TX_READY; // disable tx-ready interrupts.
+    TXDRDY = 0; // clear tx-ready event.
+    
     uint8_t b;
     if(uart_buffer_getb(&_ctx.write_buffer, &b) == UART_BUFFER_GET_SUCCESS) {
-      TXD = b;
-    }
-    else {
-      // Disable transmit interrupts - no more data to send.
-      INTENCLR = INTEN_TX_READY;
-    }
-    TXDRDY = 0;
+      TXD = (uint32_t)b; // start TX.
+      INTENSET = INTEN_TX_READY; // enable tx ready interrupts.
+    }    
   }
 
   return 0;
@@ -123,7 +124,7 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 
   int flags = _ctx.flags;
   if(in_interrupt())
-    flags |= _NONBLOCK; // HACK - kprintf in an interrupt? use non-blocking.
+    flags |= _NONBLOCK | _DEV; // HACK - kprintf in an interrupt? use non-blocking.
 
   uint8_t * vbuffer = (uint8_t *)_vbuffer;
 
@@ -131,6 +132,7 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
   if(flags & _DEV) {
     while(count) {
       if(TXDRDY == 1) {
+	TXDRDY = 0;
 	TXD = (uint32_t)*vbuffer++;
 	--count;
       }
@@ -159,7 +161,9 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
     spinlock_unlock_irqrestore(&_ctx.spinlock);
     
     if(count && !(flags & _NONBLOCK)) {
+      _debug_out("y");
       kthread_yield();
+      _debug_out("Y");
     }
     else
       break;

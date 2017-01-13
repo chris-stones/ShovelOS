@@ -83,7 +83,8 @@ _RESET:
 	bl interrupt_controller_open
 	mov r0, r4                      @ pass struct stack_struct to kthread_init.
 	bl kthread_init
-	bl console_setup
+@	bl console_setup
+	bl console_setup_dev
 	
 	@ run kernel main.
 	b  Main              @ run main!!!

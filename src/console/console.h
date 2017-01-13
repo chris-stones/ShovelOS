@@ -3,7 +3,7 @@
 #include <file/file.h>
 
 void console_setup();
-void console_setup_dev(); // DEVELOPMENT console - no interrupts.
+void console_panic() {
 
 void console_teardown();
 

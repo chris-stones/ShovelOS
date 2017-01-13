@@ -36,9 +36,9 @@ void _break(const char * file, const char * func, int line) {
 
 void _bug(const char * file, const char * func, int line) {
   
-  _arm_disable_interrupts();
+  //  _arm_disable_interrupts();
   
-  kprintf(">>>BUG");
+  _debug_out(">>>BUG");
   kprintf("  %s\r\n", file);
   kprintf("  %s:%d\r\n", func, line);
   for(;;);

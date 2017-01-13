@@ -22,9 +22,10 @@ void console_setup() {
 	}
 }
 
-void console_setup_dev() {
-
-	chrd_open( &_console_file, &_console_irq, CHRD_DEV_CONSOLE_MAJOR, CHRD_DEV_CONSOLE_MINOR);
+void console_panic() {
+  // NULL out the console.
+  //  future conole output will be unbuffered, blocking, and work without interrupts.
+  _console_file = 0;
 }
 
 void console_teardown() {
