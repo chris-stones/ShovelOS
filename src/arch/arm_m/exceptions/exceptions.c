@@ -5,15 +5,18 @@
 #include <arch.h>
 #include <special/special.h>
 
+uint32_t armm_nvic_enable_interrupts();
+
 void exceptions_setup() {
 
-  _arm_enable_interrupts();
+  armm_nvic_enable_interrupts();
 }
 
 int in_interrupt() {
 
   // ARM-M implementation.
   // is this correct!?
+  //  NOTE: will not detect SVC
   return !!(_arm_ipsr_read() & IPSR_EXCEPTION_NUMBER);
 }
 

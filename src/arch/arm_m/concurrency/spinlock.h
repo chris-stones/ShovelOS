@@ -55,11 +55,15 @@ void spinlock_unlock_irqrestore(spinlock_t * lock);
 void spinlock_lock(spinlock_t * lock);
 void spinlock_unlock(spinlock_t * lock);
 
+uint32_t armm_nvic_enable_interrupts();
+uint32_t armm_nvic_disable_interrupts();
+uint32_t armm_nvic_restore_interrupts(uint32_t flags);
+
 static inline void spinlock_lock_irqsave_inline(spinlock_t * lock) {
 
 #ifdef CONFIG_UNICORE
 	if(!in_interrupt())
-		*lock = _arm_disable_interrupts();
+		*lock = armm_nvic_disable_interrupts();
 #elif  CONFIG_SMP
 	#error spinlock_lock_smp NOT IMPLEMENTED
 #endif
@@ -69,7 +73,7 @@ static inline void spinlock_unlock_irqrestore_inline(spinlock_t * lock) {
 
 #ifdef CONFIG_UNICORE
 	if(!in_interrupt())
-		_arm_restore_interrupts(*lock);
+		armm_nvic_restore_interrupts(*lock);
 #elif  CONFIG_SMP
 	#error spinlock_unlock_smp NOT IMPLEMENTED
 #endif

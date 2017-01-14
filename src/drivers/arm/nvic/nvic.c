@@ -7,6 +7,7 @@
 #include <stdlib/stdlib.h>
 #include <bug.h>
 
+#include <asm.h>
 #include <special/special.h>
 
 #include "regs.h"
@@ -16,6 +17,9 @@ struct context {
   DRIVER_INTERFACE(struct interrupt_controller, interrupt_controller_interface);
 
   irq_itf interrupt_functions[INTERRUPTS_MAX];
+
+  int enabled;
+  uint32_t enabled_interrupts;
 };
 
 static struct context _ctx;
@@ -27,6 +31,33 @@ static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
   return 0;
 }
 
+uint32_t armm_nvic_enable_interrupts() {
+
+  int old=_ctx.enabled;
+  _ctx.enabled=1;
+  NVIC_ISER = _ctx.enabled_interrupts;
+  return old;
+}
+
+uint32_t armm_nvic_disable_interrupts() {
+
+  NVIC_ICER = 0xFFFFFFFF;
+  int old=_ctx.enabled;
+  _ctx.enabled=0;
+  dsb();
+  isb();
+  return old;
+}
+
+uint32_t armm_nvic_restore_interrupts(uint32_t flags) {
+
+  if(flags)
+    armm_nvic_enable_interrupts();
+  else
+    armm_nvic_disable_interrupts();
+  return 0;
+}
+
 static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
 
   irq_t irq_num = INVOKE(i_irq, get_irq_number);
@@ -34,8 +65,12 @@ static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
   // HACK - NVIC index vs external interrupt number
   _BUG_ON(irq_num < 16);
   irq_num -= 16;
+
+  uint32_t m = (1<<irq_num);
   
-  NVIC_ICER = (1<<irq_num);
+  _ctx.enabled_interrupts &= ~m;
+  if(_ctx.enabled)
+    NVIC_ICER = m;
   return 0;
 }
 
@@ -46,8 +81,12 @@ static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
   // HACK - NVIC index vs external interrupt number
   _BUG_ON(irq_num < 16);
   irq_num -= 16;
+
+  uint32_t m = (1<<irq_num);
   
-  NVIC_ISER = (1<<irq_num);
+  _ctx.enabled_interrupts |= m;
+  if(_ctx.enabled)
+    NVIC_ISER = m;
   return 0;
 }
 
