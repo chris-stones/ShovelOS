@@ -3,7 +3,7 @@
 #include <file/file.h>
 
 void console_setup();
-void console_panic() {
+void console_panic();
 
 void console_teardown();
 
