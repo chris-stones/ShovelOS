@@ -11,6 +11,7 @@
 
 void _hardfault(const struct exception_frame *s) {
 
+  console_panic();
   kprintf("ARM-M HARDFAULT!!!\r\n");
   kprintf("  stack        = 0x%x (%d)\r\n",     s,               s);
   kprintf("  r0           = 0x%x (%d)\r\n", s->R0,           s->R0);
@@ -25,20 +26,19 @@ void _hardfault(const struct exception_frame *s) {
 }
 
 void _break(const char * file, const char * func, int line) {
-	_debug_out(">>>BREAK!\r\n");
-	_debug_out(file);_debug_out("\r\n");
-	_debug_out(func);_debug_out("\r\n");
-	_debug_out_uint(line);_debug_out("\r\n");
-	_debug_out("<<<BREAK!\r\n");
-	return ; // just a point to attach a debugger to.
+    _debug_out(">>>BREAK!\r\n");
+    _debug_out(file);_debug_out("\r\n");
+    _debug_out(func);_debug_out("\r\n");
+    _debug_out_uint(line);_debug_out("\r\n");
+    _debug_out("<<<BREAK!\r\n");
+    return ; // just a point to attach a debugger to.
 }
 
 
 void _bug(const char * file, const char * func, int line) {
   
-  //  _arm_disable_interrupts();
-  
-  _debug_out(">>>BUG");
+  console_panic();
+  kprintf(">>>BUG");
   kprintf("  %s\r\n", file);
   kprintf("  %s:%d\r\n", func, line);
   for(;;);
