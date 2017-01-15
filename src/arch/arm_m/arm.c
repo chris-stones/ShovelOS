@@ -75,8 +75,9 @@ void register_drivers() {
 
 static void _wfi() {__asm__ __volatile__ ("wfi");}
 
+uint32_t armm_nvic_disable_interrupts();
 void halt() {
-  _arm_disable_interrupts();
+  armm_nvic_disable_interrupts();
   for(;;)
     _wfi();
 }

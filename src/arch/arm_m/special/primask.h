@@ -6,7 +6,7 @@
 
 _ARM_DEFINE_SPECIAL_REG(primask)
 
-static inline uint32_t _arm_disable_interrupts() {
+static inline uint32_t armm_cpsid() {
 
   uint32_t primask = _arm_primask_read();
   
@@ -17,7 +17,7 @@ static inline uint32_t _arm_disable_interrupts() {
   return primask & 1;
 }
 
-static inline uint32_t _arm_enable_interrupts() {
+static inline uint32_t armm_cpsie() {
 
   uint32_t primask = _arm_primask_read();
 
@@ -26,10 +26,12 @@ static inline uint32_t _arm_enable_interrupts() {
   return primask & 1;
 }
 
-static inline void _arm_restore_interrupts(uint32_t flags) {
+static inline void _arm_cps_restore(uint32_t flags) {
 
   if(flags & 1) {
      __asm__ __volatile__ ("cpsid i");
+     dsb();
+     isb();
   }
   else {
      __asm__ __volatile__ ("cpsie i");

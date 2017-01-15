@@ -12,3 +12,4 @@ static inline void dsb() {
 static inline void isb() {
 	__asm__ __volatile__ ("isb");
 }
+
