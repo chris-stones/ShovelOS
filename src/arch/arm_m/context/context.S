@@ -3,7 +3,10 @@
 	.text
 	.global _arm_svc
 _arm_svc:
+	@ MUST use nvic here, as svc will hardfault if primask is set.
+	bl armm_nvic_disable_interrupts
 	svc #0
+	bl armm_nvic_restore_interrupts
 	mov pc, lr
 	
 	.text
