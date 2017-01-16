@@ -18,7 +18,7 @@ struct context {
 
   irq_itf interrupt_functions[INTERRUPTS_MAX];
 
-  int enabled;
+  int disabled;
   uint32_t enabled_interrupts;
 };
 
@@ -33,8 +33,8 @@ static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
 
 uint32_t armm_nvic_enable_interrupts() {
 
-  int old=_ctx.enabled;
-  _ctx.enabled=1;
+  int old=_ctx.disabled;
+  _ctx.disabled=0;
   NVIC_ISER = _ctx.enabled_interrupts;
   return old;
 }
@@ -42,8 +42,8 @@ uint32_t armm_nvic_enable_interrupts() {
 uint32_t armm_nvic_disable_interrupts() {
 
   NVIC_ICER = 0xFFFFFFFF;
-  int old=_ctx.enabled;
-  _ctx.enabled=0;
+  int old=_ctx.disabled;
+  _ctx.disabled=1;
   dsb();
   isb();
   return old;
@@ -52,9 +52,9 @@ uint32_t armm_nvic_disable_interrupts() {
 uint32_t armm_nvic_restore_interrupts(uint32_t flags) {
 
   if(flags)
-    armm_nvic_enable_interrupts();
-  else
     armm_nvic_disable_interrupts();
+  else
+    armm_nvic_enable_interrupts();
   return 0;
 }
 
@@ -69,7 +69,7 @@ static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
   uint32_t m = (1<<irq_num);
   
   _ctx.enabled_interrupts &= ~m;
-  if(_ctx.enabled)
+  if(!_ctx.disabled)
     NVIC_ICER = m;
   return 0;
 }
@@ -85,7 +85,7 @@ static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
   uint32_t m = (1<<irq_num);
   
   _ctx.enabled_interrupts |= m;
-  if(_ctx.enabled)
+  if(!_ctx.disabled)
     NVIC_ISER = m;
   return 0;
 }
@@ -124,7 +124,7 @@ static int _open(interrupt_controller_itf * itf) {
   _ctx.interrupt_controller_interface->_arm_IRQ = &__arm_IRQ;
   
   *itf = (interrupt_controller_itf)&(_ctx.interrupt_controller_interface);
-  
+
   return 0;
 }
 
