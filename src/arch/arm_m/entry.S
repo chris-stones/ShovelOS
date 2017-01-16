@@ -60,6 +60,10 @@ _start:
 _RESET:
 	bl ___nrf51822_debug_startup    @ FIXME-HACK - GET UART WORKING ASAP!
 
+	ldr r1, =0xE000ED20		@ SHPR3 Address.
+	ldr r0, =0x00C00000             @ PendSV priority 3 (LOWEST)
+	str r0, [r1]                    @
+
 	bl _init_ram                    @ clear the BSS section and init .data section
 
 	@ Setup stack.
@@ -89,10 +93,8 @@ _RESET:
 	@ run kernel main.
 	b  Main              @ run main!!!
 
-
 _HALT:
 _RESERVED:
-_PENDSV:
 _SYSTICK:	
 	wfi
 	b _HALT
