@@ -76,8 +76,15 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
 
   TIMER->STOP = 1;
     
-  if(cpu_state)
-    _arch_irq_task_switch(cpu_state);
+  if(cpu_state) {
+    // TODO:
+    //  OPTION 0:
+    //    SET THIS IRQ TO LOWEST PRIORITY, AND SWITCH HERE:
+    //      _arch_irq_task_switch(cpu_state);
+  }
+  //  OPTION 1:
+  //    REQUEST PendSV HERE:
+  *((volatile uint32_t *)(0xE000ED04)) = 1<<28; // PENDSVSET
     
   return 0;
 }
