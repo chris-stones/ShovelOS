@@ -30,6 +30,10 @@ _PENDSV:
 	mov r0, sp
 	bl _arch_irq_task_switch
 
+	ldr r0, =0xE000ED04 @ ICSR address
+	ldr r1, =(1<<27)    @ PENDSVCLR
+	str r1, [r0]        @ CLEAR PendSV
+
 	b _IRQ_TAIL
 	
 	.global _my_IRQ_handler
