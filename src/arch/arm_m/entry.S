@@ -93,10 +93,8 @@ _RESET:
 	@ run kernel main.
 	b  Main              @ run main!!!
 
-
 _HALT:
 _RESERVED:
-_PENDSV:
 _SYSTICK:	
 	wfi
 	b _HALT
