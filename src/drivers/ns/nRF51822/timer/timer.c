@@ -75,6 +75,7 @@ static int _debug_dump(timer_itf itf) {
 static int _IRQ(irq_itf itf, void * cpu_state) {
 
   TIMER->STOP = 1;
+  TIMER->COMPARE[0] = 0;
     
   if(cpu_state) {
     // TODO:
