@@ -108,10 +108,11 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
   if(TXDRDY) {
 
     INTENCLR = INTEN_TX_READY; // disable tx-ready interrupts.
-    TXDRDY = 0; // clear tx-ready event.
     
     uint8_t b;
     if(uart_buffer_getb(&_ctx.write_buffer, &b) == UART_BUFFER_GET_SUCCESS) {
+
+      TXDRDY = 0; // clear tx-ready event.
       TXD = (uint32_t)b; // start TX.
       INTENSET = INTEN_TX_READY; // enable tx ready interrupts.
     }    
