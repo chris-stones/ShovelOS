@@ -63,6 +63,8 @@ _RESET:
 	ldr r1, =0xE000ED20		@ SHPR3 Address.
 	ldr r0, =0x00C00000             @ PendSV priority 3 (LOWEST)
 	str r0, [r1]                    @
+	dsb
+	isb
 
 	bl _init_ram                    @ clear the BSS section and init .data section
 
