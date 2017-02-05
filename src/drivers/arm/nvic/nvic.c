@@ -31,33 +31,6 @@ static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
   return 0;
 }
 
-uint32_t armm_nvic_enable_interrupts() {
-
-  int old=_ctx.disabled;
-  _ctx.disabled=0;
-  NVIC_ISER = _ctx.enabled_interrupts;
-  return old;
-}
-
-uint32_t armm_nvic_disable_interrupts() {
-
-  NVIC_ICER = 0xFFFFFFFF;
-  int old=_ctx.disabled;
-  _ctx.disabled=1;
-  dsb();
-  isb();
-  return old;
-}
-
-uint32_t armm_nvic_restore_interrupts(uint32_t flags) {
-
-  if(flags)
-    armm_nvic_disable_interrupts();
-  else
-    armm_nvic_enable_interrupts();
-  return 0;
-}
-
 static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
 
   irq_t irq_num = INVOKE(i_irq, get_irq_number);
