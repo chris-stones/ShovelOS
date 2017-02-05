@@ -71,7 +71,7 @@ _RESET:
 	sub sp, #8			@ allocate stack_struct on the stack.
 	mov r0, sp			@ pointer to stack_struct.
 	mov r4, sp			@ also in r4, for later!
-	ldr r1, =512			@ size of new stack.
+	ldr r1, =1024			@ size of new stack.
 	mov r2, #0			@ flags for new stack.
 	bl  boot_stack                  @ get a boot-stack.
 	ldr r0, [sp]			@ load new stack base
