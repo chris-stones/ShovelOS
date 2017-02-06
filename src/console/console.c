@@ -56,18 +56,6 @@ int32_t kprintf(const char * format, ...) {
 	return r;
 }
 
-int32_t kprintf_panic(const char * format, ...) {
-
-	int32_t r = -1;
-
-	va_list va;
-	va_start(va, format);
-	r = vfprintf((file_itf)-1, format, va);
-	va_end(va);
-  
-	return r;
-}
-
 char * kgets(char * s, size_t size) {
 
 	if(_console_file)

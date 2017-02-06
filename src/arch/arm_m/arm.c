@@ -74,8 +74,6 @@ void register_drivers() {
 		(**itor)();
 }
 
-static void _wfi() {__asm__ __volatile__ ("wfi");}
-
 void halt() {
   for(;;);
 }

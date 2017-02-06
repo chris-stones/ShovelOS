@@ -8,6 +8,7 @@
 #include <stdlib/stdlib.h>
 #include <drivers/lib/uart_buffer.h>
 #include <sched/sched.h>
+#include <special/special.h>
 
 #include "regs.h"
 
@@ -30,52 +31,6 @@ struct context {
 };
 static struct context _ctx;
 
-static ssize_t __debug(const void * _vbuffer, ssize_t count)
-{
-  uint8_t * vbuffer = (uint8_t *)_vbuffer;
-
-  while(count) {
-
-    // wait for TX ready.
-    while(TXDRDY != 1);
-
-    // clear TX ready.
-    TXDRDY = 0;
-
-    // start TX.
-    TXD = (uint32_t)*vbuffer++;
-    
-    --count;
-  }
-  return (size_t)vbuffer - (size_t)_vbuffer;
-}
-
-// Bypass the character device and just dump a debug string to the serial port.
-ssize_t _debug_out( const char * string ) {
-
-  ssize_t ret;
-  size_t len = strlen(string);
-  ret = __debug(string, len );
-  return ret;
-}
-
-// Bypass the character device and just dump a debug number to the serial port.
-ssize_t _debug_out_uint( uint32_t i ) {
-
-  static const char c[] = "0123456789ABCDEF";
-
-  __debug(c + ((i >> 28) & 0xF), 1);
-  __debug(c + ((i >> 24) & 0xF), 1);
-  __debug(c + ((i >> 20) & 0xF), 1);
-  __debug(c + ((i >> 16) & 0xF), 1);
-  __debug(c + ((i >> 12) & 0xF), 1);
-  __debug(c + ((i >>  8) & 0xF), 1);
-  __debug(c + ((i >>  4) & 0xF), 1);
-  __debug(c + ((i >>  0) & 0xF), 1);
-
-  return 1;
-}
-
 void ___nrf51822_debug_startup() {
   
   BAUDRATE = 0x004EA000; // 19200
@@ -92,6 +47,18 @@ void ___nrf51822_debug_startup() {
   PSELTXD  = 24; // pin select TXD.
 }
 
+ssize_t _debug_out(const char * string) {
+
+  const char * _str = string;
+  while(*_str) {
+    while(TXDRDY != 1);
+    TXDRDY = 0;
+    TXD = (uint32_t)(*(_str++));
+  }
+  while(TXDRDY != 1);
+  return (ssize_t)_str - (ssize_t)string;
+}
+
 static irq_t _get_irq_number(irq_itf itf) {
 
   return 2+16;
@@ -106,49 +73,32 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
   }
 
   if(TXDRDY) {
-
-    INTENCLR = INTEN_TX_READY; // disable tx-ready interrupts.
     
     uint8_t b;
     if(uart_buffer_getb(&_ctx.write_buffer, &b) == UART_BUFFER_GET_SUCCESS) {
-
-      TXDRDY = 0; // clear tx-ready event.
-      TXD = (uint32_t)b; // start TX.
-      INTENSET = INTEN_TX_READY; // enable tx ready interrupts.
-    }    
+      TXDRDY = 0;
+      TXD = (uint32_t)b;
+    }
+    else {
+      INTENCLR = INTEN_TX_READY; //no data to send, disable tx-ready interrupts.
+    }
   }
-
   return 0;
 }
 
-static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
+static ssize_t _write(file_itf __ignore_itf, const void * _vbuffer, size_t count) {
 
   int flags = _ctx.flags;
-  if(in_interrupt())
-    flags |= _NONBLOCK | _DEV; // HACK - kprintf in an interrupt? use non-blocking.
-
-  uint8_t * vbuffer = (uint8_t *)_vbuffer;
-
-  //////// DEVELOPMENT - MINIMALISTIC WRITE - INTERRUPTS MAY NOT BE WORKING ////////
-  if(flags & _DEV) {
-    while(count) {
-      if(TXDRDY == 1) {
-	TXDRDY = 0;
-	TXD = (uint32_t)*vbuffer++;
-	--count;
-      }
-    }
-    while(TXDRDY != 1); // flush TX
-    return (size_t)vbuffer - (size_t)_vbuffer;
+  
+  if(in_interrupt()) {
+    return 0;
   }
-  /////////////////////////////////////////////////////////////////////////////////
+  
+  uint8_t * vbuffer = (uint8_t *)_vbuffer;
 
   while(count) {
 
     spinlock_lock_irqsave(&_ctx.spinlock);
-
-    // ENABLE TRANSMIT INTERRUPTS - WE HAVE DATA TO TRANSMIT!
-    INTENSET = INTEN_TX_READY;
 
     while(count) {
 
@@ -157,18 +107,21 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 	count--;
       }
       else
-	break;
+	break; // tx buffer full, release the lock so some data can be sent.
     }
     spinlock_unlock_irqrestore(&_ctx.spinlock);
+
+    // we have data to send - enable interrupts!
+    INTENSET = INTEN_TX_READY;
     
-    if(count && !(flags & _NONBLOCK)) {
-      _debug_out("y");
-      kthread_yield();
-      _debug_out("Y");
+    if(!count || (flags & _NONBLOCK))
+      break; // non-blocking - return to caller.
+    else {
+      kthread_yield(); // blocking - do something else for a while and try again.
+      continue;
     }
-    else
-      break;
   }
+  
   return (size_t)vbuffer - (size_t)_vbuffer;
 }
 
