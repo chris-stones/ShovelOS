@@ -91,6 +91,7 @@ _RESET:
 	bl kthread_init
 	bl console_setup
 
+	bl heartbeat_start
 	
 	@ run kernel main.
 	b  Main              @ run main!!!

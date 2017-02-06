@@ -10,6 +10,8 @@
 #include <asm.h>
 #include <special/special.h>
 
+#include <arch.h>
+
 #include "regs.h"
 
 struct context {
@@ -70,6 +72,8 @@ static int _sgi(interrupt_controller_itf itf, irq_itf i_irq) {
 
 static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
+  heartbeat_update();
+  
   int e = -1;
   irq_t irq_num = (_arm_ipsr_read() & ((1<<6)-1));
   
