@@ -77,7 +77,6 @@ SHOV_KERN_CORE = \
   gpio/gpio.c \
   interrupt_controller/controller.h \
   interrupt_controller/controller.c \
-  drivers/lib/uart_buffer.h \
   drivers/drivers.h \
   drivers/drivers.c \
   sched/sched_priv.h \

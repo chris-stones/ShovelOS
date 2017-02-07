@@ -11,12 +11,13 @@
 #include <memory/vm/vm.h>
 #include <chardevice/chardevice.h>
 #include <file/file.h>
-#include <drivers/lib/uart_buffer.h>
+#include <memory/fifo_buffer.h>
 #include <concurrency/spinlock.h>
 #include <sched/sched.h>
 #include <exceptions/exceptions.h>
 
 #include <console/console.h>
+#include <concurrency/spinlock.h>
 
 #include "regs.h"
 
@@ -34,8 +35,8 @@ struct context {
 	spinlock_t spinlock;
 
 	struct UART_REGS * regs;
-	struct uart_buffer read_buffer;
-	struct uart_buffer write_buffer;
+	struct fifo_buffer read_buffer;
+	struct fifo_buffer write_buffer;
 
 	int flags;
 	int irq_number;
@@ -134,7 +135,7 @@ static ssize_t _write(file_itf itf, const void * _vbuffer, size_t count) {
 
 		while(count) {
 
-			if(uart_buffer_putb(&ctx->write_buffer, *vbuffer) == UART_BUFFER_PUT_SUCCESS) {
+			if(fifo_buffer_putb(&ctx->write_buffer, *vbuffer) == FIFO_BUFFER_PUT_SUCCESS) {
 				vbuffer++;
 				count--;
 			}
@@ -201,7 +202,7 @@ static ssize_t _read(file_itf itf, void * _vbuffer, size_t count) {
 	for(;;) {
 		spinlock_lock_irqsave(&ctx->spinlock);
 		while(count) {
-			if(uart_buffer_getb( &ctx->read_buffer, &byte) == UART_BUFFER_GET_SUCCESS) {
+			if(fifo_buffer_getb( &ctx->read_buffer, &byte) == FIFO_BUFFER_GET_SUCCESS) {
 				*vbuffer++ = byte;
 				--count;
 			}
@@ -241,7 +242,7 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
 
 		uint8_t b;
 		while(!(ctx->regs->SSR & TX_FIFO_FULL)) {
-			if(uart_buffer_getb(&ctx->write_buffer, &b) == UART_BUFFER_GET_SUCCESS)
+			if(fifo_buffer_getb(&ctx->write_buffer, &b) == FIFO_BUFFER_GET_SUCCESS)
 				ctx->regs->THR = (uint32_t)b;
 			else {
 				// DISABLE TRANSMIT INTERRUPTS - WE HAVE NO DATA TO TRANSMIT!
@@ -257,7 +258,7 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
 
 		int err=0;
 		while(!err && (ctx->regs->LSR & RX_FIFO_E)!=0)
-			if(uart_buffer_putb(&ctx->read_buffer,(volatile uint8_t)(ctx->regs->RHR)) != UART_BUFFER_PUT_SUCCESS)
+			if(fifo_buffer_putb(&ctx->read_buffer,(volatile uint8_t)(ctx->regs->RHR)) != FIFO_BUFFER_PUT_SUCCESS)
 				err = 1;
 
 		/*** TODO: HANDLE ERROR - LOST BYTES!! ***/
@@ -353,13 +354,13 @@ static int _chrd_open(
 
 	spinlock_init(&ctx->spinlock);
 
-	if(0 != uart_buffer_create(&ctx->read_buffer, PAGE_SIZE)) {
+	if(0 != fifo_buffer_create(&ctx->read_buffer, PAGE_SIZE)) {
 		kfree(ctx);
 		return -1;
 	}
 
-	if(0 != uart_buffer_create(&ctx->write_buffer, PAGE_SIZE)) {
-		uart_buffer_destroy(&ctx->read_buffer);
+	if(0 != fifo_buffer_create(&ctx->write_buffer, PAGE_SIZE)) {
+		fifo_buffer_destroy(&ctx->read_buffer);
 		kfree(ctx);
 		return -1;
 	}

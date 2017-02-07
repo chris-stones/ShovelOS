@@ -6,9 +6,11 @@
 #include <chardevice/chardevice.h>
 #include <file/file.h>
 #include <stdlib/stdlib.h>
-#include <drivers/lib/uart_buffer.h>
+#include <memory/fifo_buffer.h>
 #include <sched/sched.h>
 #include <special/special.h>
+
+#include <concurrency/spinlock.h>
 
 #include "regs.h"
 
@@ -24,8 +26,8 @@ struct context {
   DRIVER_INTERFACE(struct irq,  irq_interface);  // implements IRQ interface.
 
   spinlock_t spinlock;
-  struct uart_buffer read_buffer;
-  struct uart_buffer write_buffer;
+  struct fifo_buffer read_buffer;
+  struct fifo_buffer write_buffer;
   
   int flags;
 };
@@ -75,7 +77,7 @@ static int _IRQ(irq_itf itf, void * cpu_state) {
   if(TXDRDY) {
     
     uint8_t b;
-    if(uart_buffer_getb(&_ctx.write_buffer, &b) == UART_BUFFER_GET_SUCCESS) {
+    if(fifo_buffer_getb(&_ctx.write_buffer, &b) == FIFO_BUFFER_GET_SUCCESS) {
       TXDRDY = 0;
       TXD = (uint32_t)b;
     }
@@ -102,7 +104,7 @@ static ssize_t _write(file_itf __ignore_itf, const void * _vbuffer, size_t count
 
     while(count) {
 
-      if(uart_buffer_putb(&_ctx.write_buffer, *vbuffer) == UART_BUFFER_PUT_SUCCESS) {
+      if(fifo_buffer_putb(&_ctx.write_buffer, *vbuffer) == FIFO_BUFFER_PUT_SUCCESS) {
 	vbuffer++;
 	count--;
       }
@@ -155,11 +157,11 @@ static int ___open___(file_itf *ifile,
     
     spinlock_init(&_ctx.spinlock);
 
-    if(0 != uart_buffer_create(&_ctx.read_buffer, PAGE_SIZE))
+    if(0 != fifo_buffer_create(&_ctx.read_buffer, PAGE_SIZE))
       return -1;
 
-    if(0 != uart_buffer_create(&_ctx.write_buffer, PAGE_SIZE)) {
-      uart_buffer_destroy(&_ctx.read_buffer);
+    if(0 != fifo_buffer_create(&_ctx.write_buffer, PAGE_SIZE)) {
+      fifo_buffer_destroy(&_ctx.read_buffer);
       return -1;
     }
   }
