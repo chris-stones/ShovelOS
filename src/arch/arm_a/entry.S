@@ -19,7 +19,7 @@ _start:
 	sub sp, #8			@ allocate stack_struct on the stack.
 	mov r0, sp			@ pointer to stack_struct.
 	mov r9, sp			@ also in r9, for later!
-	ldr r1, =512			@ size of new stack.
+	ldr r1, =1024			@ size of new stack.
 	mov r2, #0			@ flags for new stack.
 	bl  boot_stack                  @ get a boot-stack.
 	ldr r0, [sp]			@ load new stack base
@@ -69,11 +69,26 @@ _start:
 	@ run kernel main in supervisor mode
 	b  Main              @ run main!!!
 
+
 @ a tiny array that we will use for a stack before get_free_page() is setup.
 .align 8
 .__pre_gfp_stack_base:
 	.word __pre_gfp_stack
 	.comm __pre_gfp_stack, pre_gpf_stacksize
+	
+	.text
+get_exception_stack:
+	push {lr}
+	sub sp, #8
+	mov r0, sp
+	ldr r1, =1024
+	mov r2, #2                      @ r2 = GFP_KERNEL <memory/memory.h>
+	bl  stack_alloc
+	ldr r1, [r0, #4]		@ load new stack size.
+	ldr r0, [r0]			@ load new stack base
+	add r0, r0, r1			@ get top of stack.
+	add sp, #8
+	pop {pc}
 
 .text
 .align 8
