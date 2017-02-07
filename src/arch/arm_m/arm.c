@@ -26,17 +26,18 @@ void _hardfault(const struct exception_frame *s) {
 }
 
 void _break(const char * file, const char * func, int line) {
-    _debug_out(">>>BREAK!\r\n");
-    _debug_out(file);_debug_out("\r\n");
-    _debug_out(func);_debug_out("\r\n");
-    _debug_out_uint(line);_debug_out("\r\n");
-    _debug_out("<<<BREAK!\r\n");
-    return ; // just a point to attach a debugger to.
+  
+  kprintf(">>>BREAK!\r\n");
+  kprintf("%s\r\n",file);
+  kprintf("%sr\n", func);
+  kprintf("%d\r\n",line);
+  kprintf("<<<BREAK!\r\n");
+  return ; // just a point to attach a debugger to.
 }
 
 
 void _bug(const char * file, const char * func, int line) {
-  
+
   console_panic();
   kprintf(">>>BUG");
   kprintf("  %s\r\n", file);
@@ -73,11 +74,6 @@ void register_drivers() {
 		(**itor)();
 }
 
-static void _wfi() {__asm__ __volatile__ ("wfi");}
-
-uint32_t armm_nvic_disable_interrupts();
 void halt() {
-  armm_nvic_disable_interrupts();
-  for(;;)
-    _wfi();
+  for(;;);
 }

@@ -5,20 +5,7 @@
 #include <stdarg.h>
 #include <console/console.h>
 
-static int32_t _putc(file_itf file, char c) {
-
-  if((size_t)file == (size_t)-1) {
-    // HACK - VERY EARLY kprintf support.
-    char str[] = {c,0};
-    _debug_out(str);
-    return 1;
-  }
-
-  if(file)
-    return INVOKE(file,write,&c,1);
-    
-  return 0;
-}
+ssize_t _debug_out(const char * string);
 
 static int32_t _puts(file_itf file, const char * str) {
 
@@ -33,6 +20,20 @@ static int32_t _puts(file_itf file, const char * str) {
   if(file)
     return INVOKE(file,write,str,l);
   
+  return 0;
+}
+
+static int32_t _putc(file_itf file, char c) {
+
+  if((size_t)file == (size_t)-1) {
+    // HACK - VERY EARLY kprintf support.
+    const char str[] = {c,0};
+    return _puts(file, str);
+  }
+
+  if(file)
+    return INVOKE(file,write,&c,1);
+    
   return 0;
 }
 

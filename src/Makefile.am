@@ -118,7 +118,7 @@ if CONFIG_SHOV_ARCH_IS_ARM_M
     arch/arm_m/special/special.h \
     arch/arm_m/concurrency/mutex.h \
     arch/arm_m/concurrency/mutex.S \
-    arch/arm_m/concurrency/kthread.c \
+    arch/arm_m/concurrency/kthread.S \
     arch/arm_m/concurrency/kthread.h \
     arch/arm_m/context/context.S \
     arch/arm_m/cpu_state.c \
@@ -187,7 +187,8 @@ SHOV_KERN_DRIVER_NRF51822 = \
   drivers/ns/nRF51822/timer/timer.c \
   drivers/ns/nRF51822/clock/clock_regs.h \
   drivers/ns/nRF51822/clock/clock_management.c \
-  drivers/ns/nRF51822/clock/clock_management.h
+  drivers/ns/nRF51822/clock/clock_management.h \
+  drivers/ns/nRF51822/heartbeat/heartbeat.c
 
 SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \

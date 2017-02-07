@@ -9,7 +9,7 @@ uint32_t armm_nvic_enable_interrupts();
 
 void exceptions_setup() {
 
-  armm_nvic_enable_interrupts();
+  //  armm_nvic_enable_interrupts();
 }
 
 int in_interrupt() {

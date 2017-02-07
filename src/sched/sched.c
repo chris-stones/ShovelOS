@@ -189,7 +189,7 @@ static int _kthread_create(kthread_t * thread,
 
   if(*thread) {
 
-    if(stack_alloc(&((*thread)->stack), 512, gfp_flags)) {
+    if(stack_alloc(&((*thread)->stack), 1024, gfp_flags)) {
 
       void* stack_p = stack_top(&((*thread)->stack));
 

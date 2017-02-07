@@ -10,6 +10,8 @@
 #include <asm.h>
 #include <special/special.h>
 
+#include <arch.h>
+
 #include "regs.h"
 
 struct context {
@@ -18,7 +20,7 @@ struct context {
 
   irq_itf interrupt_functions[INTERRUPTS_MAX];
 
-  int enabled;
+  int disabled;
   uint32_t enabled_interrupts;
 };
 
@@ -28,33 +30,6 @@ static int _register_handler(interrupt_controller_itf itf, irq_itf i_irq) {
 
   irq_t irq_num = INVOKE(i_irq, get_irq_number);
   _ctx.interrupt_functions[irq_num] = i_irq;
-  return 0;
-}
-
-uint32_t armm_nvic_enable_interrupts() {
-
-  int old=_ctx.enabled;
-  _ctx.enabled=1;
-  NVIC_ISER = _ctx.enabled_interrupts;
-  return old;
-}
-
-uint32_t armm_nvic_disable_interrupts() {
-
-  NVIC_ICER = 0xFFFFFFFF;
-  int old=_ctx.enabled;
-  _ctx.enabled=0;
-  dsb();
-  isb();
-  return old;
-}
-
-uint32_t armm_nvic_restore_interrupts(uint32_t flags) {
-
-  if(flags)
-    armm_nvic_enable_interrupts();
-  else
-    armm_nvic_disable_interrupts();
   return 0;
 }
 
@@ -69,7 +44,7 @@ static int _mask(interrupt_controller_itf itf, irq_itf i_irq) {
   uint32_t m = (1<<irq_num);
   
   _ctx.enabled_interrupts &= ~m;
-  if(_ctx.enabled)
+  if(!_ctx.disabled)
     NVIC_ICER = m;
   return 0;
 }
@@ -85,7 +60,7 @@ static int _unmask(interrupt_controller_itf itf, irq_itf i_irq) {
   uint32_t m = (1<<irq_num);
   
   _ctx.enabled_interrupts |= m;
-  if(_ctx.enabled)
+  if(!_ctx.disabled)
     NVIC_ISER = m;
   return 0;
 }
@@ -97,6 +72,8 @@ static int _sgi(interrupt_controller_itf itf, irq_itf i_irq) {
 
 static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
+  heartbeat_update();
+  
   int e = -1;
   irq_t irq_num = (_arm_ipsr_read() & ((1<<6)-1));
   
@@ -124,7 +101,7 @@ static int _open(interrupt_controller_itf * itf) {
   _ctx.interrupt_controller_interface->_arm_IRQ = &__arm_IRQ;
   
   *itf = (interrupt_controller_itf)&(_ctx.interrupt_controller_interface);
-  
+
   return 0;
 }
 

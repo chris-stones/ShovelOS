@@ -124,7 +124,6 @@ static int _sgi(interrupt_controller_itf itf, irq_itf i_irq) {
 
 static int __arm_IRQ(interrupt_controller_itf itf, void * cpu_state) {
 
-	_debug_out("IRQ\r\n");
 
 	struct context * ctx =
 		STRUCT_BASE(struct context, interrupt_controller_interface, itf);

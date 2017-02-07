@@ -60,6 +60,12 @@ _start:
 _RESET:
 	bl ___nrf51822_debug_startup    @ FIXME-HACK - GET UART WORKING ASAP!
 
+	ldr r1, =0xE000ED20		@ SHPR3 Address.
+	ldr r0, =0x00C00000             @ PendSV priority 3 (LOWEST)
+	str r0, [r1]                    @
+	dsb
+	isb
+
 	bl _init_ram                    @ clear the BSS section and init .data section
 
 	@ Setup stack.
@@ -67,7 +73,7 @@ _RESET:
 	sub sp, #8			@ allocate stack_struct on the stack.
 	mov r0, sp			@ pointer to stack_struct.
 	mov r4, sp			@ also in r4, for later!
-	ldr r1, =512			@ size of new stack.
+	ldr r1, =1024			@ size of new stack.
 	mov r2, #0			@ flags for new stack.
 	bl  boot_stack                  @ get a boot-stack.
 	ldr r0, [sp]			@ load new stack base
@@ -85,14 +91,13 @@ _RESET:
 	bl kthread_init
 	bl console_setup
 
+	bl heartbeat_start
 	
 	@ run kernel main.
 	b  Main              @ run main!!!
 
-
 _HALT:
 _RESERVED:
-_PENDSV:
 _SYSTICK:	
 	wfi
 	b _HALT
