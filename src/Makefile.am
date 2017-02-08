@@ -205,8 +205,12 @@ SHOV_KERN_DRIVER_HOSTED = \
   drivers/hosted/uart/uart.c \
   drivers/hosted/timer/sync_timer.c
 
+SHOV_KERN_TESTS = \
+  test/hwrng.c
+
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
+  $(SHOV_KERN_TESTS) \
   config.h
 
 if CONFIG_SHOV_HOSTED_PLATFORM
