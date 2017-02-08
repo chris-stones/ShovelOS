@@ -191,7 +191,8 @@ SHOV_KERN_DRIVER_NRF51822 = \
   drivers/ns/nRF51822/clock/clock_management.h \
   drivers/ns/nRF51822/heartbeat/heartbeat.c \
   drivers/ns/nRF51822/hwrng/regs.h \
-  drivers/ns/nRF51822/hwrng/hwrng.c
+  drivers/ns/nRF51822/hwrng/hwrng.c \
+  drivers/ns/nRF51822/radio/regs.h
 
 SHOV_KERN_DRIVER_ARM_GIC = \
   drivers/arm/gic/regs.h \
