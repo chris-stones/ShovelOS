@@ -1,5 +1,6 @@
 #include <_config.h>
 
+#include <stdlib.h>
 #include <console/console.h>
 
 // DIRECTLY include the bbc microbit registers.
@@ -19,28 +20,21 @@ static int packet_not_nill() {
 static void dump_packet() {
 
   int nn = packet_not_nill();
-  
-  kprintf("{");
-  if(nn) {
-    kprintf("CRCSTATUS = %d (%d)",CRCSTATUS, RXCRC);
-    //    if(CRCSTATUS)
-      for(int i=0; i<PAYLOAD_SIZE; i++) {
-	//	char c = packet_ptr[i];
-	//if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-	//kprintf("%c,", packet_ptr[i]);
-	//else
-	  kprintf("%02x,", packet_ptr[i]);
-      }
-  }
-  kprintf("}\r\n");
 
-  //  if(nn)
-  //    for(;;);
+  if(nn) {
+    kprintf("{");
+    kprintf("CRCSTATUS = %d (%8x)",CRCSTATUS, RXCRC);
+    for(int i=0; i<PAYLOAD_SIZE; i++) {
+      kprintf("%02x,", packet_ptr[i]);
+    }
+    memset(packet_ptr, 0, sizeof packet_ptr);
+    kprintf("}\r\n");
+  }
 }
 
-
 static void dump_state(uint32_t oldState, uint32_t newState) {
-  
+
+  return;
   if(oldState == newState) {
     //kprintf(".");
     return;
@@ -60,11 +54,11 @@ static void dump_state(uint32_t oldState, uint32_t newState) {
   }
 }
 
-static const int advert_channels[] = {2,26,80};
-static const int advert_channels_nb = 3;
+const int advert_channels[] = {2,26,80};
+const int advert_channels_nb = 3;
 
 void bbcmicrobit_test_radio() {
-
+  
   // POWER ON THE RADIO
   POWER = 1;
   
@@ -77,7 +71,9 @@ void bbcmicrobit_test_radio() {
     OVERRIDE1 = BLE_1MBIT1;
     OVERRIDE2 = BLE_1MBIT2;
     OVERRIDE3 = BLE_1MBIT3;
-    OVERRIDE4 = BLE_1MBIT4 /*| OVERRIDE4_ENABLE*/;
+    OVERRIDE4 = BLE_1MBIT4;
+    
+    OVERRIDE4 = BLE_1MBIT4 | OVERRIDE4_ENABLE;
   }
 
   // SET PACKET RAM ADDRES
@@ -111,44 +107,43 @@ void bbcmicrobit_test_radio() {
   CRCPOLY = 0x0000065B;
   CRCINIT = 0x00555555;
 
-  //  0x8E89BED6
-    PREFIX0 = 0x8E; BASE0 = 0x89BED600;
-  //PREFIX0 = 0x8E; BASE0 = 0xD6BE8900;
-  //PREFIX0 = 0xD6; BASE0 = 0xBE898E00;
-  //PREFIX0 = 0xD6; BASE0 = 0x8E89BE00;
-    
-  // CONFIGURE ADDRESS
-  //PREFIX0 = 0x71;
-  //BASE0   = 0x76412900;
+  // BLUETOOTH BROADCAST ADDRESS???
+  //  uint32_t base = 0x8E89BED6;
+  uint32_t base = 0x8E89BED6;
 
-  // ADVERT ADDRESS...?
+  uint32_t prefix = base >> 24;
+  BASE0 = base << 8;
+  BASE1 = base << 8;
+  PREFIX0 = prefix | prefix << 8 | prefix << 16 | prefix << 24;
+  PREFIX1 = prefix | prefix << 8 | prefix << 16 | prefix << 24;
+  
 
-  FREQUENCY = 2; //advert_channels[0];
+  FREQUENCY = advert_channels[2];
 
   uint32_t lastState = 0xFFFFFFFF;
-  uint32_t frequency = 0;
+  //  uint32_t frequency = 0;
   for(;;) {
 
     if(READY) {
-      kprintf("GOT READY\r\n");
+      //      kprintf("GOT READY\r\n");
       READY = 0;
     }
 
     if(ADDRESS) {
-      uint32_t rxmatch = RXMATCH;
-      kprintf("GOT ADDRESS %x\r\n", rxmatch);
+      //      uint32_t rxmatch = RXMATCH;
+      //      kprintf("GOT ADDRESS %x\r\n", rxmatch);
       //dump_packet();
       ADDRESS = 0;
     }
     
     if(PAYLOAD) {
-      kprintf("GOT PAYLOAD\r\n");
+      //      kprintf("GOT PAYLOAD\r\n");
       dump_packet();
       PAYLOAD = 0;
     }
 
     if(END) {
-      kprintf("GOT END\r\n");
+      //      kprintf("GOT END\r\n");
       END = 0;
 
       DISABLE = 1;
@@ -156,41 +151,40 @@ void bbcmicrobit_test_radio() {
     }
 
     if(DISABLED) {
-      kprintf("GOT DISABLED\r\n");
+      //      kprintf("GOT DISABLED\r\n");
       DISABLED = 0;
     }
 
     if(DEVMATCH) {
-      kprintf("GOT DEVMATCH\r\n");
+      //      kprintf("GOT DEVMATCH\r\n");
       DEVMATCH = 0;
     }
 
     if(DEVMISS) {
-      kprintf("GOT DEVMISS\r\n");
+      //      kprintf("GOT DEVMISS\r\n");
       DEVMISS = 0;
     }
 
     if(RSSIEND) {
-      kprintf("GOT RSSIEND\r\n");
+      //      kprintf("GOT RSSIEND\r\n");
       RSSIEND= 0;
     }
 
     if(BCMATCH) {
-      kprintf("GOT BCMATCH\r\n");
+      //      kprintf("GOT BCMATCH\r\n");
       BCMATCH = 0;
     }
-
 
     uint32_t newState = STATE;
     dump_state(lastState, newState);
     lastState = newState;
     
     if(newState == STATUS_DISABLED) {
-      kprintf("%d Mhz\r\n", 2400+advert_channels[frequency]);
-      FREQUENCY = 2;//advert_channels[frequency];
-      frequency++;
-      if(frequency >= advert_channels_nb)
-	frequency = 0;
+      //      kprintf("%d Mhz\r\n", 2400+advert_channels[frequency]);
+      //      FREQUENCY = 2;//advert_channels[frequency];
+      //      frequency++;
+      //      if(frequency >= advert_channels_nb)
+      //	frequency = 0;
       RXEN = 1;
       while(STATE == STATUS_DISABLED);
       continue;
