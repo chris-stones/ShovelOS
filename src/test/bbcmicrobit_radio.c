@@ -10,7 +10,7 @@
 
 static uint8_t packet_ptr[PAYLOAD_SIZE];
 
-static int packet_not_nill() {
+int packet_not_nill() {
  for(int i=0; i<PAYLOAD_SIZE; i++)
    if(packet_ptr[i] != 0)
      return 1;
@@ -19,8 +19,9 @@ static int packet_not_nill() {
 
 static void dump_packet() {
 
-  int nn = packet_not_nill();
-
+  static int __i = 0;
+  //int nn = packet_not_nill();
+  int nn = 1;//CRCSTATUS;
   if(nn) {
     kprintf("{");
     kprintf("CRCSTATUS = %d (%8x)",CRCSTATUS, RXCRC);
@@ -30,9 +31,14 @@ static void dump_packet() {
     memset(packet_ptr, 0, sizeof packet_ptr);
     kprintf("}\r\n");
   }
+  else {
+    //    if(++__i % 10 == 0)
+    
+      kprintf("%d\r\n",++__i);
+  }
 }
 
-static void dump_state(uint32_t oldState, uint32_t newState) {
+void dump_state(uint32_t oldState, uint32_t newState) {
 
   return;
   if(oldState == newState) {
@@ -54,7 +60,8 @@ static void dump_state(uint32_t oldState, uint32_t newState) {
   }
 }
 
-const int advert_channels[] = {2,26,80};
+const int advert_channels[] = { 2,26,80};
+const int adv_whiteiv[]     = {37,38,39};
 const int advert_channels_nb = 3;
 
 void bbcmicrobit_test_radio() {
@@ -86,13 +93,18 @@ void bbcmicrobit_test_radio() {
   TXADDRESS = 1;
 
   // SELECT TX POWER LEVEL (MAX?)
-  TXPOWER = TXPOWER_NEG_30_DBM;
+  TXPOWER = TXPOWER_NEG_0_DBM;
 
   // SELECT SIZE OF S0 LENGTH and S1 FIELDS
   PCNF0 =
+    PCNF0_LFLEN_BITS(6)  |
+    PCNF0_S0LEN_BYTES(1) |
+    PCNF0_S1LEN_BITS(2)  ;
+    /*
     PCNF0_LFLEN_BITS(8)  |
     PCNF0_S0LEN_BYTES(1) |
     PCNF0_S1LEN_BITS(0)  ;
+    */
 
   // SELECT MAX SIZE, AND BASE ADDRESS SIZE
   PCNF1 =
@@ -100,7 +112,7 @@ void bbcmicrobit_test_radio() {
     PCNF1_STATLEN(0)            |
     PCNF1_BALEN(3)              |
     PCNF1_ENDIAN(0)             |
-    PCNF1_WHITEEN(0)            ;
+    PCNF1_WHITEEN(1)            ;
 
   // CONFIGURE CRC
   CRCCNF = CRCCNF_LEN(3) | CRCCNF_SKIPADDR(1);
@@ -118,82 +130,22 @@ void bbcmicrobit_test_radio() {
   PREFIX1 = prefix | prefix << 8 | prefix << 16 | prefix << 24;
   
 
-  FREQUENCY = advert_channels[2];
+  FREQUENCY   = advert_channels[0];
+  DATAWHITEIV = adv_whiteiv[0];
 
-  uint32_t lastState = 0xFFFFFFFF;
+  //uint32_t lastState = 0xFFFFFFFF;
   //  uint32_t frequency = 0;
   for(;;) {
-
-    if(READY) {
-      //      kprintf("GOT READY\r\n");
-      READY = 0;
-    }
-
-    if(ADDRESS) {
-      //      uint32_t rxmatch = RXMATCH;
-      //      kprintf("GOT ADDRESS %x\r\n", rxmatch);
-      //dump_packet();
-      ADDRESS = 0;
-    }
     
-    if(PAYLOAD) {
-      //      kprintf("GOT PAYLOAD\r\n");
-      dump_packet();
-      PAYLOAD = 0;
-    }
-
-    if(END) {
-      //      kprintf("GOT END\r\n");
-      END = 0;
-
-      DISABLE = 1;
-      while(STATE != STATUS_DISABLED);
-    }
-
-    if(DISABLED) {
-      //      kprintf("GOT DISABLED\r\n");
-      DISABLED = 0;
-    }
-
-    if(DEVMATCH) {
-      //      kprintf("GOT DEVMATCH\r\n");
-      DEVMATCH = 0;
-    }
-
-    if(DEVMISS) {
-      //      kprintf("GOT DEVMISS\r\n");
-      DEVMISS = 0;
-    }
-
-    if(RSSIEND) {
-      //      kprintf("GOT RSSIEND\r\n");
-      RSSIEND= 0;
-    }
-
-    if(BCMATCH) {
-      //      kprintf("GOT BCMATCH\r\n");
-      BCMATCH = 0;
-    }
-
-    uint32_t newState = STATE;
-    dump_state(lastState, newState);
-    lastState = newState;
-    
-    if(newState == STATUS_DISABLED) {
-      //      kprintf("%d Mhz\r\n", 2400+advert_channels[frequency]);
-      //      FREQUENCY = 2;//advert_channels[frequency];
-      //      frequency++;
-      //      if(frequency >= advert_channels_nb)
-      //	frequency = 0;
+    if(STATE == STATUS_DISABLED) {
       RXEN = 1;
-      while(STATE == STATUS_DISABLED);
-      continue;
-    }
-
-    if(newState == STATUS_RXIDLE) {
-      START = 1;
-      while(STATE == STATUS_RXIDLE);  
-      continue;
+      while(STATE != STATUS_RXIDLE);
+      for(;;) {
+	START = 1;
+	while(END==0);
+	dump_packet();
+	END = 0;
+      }
     }
   }  
 }
