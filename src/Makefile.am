@@ -54,6 +54,8 @@ SHOV_KERN_CORE = \
   memory/stack.h \
   memory/fifo_buffer.c \
   memory/fifo_buffer.h \
+  memory/fifo_packet_buffer.c \
+  memory/fifo_packet_buffer.h \
   file/file.h \
   chardevice/devices.c \
   chardevice/chardevice.h \
