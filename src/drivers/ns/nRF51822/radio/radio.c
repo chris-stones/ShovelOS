@@ -25,6 +25,8 @@
 #include <sched/sched.h>
 #include <concurrency/spinlock.h>
 
+#include <console/console.h>
+
 #include "regs.h"
 
 #define PAYLOAD_SIZE 39
@@ -32,7 +34,8 @@
 #define BUFFER_SEND_PACKETS 1
 
 typedef enum {
-  _NONBLOCK = 1<<0,
+  _NONBLOCK   = 1<<0,
+  _RX_PENDING = 1<<1,
 } flags_enum_t;
 
 struct context {
@@ -48,25 +51,212 @@ struct context {
 };
 static struct context _ctx;
 
-static irq_t _get_irq_number(irq_itf) {
+static irq_t _get_irq_number(irq_itf __ignored) {
 
-  return +16;
+  return 1+16;
 }
 
-static int _IRQ(irq_itf, void * cpu_state) {
+static int __IRQ() {
 
+  // READY TO START TRANSMITTING OR RECEIVING...
+  //  Check if we need either?
+  if(DISABLED) {
+
+    packet_fifo_write_cancel(&_ctx.read_buffer,  NULL);
+    packet_fifo_read_cancel (&_ctx.write_buffer, NULL);
+    
+    if(packet_fifo_size(&_ctx.write_buffer) > 0) {
+      DISABLED = 0;
+      TXEN = 1;
+    }
+    else if(_ctx.flags & _RX_PENDING) {
+      DISABLED = 0;
+      RXEN = 1;
+    }
+    else
+      INTENCLR = INTEN_DISABLED;
+
+    return 0;
+  }
+  
+  if(READY) {
+    READY = 0;
+    if(STATE == STATUS_TXIDLE) {
+      const uint8_t * packet;
+      if(packet_fifo_read_lock(&_ctx.write_buffer, &packet) ==  FIFO_PACKET_SUCCESS) {
+	PACKETPTR = (uint32_t)packet;
+	START = 1;
+      }
+      else
+	DISABLE = 1;
+    }
+    else {
+      uint8_t * packet;
+      if(packet_fifo_write_lock(&_ctx.read_buffer, &packet) ==  FIFO_PACKET_SUCCESS) {
+	PACKETPTR = (uint32_t)packet;
+	START = 1;
+      }
+      else
+	DISABLE = 1;
+    }
+    return 0;
+  }
+
+  if(PAYLOAD) {
+    STOP = 1;
+    PAYLOAD = 0;
+    if(STATE == STATUS_TX)
+      packet_fifo_read_release(&_ctx.write_buffer, NULL);
+    else
+      packet_fifo_write_release(&_ctx.read_buffer, NULL);
+    return 0;
+  }
+
+  if(END) {
+    END = 0;
+    DISABLE = 1;
+  }
+  return 0;
 }
 
-static size_t _write(file_itf __ignore_itf, const void * _vbuffer, size_t count) {
+static int _IRQ(irq_itf __ignored, void * cpu_state) {
 
+  return __IRQ();
+}
+
+static ssize_t _write(file_itf __ignore_itf, const void * _vbuffer, size_t count) {
+
+  const uint8_t * vbuffer = (const uint8_t *)_vbuffer;
+  int flags = _ctx.flags;
+
+  uint8_t * packet;
+
+  if(count > PAYLOAD_SIZE)
+    count = PAYLOAD_SIZE;
+  
+  while(count) {
+  
+    spinlock_lock_irqsave(&_ctx.spinlock);
+
+    // We could be waiting in an RX state forever,
+    // transmit takes priority over receive.
+    switch(STATE) {
+    case STATUS_RXRU:
+    case STATUS_RXIDLE:
+    case STATUS_RX:
+      DISABLE = 1;
+      break;
+    }
+
+    if(packet_fifo_write_lock(&_ctx.write_buffer, &packet) == FIFO_PACKET_SUCCESS) {
+      
+      memcpy(packet, vbuffer, count);
+      packet_fifo_write_release(&_ctx.write_buffer, packet);
+      vbuffer += count;
+      count = 0; 
+    }
+    
+    spinlock_unlock_irqrestore(&_ctx.spinlock);
+
+    // We have data to send, enable interrupt when radio is ready to switch to TX mode.
+    INTENSET = INTEN_DISABLED;
+    
+    if(!count || (flags & _NONBLOCK))
+      break; // non-blocking - return to caller/
+    else {
+      kthread_yield(); // blocking, do something else for a while then try again.
+      continue;
+    }
+  }
+
+  return (size_t)vbuffer - (size_t)_vbuffer;
 }
 
 static ssize_t _read(file_itf __ignore_itf, void * _vbuffer, size_t count) {
 
+  uint8_t * vbuffer = (uint8_t *)_vbuffer;
+  int flags = _ctx.flags;
+   
+  const uint8_t * packet;
+
+  if(count > PAYLOAD_SIZE)
+    count = PAYLOAD_SIZE;
+  
+  while(count) {
+  
+    spinlock_lock_irqsave(&_ctx.spinlock);
+
+    if(packet_fifo_read_lock(&_ctx.read_buffer, &packet) == FIFO_PACKET_SUCCESS) {
+      
+      memcpy(vbuffer, packet, count);
+      packet_fifo_read_release(&_ctx.read_buffer, packet);
+      vbuffer += count;
+      count = 0;
+      _ctx.flags &= ~_RX_PENDING;
+    } else {
+
+      // We want data to read, enable interrupt when radio is ready to switch to RX mode.
+      _ctx.flags |= _RX_PENDING;
+      INTENSET = INTEN_DISABLED;
+    }
+    
+    spinlock_unlock_irqrestore(&_ctx.spinlock);
+
+    if(!count || (flags & _NONBLOCK))
+      break; // non-blocking - return to caller
+    else {
+      kprintf("state = %d %d %d\r\n", STATE, ADDRESS, PAYLOAD);
+      kthread_yield(); // blocking, do something else for a while then try again.
+      continue;
+    }
+  }
+
+  return (size_t)vbuffer - (size_t)_vbuffer;
 }
 
 static int _close(file_itf *itf) {
 
+  INTENCLR =
+    INTEN_READY    |
+    INTEN_ADDRESS  |
+    INTEN_PAYLOAD  |
+    INTEN_END      |
+    INTEN_DISABLED |
+    INTEN_DEVMATCH |
+    INTEN_DEVMISS  |
+    INTEN_RSSIEND  |
+    INTEN_BCMATCH  ;
+
+  DISABLE = 1;
+  
+  POWER = 0;
+
+  packet_fifo_destroy(&_ctx.read_buffer);
+  packet_fifo_destroy(&_ctx.write_buffer);
+  
+  return 0;
+}
+
+static uint32_t __channel_to_freq(uint8_t ch) {
+
+  switch(ch) {
+  case 37:
+    return 2;
+  case 38:
+    return 26;
+  case 39:
+    return 80;
+  default:
+    if(ch<=10)
+      return 4+ch*2;
+    return 6+ch*2;
+  }
+}
+
+static void __configure_channel(uint8_t ch) {
+
+  FREQUENCY   = __channel_to_freq(ch);
+  DATAWHITEIV = ch;
 }
 
 static void __configure_ble() {
@@ -102,26 +292,9 @@ static void __configure_ble() {
   CRCCNF = CRCCNF_LEN(3) | CRCCNF_SKIPADDR(1);
   CRCPOLY = 0x0000065B;
   CRCINIT = 0x00555555;
-}
 
-static uint32_t __channel_to_freq(uint8_t ch) {
-
-  switch(ch) {
-  case 37:
-    return 2;
-  case 38:
-    return 26;
-  case 39:
-    return 80;
-  default:
-    if(ch<=10)
-      return 4+ch*2;
-    return 6+ch*2;
-  }
-}
-
-static int __configure_channel(uint8_t ch) {
-
+  // DEFAULT CHANNEL?
+  __configure_channel(37);
 }
 
 static int __open__(file_itf *ifile,
@@ -157,6 +330,24 @@ static int __open__(file_itf *ifile,
 
   POWER = 1;
   __configure_ble();
+
+  // move out of, and then back into the disabled state to set the disabled-interrupt as pending.
+  if(DISABLED==0) {
+    RXEN = 1;
+    while(READY==0);
+    READY = 0;
+    DISABLE = 1;
+    while(DISABLED==0);
+  }
+
+  READY = 0;
+  PAYLOAD = 0;
+  END = 0;
+
+  INTENSET =
+    INTEN_READY    |
+    INTEN_PAYLOAD  |
+    INTEN_END      ;
   
   return 0;
 }

@@ -37,3 +37,6 @@ int chrd_uninstall( chrd_major_t major, chrd_minor_t minor );
 
 #define CHRD_HWRNG_MAJOR 6
 #define CHRD_HWRNG_MINOR 0
+
+#define CHRD_BLERAW_MAJOR 7
+#define CHRD_BLERAW_MINOR 0

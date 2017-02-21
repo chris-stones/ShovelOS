@@ -155,3 +155,12 @@
 #define CRCCNF_LEN(l)      (l   )
 #define CRCCNF_SKIPADDR(s) (1<<8)
  
+// ENUM SHORTS REGS
+#define SHORTS_READY_START       (1<<0)
+#define SHORTS_END_DISABLE       (1<<1)
+#define SHORTS_DISABLED_TXEN     (1<<2)
+#define SHORTS_DISABLED_RXEN     (1<<3)
+#define SHORTS_ADDRESS_RSSISTART (1<<4)
+#define SHORTS_END_START         (1<<5)
+#define SHORTS_BCSTART           (1<<6)
+#define SHORTS_DISABLED_RSSISTOP (1<<8)
