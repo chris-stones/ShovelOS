@@ -202,10 +202,11 @@ static ssize_t _read(file_itf __ignore_itf, void * _vbuffer, size_t count) {
     
     spinlock_unlock_irqrestore(&_ctx.spinlock);
 
+    kprintf("state = %d %d %d\r\n", STATE, ADDRESS, PAYLOAD);
+    
     if(!count || (flags & _NONBLOCK))
       break; // non-blocking - return to caller
     else {
-      kprintf("state = %d %d %d\r\n", STATE, ADDRESS, PAYLOAD);
       kthread_yield(); // blocking, do something else for a while then try again.
       continue;
     }
