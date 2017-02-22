@@ -1,0 +1,14 @@
+#pragma once
+
+#include <stdint.h>
+
+#define _IOCTL_BLE_BASE              0x00000000
+
+#define IOCTL_BLE_SET_TX_ADDRESS   (_IOCTL_BLE_BASE + 0x00)
+#define IOCTL_BLE_SET_RX_ADDRESS   (_IOCTL_BLE_BASE + 0x01)
+#define IOCTL_BLE_SET_CHANNEL      (_IOCTL_BLE_BASE + 0x02)
+#define IOCTL_BLE_POWERUP          (_IOCTL_BLE_BASE + 0x03)
+#define IOCTL_BLE_POWERDOWN        (_IOCTL_BLE_BASE + 0x04)
+#define IOCTL_BLE_RX_DROP          (_IOCTL_BLE_BASE + 0x05)
+#define IOCTL_BLE_START_LISTENING  (_IOCTL_BLE_BASE + 0x06)
+#define IOCTL_BLE_STOP_LISTENING   (_IOCTL_BLE_BASE + 0x07)

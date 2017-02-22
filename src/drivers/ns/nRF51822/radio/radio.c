@@ -27,6 +27,8 @@
 
 #include <console/console.h>
 
+#include <ioctl/ioctl.h>
+
 #include "regs.h"
 
 #define PAYLOAD_SIZE 39
@@ -201,8 +203,6 @@ static ssize_t _read(file_itf __ignore_itf, void * _vbuffer, size_t count) {
     }
     
     spinlock_unlock_irqrestore(&_ctx.spinlock);
-
-    kprintf("state = %d %d %d\r\n", STATE, ADDRESS, PAYLOAD);
     
     if(!count || (flags & _NONBLOCK))
       break; // non-blocking - return to caller
@@ -260,6 +260,30 @@ static void __configure_channel(uint8_t ch) {
   DATAWHITEIV = ch;
 }
 
+static void __configure_tx_address(uint32_t addr) {
+
+  uint32_t prefix0 = PREFIX0;
+  prefix0 &= 0xFFFFFF00;
+  prefix0 |= (addr >> 24);
+
+  uint32_t base0 = addr << 8;
+  
+  BASE0   = base0;
+  PREFIX0 = prefix0;
+}
+
+static void __configure_rx_address(uint32_t addr) {
+
+  uint32_t prefix0 = PREFIX0;
+  prefix0 &= 0xFFFF00FF;
+  prefix0 |= (addr >> 24) << 8;
+
+  uint32_t base1 = addr << 8;
+  
+  BASE1   = base1;
+  PREFIX0 = prefix0;
+}
+
 static void __configure_ble() {
   
   // configure for Bluetooth low energy mode.
@@ -298,6 +322,22 @@ static void __configure_ble() {
   __configure_channel(37);
 }
 
+static int _ioctl(file_itf self, uint32_t id, void * data) {
+
+  switch(id) {
+  case IOCTL_BLE_SET_TX_ADDRESS:
+  case IOCTL_BLE_SET_RX_ADDRESS:
+  case IOCTL_BLE_SET_CHANNEL:
+  case IOCTL_BLE_POWERUP:   
+  case IOCTL_BLE_POWERDOWN:
+  case IOCTL_BLE_RX_DROP:
+  case IOCTL_BLE_START_LISTENING:
+  case IOCTL_BLE_STOP_LISTENING:
+  }
+
+  return -1;
+}
+
 static int __open__(file_itf *ifile,
 		    irq_itf  *iirq,
 		    chrd_major_t major,
@@ -320,6 +360,7 @@ static int __open__(file_itf *ifile,
   _ctx.file_interface->close = &_close;
   _ctx.file_interface->read  = &_read;
   _ctx.file_interface->write = &_write;
+  _ctx.file_interface->ioctl = &_ioctl;
 
   // initialise function pointers for IRQ interface.
   _ctx.irq_interface->IRQ = &_IRQ;
@@ -331,6 +372,19 @@ static int __open__(file_itf *ifile,
 
   POWER = 1;
   __configure_ble();
+
+  // LISTEN FOR RX on address 1
+  RXADDRESSES = 1<<1;
+
+  // SELECT TX ADDRESS 0
+  TXADDRESS = 0;
+
+  // BLUETOOTH BROADCAST ADDRESS
+  __configure_tx_address(0x8E89BED6);
+  __configure_rx_address(0x8E89BED6);
+    
+  // SELECT TX POWER LEVEL.
+  TXPOWER = TXPOWER_NEG_0_DBM;
 
   // move out of, and then back into the disabled state to set the disabled-interrupt as pending.
   if(DISABLED==0) {
