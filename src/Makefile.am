@@ -178,7 +178,19 @@ SHOV_KERN_DRIVER_OMAP3 = \
   drivers/ti/omap/omap3/interrupt_controller/regs.h \
   drivers/ti/omap/omap3/interrupt_controller/interrupt_controller.c
 
+SHOV_KERN_DRIVER_NRF51822_RADIO = \
+  drivers/ns/nRF51822/radio/radio.c \
+  drivers/ns/nRF51822/radio/context.h \
+  drivers/ns/nRF51822/radio/flush.h \
+  drivers/ns/nRF51822/radio/ioctl.h \
+  drivers/ns/nRF51822/radio/irq.h \
+  drivers/ns/nRF51822/radio/read.h \
+  drivers/ns/nRF51822/radio/regs.h \
+  drivers/ns/nRF51822/radio/util.h \
+  drivers/ns/nRF51822/radio/read.h
+
 SHOV_KERN_DRIVER_NRF51822 = \
+  $(SHOV_KERN_DRIVER_NRF51822_RADIO) \
   drivers/ns/nRF51822/uart/uart.c \
   drivers/ns/nRF51822/uart/regs.h \
   drivers/ns/nRF51822/gpio/regs.h \
@@ -209,6 +221,7 @@ SHOV_KERN_DRIVER_HOSTED = \
 
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
+  test/bleraw.c \
   config.h
 
 if CONFIG_SHOV_HOSTED_PLATFORM

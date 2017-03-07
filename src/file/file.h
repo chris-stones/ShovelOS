@@ -12,7 +12,7 @@ typedef const struct file * const * file_itf;
 struct file {
 
 	// IOCTL
-	int (*ioctl)(file_itf self, uint32_t id, void * data);
+	int (*ioctl)(file_itf self, uint32_t id, ...);
 
 	// seek in the device.
 	int (*seek)(file_itf  self, off_t offset, int whence);
