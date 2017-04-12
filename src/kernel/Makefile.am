@@ -2,8 +2,8 @@
 bin_PROGRAMS = kernel
 
 kernel_CPPFLAGS = \
-  -I$(top_srcdir)/src/stdlib \
-  -I$(top_srcdir)/src/arch/$(SHOV_CONFIG_ARCH_DIR)
+  -I$(top_srcdir)/src/kernel/stdlib \
+  -I$(top_srcdir)/src/kernel/arch/$(SHOV_CONFIG_ARCH_DIR)
 
 kernel_CFLAGS = \
   -ggdb3 \
@@ -42,7 +42,7 @@ SHOV_KERN_CORE = \
   memory/boot_pages.c \
   memory/kmalloc.c \
   memory/mem_cache.c \
-  memory/page.c \
+  memory/page2.c \
   memory/kmalloc.h \
   memory/vm/vm.h \
   memory/mem_cache.h \
