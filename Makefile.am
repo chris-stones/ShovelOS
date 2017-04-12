@@ -1,2 +1,2 @@
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = src/arch/hosted/libNix src
+SUBDIRS = src/kernel/arch/hosted/libNix src/kernel

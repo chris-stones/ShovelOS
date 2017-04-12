@@ -10,12 +10,12 @@ build:bbc_microbit:
     - cd build
     - ../configure --with-machine=bbc_microbit --host=arm-none-eabi
     - make
-    - arm-none-eabi-objcopy -O binary src/kernel src/kernel.bin
-    - arm-none-eabi-objcopy -O ihex src/kernel src/kernel.hex
+    - arm-none-eabi-objcopy -O binary src/kernel/kernel src/kernel.bin
+    - arm-none-eabi-objcopy -O ihex src/kernel/kernel src/kernel.hex
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
-      - build/src/kernel
+      - build/src/kernel/kernel
       - build/src/kernel.bin
       - build/src/kernel.hex
     expire_in: 1 day
@@ -28,11 +28,11 @@ build:beaglexm:
     - cd build
     - ../configure --with-machine=beaglexm --host=arm-none-eabi
     - make
-    - arm-none-eabi-objcopy -O binary src/kernel src/kernel.bin
+    - arm-none-eabi-objcopy -O binary src/kernel/kernel src/kernel.bin
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
-      - build/src/kernel
+      - build/src/kernel/kernel
       - build/src/kernel.bin
     expire_in: 1 day
 
@@ -44,11 +44,11 @@ build:iGEPv5:
     - cd build
     - ../configure --with-machine=iGEPv5 --host=arm-none-eabi
     - make
-    - arm-none-eabi-objcopy -O binary src/kernel src/kernel.bin
+    - arm-none-eabi-objcopy -O binary src/kernel/kernel src/kernel.bin
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
-      - build/src/kernel
+      - build/src/kernel/kernel
       - build/src/kernel.bin
     expire_in: 1 day 
 
@@ -63,7 +63,6 @@ build:hosted:
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
     paths:
-      - build/src/kernel
+      - build/src/kernel/kernel
     expire_in: 1 day 
-
 
