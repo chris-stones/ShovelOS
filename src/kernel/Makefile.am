@@ -2,8 +2,8 @@
 bin_PROGRAMS = kernel
 
 kernel_CPPFLAGS = \
-  -I$(top_srcdir)/src/stdlib \
-  -I$(top_srcdir)/src/arch/$(SHOV_CONFIG_ARCH_DIR)
+  -I$(top_srcdir)/src/kernel/stdlib \
+  -I$(top_srcdir)/src/kernel/arch/$(SHOV_CONFIG_ARCH_DIR)
 
 kernel_CFLAGS = \
   -ggdb3 \

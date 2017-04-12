@@ -4,9 +4,9 @@ autom4te.cache
 build*
 config
 configure
-src/Makefile.in
-src/arch/hosted/libNix/Makefile.in
-src/config.h.in
+src/kernel/Makefile.in
+src/kernel/arch/hosted/libNix/Makefile.in
+src/kernel/config.h.in
 
 # Object files
 *.o
