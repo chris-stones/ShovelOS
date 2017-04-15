@@ -11,6 +11,8 @@ src/kernel/config.h.in
 # Object files
 *.o
 *.ko
+*.bin
+*.img
 
 *~
 
