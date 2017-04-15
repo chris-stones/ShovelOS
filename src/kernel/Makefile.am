@@ -17,13 +17,16 @@ kernel_CFLAGS = \
 kernel_CCASFLAGS = \
   @CPU_ARCH_FLAGS@
 
+if CONFIG_SHOV_ARCH_IS_ARM
+  kernel_CFLAGS += -mno-unaligned-access
+endif
+
 if CONFIG_SHOV_HOSTED_PLATFORM
   kernel_CFLAGS += \
     -pthread
 else
   kernel_CFLAGS += \
     -nostdlib \
-    -mno-unaligned-access \
     -ffreestanding \
     -fno-unwind-tables \
     -fno-exceptions
@@ -258,3 +261,4 @@ endif
 if CONFIG_SHOV_HOSTED_PLATFORM
   kernel_LDADD = arch/hosted/libNix/libnix.a
 endif
+
