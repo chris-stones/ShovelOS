@@ -10,12 +10,17 @@ AM_INIT_AUTOMAKE([subdir-objects])
 
 AC_CANONICAL_HOST
 
+AC_MSG_NOTICE([HOST CPU IS "$host_cpu"])
+
 case "$host_cpu" in
+i386)
+  
+  ;;
 *arm*)
   config_shov_arch_is_arm="yes"
   ;;
 *)
-# AC_MSG_ERROR([Unsupported HOST $host_cpu])
+  AC_MSG_NOTICE([unknown host_cpu])
   ;;
 esac
 
@@ -48,6 +53,10 @@ AC_PROG_RANLIB
 AM_PROG_AS
 
 case "$config_shov_machine" in
+i386_pc)
+  i386_pc=yes
+  AC_SUBST([SHOV_CONFIG_ARCH_DIR],[i386])
+  ;;
 bbc_microbit)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x20000000],[physical base])
   AC_DEFINE([VIRTUAL_MEMORY_BASE_ADDRESS],[0x20000000],[virtual base])
@@ -143,11 +152,14 @@ AM_CONDITIONAL([CONFIG_SHOV_DRIVER_NRF51822],  [test "x$nrf51822" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_GIC],   [test "x$config_shov_arch_is_arm_gic" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_NVIC],  [test "x$config_shov_arch_is_arm_nvic" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_i386_PC],          [test "x$i386_pc" = "xyes"])
 
 AC_CONFIG_FILES([
   Makefile
-  src/kernel/link.script	
-  src/kernel/Makefile
+  src/kernel/link.script
+  src/bootloader/i386-pc/link.script
   src/kernel/arch/hosted/libNix/Makefile
+  src/bootloader/i386-pc/Makefile
+  src/kernel/Makefile
 ])
 AC_OUTPUT
