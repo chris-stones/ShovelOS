@@ -1,3 +1,4 @@
 #!/bin/bash
-arm-none-eabi-objcopy -O binary $1 $2
+OBJCOPY="${SHOV_HOST}-objcopy"
+${OBJCOPY} -O binary $1 $2
 sync
