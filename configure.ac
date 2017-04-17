@@ -158,8 +158,10 @@ AC_CONFIG_FILES([
   Makefile
   src/kernel/link.script
   src/bootloader/i386-pc/link.script
-  src/kernel/arch/hosted/libNix/Makefile
   src/bootloader/i386-pc/Makefile
+  src/bootloader/i386-pc/stage1.5/link.script
+  src/bootloader/i386-pc/stage1.5/Makefile
+  src/kernel/arch/hosted/libNix/Makefile
   src/kernel/Makefile
 ])
 AC_OUTPUT

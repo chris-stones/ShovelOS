@@ -1,0 +1,66 @@
+ENTRY(_start)
+
+MEMORY
+{
+  CODE  (rwx) : ORIGIN = 0x0500,            LENGTH = 0x07700
+  RAM   (rwx) : ORIGIN = 0x7E00,            LENGTH = 0x78200
+}
+
+SECTIONS
+{
+  /DISCARD/ :
+  {
+    *(.ARM.exidx*)
+    *(.ARM.extab*)
+  }
+  
+  . = 0x500;
+
+  .head : AT(0x500)
+  {
+    LONG(0x766f6853);
+    LONG(0x67617453);
+    LONG(0x352E3165);	
+  }
+
+  .text : AT(0x50C)
+  {
+    *(.start_text);	
+    *(.text);
+  } > CODE
+
+  .rodata :
+  {
+    PROVIDE_HIDDEN (__REGISTER_DRIVERS_BEGIN = .);
+    KEEP (*(.register_drivers))
+    PROVIDE_HIDDEN (__REGISTER_DRIVERS_END = .);
+    	
+    PROVIDE_HIDDEN (__REGISTER_DEVICE_ADDRESS_BEGIN = .);
+    KEEP (*(.register_device_address))
+    PROVIDE_HIDDEN (__REGISTER_DEVICE_ADDRESS_END = .);
+
+    *(.rodata)
+    *(.rodata.*)
+    
+  } > CODE
+
+  . = ALIGN(4);
+  __SOURCE_DATA = .;
+
+  .data : AT(__SOURCE_DATA)
+  {
+    PROVIDE_HIDDEN (__DATA_BEGIN = .);
+    *(.data)
+    PROVIDE_HIDDEN (__DATA_END = .);
+  } > CODE
+	
+  .bss :
+  {
+    PROVIDE_HIDDEN (__BSS_BEGIN = .);
+    *(.bss)
+    PROVIDE_HIDDEN (__BSS_END = .);
+  } > RAM
+
+  . = ALIGN(4);
+  PROVIDE_HIDDEN (__HEAP_BEGIN = .);
+}
