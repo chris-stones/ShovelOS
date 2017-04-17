@@ -16,13 +16,13 @@
 #                                                                                  #
 #    4) Give up!                                                                   #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#    Assumes Bios supports LBA32 disk access ( all pc's since the mid 90's do )    #
 #                                                                                  #
 #    At present, this can only chainload the first hard disk.                      #
 #                                                                                  #
 ####################################################################################
 
 .code16
-#.arch i386
 .section .text
 
 #####################################################
@@ -180,27 +180,34 @@ try_to_boot:
         jz    failed_to_boot     # zero ? no partition!
   
   ##########################################################################
-  # read address ( in CHS ) of first sector from partiton table
-  # read sector to 0000:7c00
+  # read address ( in LBA ) of first sector from partiton table
+  # read sector to 0000:7c00 ( ASSUMING EXTENDED BIOS FUNCTIONS AVAILABLE )
   ##########################################################################
-
-try_CHS:
-	movb    $0x02,    %ah     # BIOS function 02h
-	movb    $0x80,    %dl     # first hard disk.
-	movb    $0x01,    %al     # read one sector.
-	cs movb  1(%bx),  %dh     # head.
-	cs movb  2(%bx),  %cl     # cylinder most sig 2 bits | sector
-	cs movb  3(%bx),  %ch     # cylinder least sig byte
-	movw  $0x7c00,    %bx     # buffer
-	int   $0x0013             # call bios.
-	jc    failed_to_boot      # read error?
+try_LBA:
+     movb   $0x42,    %ah     # BIOS function 42h
+     movb   $0x80,    %dl     # first hard disk
+     movw $0x0000,    %si     # Disk Access Packet in data segment
+     movb $0x0010,   (%si)    # D.A.P size in bytes
+     movb $0x0000,  1(%si)    # reserved
+     movb $0x0001,  2(%si)    # sectors to read
+     movb $0x0000,  3(%si)    # reserved
+     movw $0x7c00,  4(%si)    # load to offset
+     movw $0x0000,  6(%si)    # load to segment
+  cs movw  8(%bx),    %cx
+     movw %cx,      8(%si)    # least sig word of LBA32
+  cs movw 10(%bx),    %cx
+     movw %cx,     10(%si)    # most sig word of LBA32
+     movw $0x0000, 12(%si)    # zero most sif dword
+     movw $0x0000, 14(%si)
+     movw $0x7c00,    %bx     # for testing MBR sig in next section
+     int  $0x0013             # call bios
+     jc failed_to_boot        # read error ?
   
-   ###############################################################
-   ### DO ALL VBR's CONTAIN MBR SIGS?
-   ###  GRUB and WINDOWS-7 DOES.
-   ###  BETTER SAFE THAN SORRY, LETS REFUSE TO CHAINLOAD WITHOUT.
-   ###############################################################
-check_sig:	
+  ###############################################################
+  ### DO ALL VBR's CONTAIN MBR SIGS?
+  ###  GRUB and WINDOWS-7 DOES.
+  ###  BETTER SAFE THAN SORRY, LETS REFUSE TO CHAINLOAD WITHOUT.
+  ###############################################################
   es cmpw $0xaa55,510(%bx) # leaded sector has MBR sig ?
      jne failed_to_boot
   
