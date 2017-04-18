@@ -2,8 +2,9 @@ ENTRY(_start)
 
 MEMORY
 {
-  CODE  (rwx) : ORIGIN = 0x0500,            LENGTH = 0x07700
-  RAM   (rwx) : ORIGIN = 0x7E00,            LENGTH = 0x78200
+  CODE  (rwx) : ORIGIN = 0x0500,            LENGTH = 0x7700
+  RAM   (rw)  : ORIGIN = 0x7E00,            LENGTH = 0x7200
+  STACK (rw)  : ORIGIN = 0xF000,            LENGTH = 0x1000
 }
 
 SECTIONS

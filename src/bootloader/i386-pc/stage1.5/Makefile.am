@@ -1,7 +1,9 @@
 
 bin_PROGRAMS = stage1_5
 
-stage_1_5_CFLAGS = \
+stage1_5_CPPFLAGS = -I$(top_srcdir)/src/bootloader/i386-pc/stage1.5/stdlib
+
+stage1_5_CFLAGS = \
   -ggdb3 \
   -Wall \
   -Werror \
@@ -26,4 +28,20 @@ stage1_5_LDFLAGS = \
   -nodefaultlibs \
   -nostdlib
 
-stage1_5_SOURCES = entry.S
+STDLIB = \
+  stdlib/stdlib_asm.S \
+  stdlib/stdlib.h \
+  stdlib/stdlib.c \
+  stdlib/stdint.h \
+  stdlib/stdarg.h \
+  stdlib/kprintf.c
+
+LIBGCC = libgcc/libgcc2.c
+
+stage1_5_SOURCES = \
+  entry.S \
+  main.c \
+  stdint.h \
+  _config.h \
+  $(STDLIB) \
+  $(LIBGCC)
