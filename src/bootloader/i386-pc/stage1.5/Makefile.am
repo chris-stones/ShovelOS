@@ -1,4 +1,6 @@
 
+if CONFIG_SHOV_i386_PC
+
 bin_PROGRAMS = stage1_5
 
 stage1_5_CPPFLAGS = -I$(top_srcdir)/src/bootloader/i386-pc/stage1.5/stdlib
@@ -45,3 +47,5 @@ stage1_5_SOURCES = \
   _config.h \
   $(STDLIB) \
   $(LIBGCC)
+
+endif
