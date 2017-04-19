@@ -7,6 +7,7 @@ configure
 src/kernel/Makefile.in
 src/kernel/arch/hosted/libNix/Makefile.in
 src/kernel/config.h.in
+src/config.h.in
 
 # Object files
 *.o

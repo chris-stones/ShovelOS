@@ -2,7 +2,7 @@ AC_PREREQ([2.69])
 AC_INIT(ShovelOS_Kernel, 0.1, contact@chris-stones.uk)
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR(src/kernel/main.c)
-AC_CONFIG_HEADERS(src/kernel/config.h)
+AC_CONFIG_HEADERS(src/config.h)
 
 AC_CONFIG_MACRO_DIR([m4])
 
