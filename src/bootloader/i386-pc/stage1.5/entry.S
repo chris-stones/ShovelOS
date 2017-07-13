@@ -13,10 +13,6 @@ _start:
 	movw %ax,  %ds
 	movw %ax,  %ss
 
-	# init extra segment.
-	movw $0x1000, %ax
-	movw %ax,     %es
-
 	# init stack.
 	movl $0xdecea5ed, 0xf000
 	movw $0xfffc,     %sp

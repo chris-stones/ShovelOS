@@ -38,13 +38,21 @@ STDLIB = \
   stdlib/stdarg.h \
   stdlib/kprintf.c
 
+DISK = \
+  disk/disk_asm.S \
+  disk/disk.c \
+  disk/disk.h \
+  disk/_priv.h
+
 LIBGCC = libgcc/libgcc2.c
 
 stage1_5_SOURCES = \
   entry.S \
   main.c \
-  stdint.h \
   _config.h \
+  segment.S \
+  segment.h \
+  $(DISK) \
   $(STDLIB) \
   $(LIBGCC)
 
