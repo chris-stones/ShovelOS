@@ -33,7 +33,7 @@ stage_1_5_disk:
 stage_1_5_sector:
   .value   0x0001
 stage_1_5_size:
-  .byte    0x3e
+  .byte    0x3b
 stage_2_partition:
   .byte   0x00
 
@@ -47,7 +47,7 @@ real_main:
   movl $0x2000, %eax
   movl %eax,     %ss       # 64k of stack at segment 0x2000
   movl $0xffff, %esp
-  movl $0x07e0, %eax
+  movl $0x0050, %eax
   movl %eax,     %es       # set es ( stage 1.5 sector )
   movl $s1,     %esi       # say hello!
   call puts
@@ -74,7 +74,7 @@ try_LBA:
      movb %bl,               2(%si)    # sectors to read
      movb $0x0000,           3(%si)    # reserved
      movw $0x0000,           4(%si)    # load to offset
-     movw $0x07e0,           6(%si)    # load to segment
+     movw $0x0050,           6(%si)    # load to segment
      movw $stage_1_5_sector,   %bx
   cs movw (%bx),               %cx
      movw %cx,               8(%si)    # least sig word of LBA32
@@ -105,7 +105,7 @@ next_sig:
   ###############################################################
   movw $jmpstr, %si       # Goodbye message
   call puts
-  ljmp $0x0000, $0x7e40   # JUMP to newly loaded Stage 1.5
+  ljmp $0x0000, $0x050C   # JUMP to newly loaded Stage 1.5
 
   ###############################################################
   ### ERROR - REPORT IT AND HALT                              ###
