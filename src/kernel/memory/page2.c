@@ -374,7 +374,7 @@ static word_t _buddy_search_unsaturated_unaligned(
   return WORD_T_MAX;
 }
 
-word_t _get_free_pages(word_t pages, int flags) {
+static word_t _get_free_pages(word_t pages, int flags) {
 
   const word_t target_order = 
     _pages_order(pages);
@@ -405,10 +405,6 @@ word_t _get_free_pages(word_t pages, int flags) {
   return search_result;
 }
 
-word_t _get_free_page(int flags) {
-  return _get_free_pages(1, flags);
-}
-
 void *get_free_pages(word_t pages, int flags) {
 
   const word_t pn = _get_free_pages(pages, flags);
@@ -431,13 +427,29 @@ void *get_free_page(int flags) {
   return get_free_pages(1, flags);
 }
 
-static word_t _free_pages(word_t page, word_t pages) {
-	
+static word_t _determine_allocated_page_order(word_t page) {
+
+  const struct buddy *const _d = &(_buddies.dirty);
+  const word_t top_order = _d->orders-1;
+  
+  int order;
+  for(order=top_order; order>0; order--) {
+    const word_t bit   = page >> (order-1);
+    const word_t shift = bit % WORD_T_BITS;
+    const word_t word  = bit / WORD_T_BITS;
+    if(!(_d->data[order-1][word] & BIT(shift)))
+      return order;
+  }
+  return 0;
+}
+
+static word_t _free_pages2(word_t page) {
+
   if(page != WORD_T_MAX) {
 
-    const word_t target_order = 
-      _pages_order(pages);
-
+    const word_t target_order =
+      _determine_allocated_page_order(page);
+    
     page >>= target_order;
 
     _buddy_clear_saturated(&_buddies, target_order, page);
@@ -448,12 +460,17 @@ static word_t _free_pages(word_t page, word_t pages) {
   return 0;
 }
 
+void free_pages2(void * page) {
+
+   if(page) {
+    word_t page_number = (((word_t)page) - _buddies.heap_base) / PAGE_SIZE;
+    _free_pages2(page_number);
+  }
+}
+
 void free_pages(void *page, word_t pages) {
 
-  if(page) {
-    word_t page_number = (((word_t)page) - _buddies.heap_base) / PAGE_SIZE;
-    _free_pages(page_number, pages);
-  }
+  free_pages2(page);
 }
 
 void free_page(void *page) {

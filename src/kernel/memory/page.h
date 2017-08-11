@@ -21,6 +21,9 @@ void * get_free_page(int flags);
 // free blocks previously allocated with get_free_pages().
 void free_pages(void * addr, size_t pages);
 
+// same as free_pages, but when number of pages can be deduced.
+void free_pages2(void * addr);
+
 // free pages previously allocated with get_free_page().
 //	this is the same as free_pages(addr,1)
 void free_page(void * addr);
