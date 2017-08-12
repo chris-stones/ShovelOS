@@ -57,6 +57,11 @@ i386_pc)
   i386_pc=yes
   AC_SUBST([SHOV_CONFIG_ARCH_DIR],[i386])
   ;;
+i286_pc)
+  AC_DEFINE([PAGE_SIZE], [4096], [PAGE SIZE])
+  AC_SUBST([SHOV_CONFIG_ARCH_DIR],[i286])
+  i286_pc=yes
+  ;;
 bbc_microbit)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x20000000],[physical base])
   AC_DEFINE([VIRTUAL_MEMORY_BASE_ADDRESS],[0x20000000],[virtual base])
@@ -153,6 +158,7 @@ AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_GIC],   [test "x$config_shov_arch_is_arm_
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_NVIC],  [test "x$config_shov_arch_is_arm_nvic" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_i386_PC],          [test "x$i386_pc" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_i286_PC],          [test "x$i286_pc" = "xyes"])
 
 AC_CONFIG_FILES([
   Makefile

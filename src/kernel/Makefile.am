@@ -222,6 +222,10 @@ SHOV_KERN_DRIVER_HOSTED = \
   drivers/hosted/uart/uart.c \
   drivers/hosted/timer/sync_timer.c
 
+SHOV_KERN_DRIVER_i286_BIOS = \
+  drivers/i286/bios/video/video.c \
+  drivers/i286/bios/video/video_asm.S
+
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
   test/bleraw.c \
@@ -256,6 +260,10 @@ endif
 
 if CONFIG_SHOV_DRIVER_ARM_NVIC
   kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_NVIC)
+endif
+
+if CONFIG_SHOV_i286_PC
+  kernel_SOURCES += $(SHOV_KERN_DRIVER_i286_BIOS)
 endif
 
 if CONFIG_SHOV_HOSTED_PLATFORM
