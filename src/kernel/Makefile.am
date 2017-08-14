@@ -43,12 +43,8 @@ SHOV_KERN_CORE = \
   _config.h \
   main.c \
   memory/boot_pages.c \
-  memory/kmalloc.c \
-  memory/mem_cache.c \
   memory/page2.c \
-  memory/kmalloc.h \
   memory/vm/vm.h \
-  memory/mem_cache.h \
   memory/boot_pages.h \
   memory/memory.c \
   memory/memory.h \
@@ -107,6 +103,17 @@ if CONFIG_SHOV_ARCH_IS_i286
     arch/i286/concurrency/spinlock.c \
     arch/i286/concurrency/spinlock.h
 endif
+
+SHOV_KERN_NORMAL_KMALLOC = \
+  memory/kmalloc.h \
+  memory/kmalloc.c \
+  memory/mem_cache.h \
+  memory/mem_cache.c
+
+SHOV_KERN_TINY_KMALLOC = \
+  memory/kmalloc.h \
+  memory/kmalloc_tiny.c
+
 
 if CONFIG_SHOV_ARCH_IS_ARM_A
   SHOV_KERN_CORE += \
@@ -284,8 +291,15 @@ if CONFIG_SHOV_DRIVER_ARM_NVIC
   kernel_SOURCES += $(SHOV_KERN_DRIVER_ARM_NVIC)
 endif
 
+
 if CONFIG_SHOV_i286_PC
   kernel_SOURCES += $(SHOV_KERN_DRIVER_i286_BIOS)
+endif
+
+if CONFIG_SHOV_TINY
+  kernel_SOURCES += $(SHOV_KERN_TINY_KMALLOC)
+else
+  kernel_SOURCES += $(SHOV_KERN_NORMAL_KMALLOC)
 endif
 
 if CONFIG_SHOV_HOSTED_PLATFORM

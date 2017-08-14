@@ -77,15 +77,17 @@ i286_pc)
   i286_pc=yes
   no_kthread=yes
   no_time=yes
+  config_tiny=yes
   ;;
 bbc_microbit)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x20000000],[physical base])
   AC_DEFINE([VIRTUAL_MEMORY_BASE_ADDRESS],[0x20000000],[virtual base])
   AC_DEFINE([PHYSICAL_MEMORY_LENGTH],[0x4000], [physical dram length])
   AC_DEFINE([CONFIG_UNICORE], [1], [UNICORE ot SMP])
-  AC_DEFINE([PAGE_SIZE], [256], [PAGE SIZE])
+  AC_DEFINE([PAGE_SIZE], [32], [PAGE SIZE])
   AC_DEFINE([CONFIG_NOMMU], [1], [NO MMU])
   AC_DEFINE([ARM_M_INIT_STACK], [0x20004000], [initial PC value])
+  AC_DEFINE([CONFIG_TINY], [1], [very little memory available])
   AC_SUBST([SHOV_CONFIG_ARCH_DIR],[arm_m])
   AC_SUBST([LS_PAGE_SIZE], [256])
   AC_SUBST([LS_FLASH_ORIGIN],[0x00000000])
@@ -100,6 +102,7 @@ bbc_microbit)
   arm_v6m=yes
   arm_m=yes
   config_shov_arch_is_arm_nvic=yes
+  config_tiny=yes
   ;;
 beaglexm)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x80200000],[physical base])
@@ -178,6 +181,7 @@ AM_CONDITIONAL([CONFIG_SHOV_i386_PC],          [test "x$i386_pc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_i286_PC],          [test "x$i286_pc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_NO_KTHREAD],       [test "x$no_kthread" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_NO_TIME],          [test "x$no_time" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_TINY],             [test "x$config_tiny" = "xyes"])
 
 AC_CONFIG_FILES([
   Makefile
