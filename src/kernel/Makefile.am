@@ -95,6 +95,7 @@ endif
 
 if CONFIG_SHOV_ARCH_IS_i286
   SHOV_KERN_CORE += \
+    arch/i286/entry.S \
     arch/i286/arch.c \
     arch/i286/arch.h \
     arch/i286/cpu_state.h \
