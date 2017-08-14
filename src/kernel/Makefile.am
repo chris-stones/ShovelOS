@@ -45,7 +45,7 @@ SHOV_KERN_CORE = \
   memory/boot_pages.c \
   memory/kmalloc.c \
   memory/mem_cache.c \
-  memory/page.c \
+  memory/page2.c \
   memory/kmalloc.h \
   memory/vm/vm.h \
   memory/mem_cache.h \
