@@ -83,9 +83,28 @@ SHOV_KERN_CORE = \
   interrupt_controller/controller.h \
   interrupt_controller/controller.c \
   drivers/drivers.h \
-  drivers/drivers.c \
+  drivers/drivers.c 
+
+SHOV_KERN_SCHED = \
   sched/sched_priv.h \
   sched/sched.h
+
+if !CONFIG_SHOV_HOSTED_PLATFORM
+  SHOV_KERN_SCHED += \
+    sched/sched.c \
+    sched/sched_sleep.c
+endif
+
+if CONFIG_SHOV_ARCH_IS_i286
+  SHOV_KERN_CORE += \
+    arch/i286/arch.c \
+    arch/i286/arch.h \
+    arch/i286/cpu_state.h \
+    arch/i286/stdint.h \
+    arch/i286/concurrency/kthread.h \
+    arch/i286/concurrency/spinlock.c \
+    arch/i286/concurrency/spinlock.h
+endif
 
 if CONFIG_SHOV_ARCH_IS_ARM_A
   SHOV_KERN_CORE += \
@@ -133,12 +152,6 @@ if CONFIG_SHOV_ARCH_IS_ARM_M
     arch/arm_m/exceptions/exceptions.h \
     arch/arm_m/concurrency/spinlock.c \
     arch/arm_m/concurrency/spinlock.h 
-endif
-
-if !CONFIG_SHOV_HOSTED_PLATFORM
-  SHOV_KERN_CORE += \
-    sched/sched.c \
-    sched/sched_sleep.c
 endif
 
 SHOV_KERN_HOSTED_CORE = \
@@ -228,7 +241,6 @@ SHOV_KERN_DRIVER_i286_BIOS = \
 
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \
-  test/bleraw.c \
   config.h
 
 if CONFIG_SHOV_HOSTED_PLATFORM
@@ -240,6 +252,10 @@ if !CONFIG_SHOV_HOSTED_PLATFORM
 if CONFIG_SHOV_ARCH_IS_ARMv7A
     kernel_SOURCES += $(SHOV_KERN_ARM_VMSAv7_CORE)
 endif
+endif
+
+if !CONFIG_SHOV_NO_KTHREAD
+  kernel_SOURCES += $(SHOV_KERN_SCHED)
 endif
 
 if CONFIG_SHOV_DRIVER_OMAP

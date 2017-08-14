@@ -74,6 +74,7 @@ i286_pc)
   AC_SUBST([LS_RODATA_MEMORY],[FLASH])
   AC_SUBST([LS_START_TEXT],[0x0500])
   i286_pc=yes
+  no_kthread=yes
   ;;
 bbc_microbit)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x20000000],[physical base])
@@ -164,6 +165,7 @@ AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARMv7A],   [test "x$arm_v7a" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARMv6M],   [test "x$arm_v6m" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARM_A],    [test "x$arm_a" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_ARM_M],    [test "x$arm_m" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_ARCH_IS_i286],     [test "x$i286_pc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP],      [test "x$omap_soc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_OMAP3],     [test "x$omap_major_ver" = "x3"])
 AM_CONDITIONAL([CONFIG_SHOV_DRIVER_NRF51822],  [test "x$nrf51822" = "xyes"])
@@ -172,6 +174,7 @@ AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_NVIC],  [test "x$config_shov_arch_is_arm_
 AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_i386_PC],          [test "x$i386_pc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_i286_PC],          [test "x$i286_pc" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_NO_KTHREAD],       [test "x$no_kthread" = "xyes"])
 
 AC_CONFIG_FILES([
   Makefile
