@@ -1,6 +1,10 @@
 
 #pragma once
 
+#if defined(CONFIG_ARCH_i286)
+__asm__(".code16gcc\n");
+#endif
+
 #ifdef HAVE_CONFIG_H
 	// GOOD... this is an auto-tools build.
 	#include<config.h>
