@@ -661,7 +661,7 @@ int main() {
     for(;;) {
       char c;
       int  r;
-      word_t i,j;
+      word_t i;
       dump_state(&_buddies);
 	
       printf(">");
@@ -676,8 +676,8 @@ int main() {
 		printf("result: ERROR\r\n");
 	      break;
 	    }
-	    if(c=='f' && (scanf("%"PRI_WORD_T" %"PRI_WORD_T, &i, &j)==2)) {
-	      r = _free_pages(i, j);
+	    if(c=='f' && (scanf("%"PRI_WORD_T, &i)==1)) {
+	      r = _free_pages2(i);
 	      if(r != WORD_T_MAX)
 		printf("result: %d\r\n", r);
 	      else
