@@ -71,19 +71,21 @@ SHOV_KERN_CORE = \
   stdlib/fprintf.c \
   console/console.h \
   console/console.c \
+  gpio/gpio.h \
+  gpio/gpio.c \
+  interrupt_controller/controller.h \
+  interrupt_controller/controller.c \
+  drivers/drivers.h \
+  drivers/drivers.c
+
+SHOV_KERN_TIME = \
   timer/timer.h \
   timer/devices.c \
   timer/timespec.h \
   timer/sync_timer.h \
   timer/sync_timer.c \
   timer/system_time.h \
-  timer/system_time.c \
-  gpio/gpio.h \
-  gpio/gpio.c \
-  interrupt_controller/controller.h \
-  interrupt_controller/controller.c \
-  drivers/drivers.h \
-  drivers/drivers.c 
+  timer/system_time.c
 
 SHOV_KERN_SCHED = \
   sched/sched_priv.h \
@@ -256,6 +258,10 @@ endif
 
 if !CONFIG_SHOV_NO_KTHREAD
   kernel_SOURCES += $(SHOV_KERN_SCHED)
+endif
+
+if !CONFIG_SHOV_NO_TIME
+  kernel_SOURCES += $(SHOV_KERN_TIME)
 endif
 
 if CONFIG_SHOV_DRIVER_OMAP

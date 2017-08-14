@@ -75,6 +75,7 @@ i286_pc)
   AC_SUBST([LS_START_TEXT],[0x0500])
   i286_pc=yes
   no_kthread=yes
+  no_time=yes
   ;;
 bbc_microbit)
   AC_DEFINE([PHYSICAL_MEMORY_BASE_ADDRESS],[0x20000000],[physical base])
@@ -175,6 +176,7 @@ AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes
 AM_CONDITIONAL([CONFIG_SHOV_i386_PC],          [test "x$i386_pc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_i286_PC],          [test "x$i286_pc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_NO_KTHREAD],       [test "x$no_kthread" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_NO_TIME],          [test "x$no_time" = "xyes"])
 
 AC_CONFIG_FILES([
   Makefile
