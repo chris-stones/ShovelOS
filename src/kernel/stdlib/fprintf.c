@@ -5,6 +5,10 @@
 #include <stdarg.h>
 #include <console/console.h>
 
+#if !defined(__WITH_64BIT_MATH)
+#define __WITH_64BIT_MATH 0
+#endif
+
 ssize_t _debug_out(const char * string);
 
 static int32_t _puts(file_itf file, const char * str) {
@@ -37,33 +41,55 @@ static int32_t _putc(file_itf file, char c) {
   return 0;
 }
 
-static sint32_t _nstrlen(sint64_t n, sint64_t base) {
-
-	sint32_t ret;
-	if(n<0) {
-		ret  =  2;
-		n   *= -1;
-	}
-	else
-		ret = 1;
-
-	while((n /= base)>0)
-		ret++;
-
-	return (ret);
+static sint32_t _nstrlen32(sint32_t n, sint32_t base) { \
+  sint32_t ret;
+  if(n<0) { 
+    ret  =  2; 
+    n   *= -1; 
+  } else 
+    ret = 1; 
+  while((n /= base)>0) 
+    ret++; 
+  return (ret); 
 }
 
-static int32_t _padn(file_itf file, sint64_t n, uint32_t base, int32_t pad, int zlead, int leftalign) {
 
-	int32_t l=0;
-	if(!leftalign) {
-		pad -= _nstrlen(n,base);
-		const char padchar = zlead ? '0' : ' ';
-		while(pad-- >0)
-			l += _putc(file, padchar);
-	}
-	return l;
+static int32_t _padn32(file_itf file, sint32_t n, uint32_t base, int32_t pad, int zlead, int leftalign) {
+
+  int32_t l=0;
+  if(!leftalign) {
+    pad -= _nstrlen32(n,base);
+    const char padchar = zlead ? '0' : ' ';
+    while(pad-- >0)
+      l += _putc(file, padchar);
+  }
+  return l;
 }
+
+#if(__WITH_64BIT_MATH)
+static sint32_t _nstrlen64(sint64_t n, sint64_t base) { \
+  sint32_t ret;
+  if(n<0) { 
+    ret  =  2; 
+    n   *= -1; 
+  } else 
+    ret = 1; 
+  while((n /= base)>0) 
+    ret++; 
+  return (ret); 
+}
+static int32_t _padn64(file_itf file, sint64_t n, uint32_t base, int32_t pad, int zlead, int leftalign) {
+
+  int32_t l=0;
+  if(!leftalign) {
+    pad -= _nstrlen64(n,base);
+    const char padchar = zlead ? '0' : ' ';
+    while(pad-- >0)
+      l += _putc(file, padchar);
+  }
+  return l;
+}
+#endif
 
 static int32_t  _padc(file_itf file, int32_t pad, int leftalign) {
 
@@ -109,6 +135,7 @@ static int32_t _putX(file_itf file, uint32_t n) {
 	return __putxX(file, n,'A');
 }
 
+#if(__WITH_64BIT_MATH)
 static int32_t __putlxX(file_itf file, uint64_t n, uint8_t a) {
 
     int      l=0;
@@ -130,6 +157,7 @@ static int32_t _putlX(file_itf file, uint64_t n) {
 
 	return __putlxX(file, n, 'A');
 }
+#endif
 
 static int32_t _putu(file_itf file, uint32_t n) {
 
@@ -152,6 +180,7 @@ static int32_t _putd(file_itf file, int32_t n) {
     return _putc(file, '-') + _putd(file, (int32_t)(-n));
 }
 
+#if(__WITH_64BIT_MATH)
 static int32_t _putlu(file_itf file, uint64_t n) {
 
     uint64_t d  = 1000000000;
@@ -174,6 +203,7 @@ static int32_t _putll(file_itf file, int64_t n) {
 
     return _putc(file, '-') + _putlu(file, (uint64_t)(-n));
 }
+#endif
 
 int32_t vfprintf(file_itf file, const char * format, va_list va) {
 
@@ -242,27 +272,29 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 			case 'u':
 			{
 				uint32_t arg = va_arg(va,uint32_t);
-				l += _padn(file, arg, 10, pad, zlead,  leftalign);
+				l += _padn32(file, arg, 10, pad, zlead,  leftalign);
 				l += _putu(file, arg);
-				l += _padn(file, arg, 10, pad, zlead, !leftalign);
+				l += _padn32(file, arg, 10, pad, zlead, !leftalign);
 				break;
 			}
 			case 'i':
 			case 'd':
 			{
 				int32_t arg = va_arg(va,int32_t);
-				l += _padn(file, arg, 10, pad, zlead,  leftalign);
+				l += _padn32(file, arg, 10, pad, zlead,  leftalign);
 				l += _putd(file, arg);
-				l += _padn(file, arg, 10, pad, zlead, !leftalign);
+				l += _padn32(file, arg, 10, pad, zlead, !leftalign);
 				break;
 			}
 			case 'p':
 			{
 				if(sizeof(void*) == 8) {
+#if(__WITH_64BIT_MATH)
 					uint64_t arg = va_arg(va, uint64_t);
-					l += _padn(file, arg, 16, pad, zlead,  leftalign);
+					l += _padn64(file, arg, 16, pad, zlead,  leftalign);
 					l += _putlx(file,arg);
-					l += _padn(file, arg, 16, pad, zlead, !leftalign);
+					l += _padn64(file, arg, 16, pad, zlead, !leftalign);
+#endif
 					break;
 				}
 			}
@@ -270,17 +302,17 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 			case 'x':
 			{
 				uint32_t arg = va_arg(va,uint32_t);
-				l += _padn(file, arg, 16, pad, zlead,  leftalign);
+				l += _padn32(file, arg, 16, pad, zlead,  leftalign);
 				l += _putx(file, arg);
-				l += _padn(file, arg, 16, pad, zlead, !leftalign);
+				l += _padn32(file, arg, 16, pad, zlead, !leftalign);
 				break;
 			}
 			case 'X':
 			{
 				uint32_t arg = va_arg(va,uint32_t);
-				l += _padn(file, arg, 16, pad, zlead,  leftalign);
+				l += _padn32(file, arg, 16, pad, zlead,  leftalign);
 				l += _putX(file, arg);
-				l += _padn(file, arg, 16, pad, zlead, !leftalign);
+				l += _padn32(file, arg, 16, pad, zlead, !leftalign);
 				break;
 			}
 			case 's':
@@ -300,34 +332,42 @@ int32_t vfprintf(file_itf file, const char * format, va_list va) {
 						case 'l':
 						case 'd':
 						{
+#if(__WITH_64BIT_MATH)
 							int64_t arg = va_arg(va, int64_t);
-							l += _padn(file, arg, 10, pad, zlead,  leftalign);
+							l += _padn64(file, arg, 10, pad, zlead,  leftalign);
 							l += _putll(file,arg);
-							l += _padn(file, arg, 10, pad, zlead, !leftalign);
+							l += _padn64(file, arg, 10, pad, zlead, !leftalign);
+#endif
 							break;
 						}
 						case 'u':
 						{
+#if(__WITH_64BIT_MATH)
 							uint64_t arg = va_arg(va, uint64_t);
-							l += _padn(file, arg, 10, pad, zlead,  leftalign);
+							l += _padn64(file, arg, 10, pad, zlead,  leftalign);
 							l += _putlu(file,arg);
-							l += _padn(file, arg, 10, pad, zlead, !leftalign);
+							l += _padn64(file, arg, 10, pad, zlead, !leftalign);
+#endif
 							break;
 						}
 						case 'x':
 						{
+#if(__WITH_64BIT_MATH)
 							uint64_t arg = va_arg(va, uint64_t);
-							l += _padn(file, arg, 16, pad, zlead,  leftalign);
+							l += _padn64(file, arg, 16, pad, zlead,  leftalign);
 							l += _putlx(file,arg);
-							l += _padn(file, arg, 16, pad, zlead, !leftalign);
+							l += _padn64(file, arg, 16, pad, zlead, !leftalign);
+#endif
 							break;
 						}
 						case 'X':
 						{
+#if(__WITH_64BIT_MATH)
 							uint64_t arg = va_arg(va, uint64_t);
-							l += _padn(file, arg, 16, pad, zlead,  leftalign);
+							l += _padn64(file, arg, 16, pad, zlead,  leftalign);
 							l += _putlX(file,arg);
-							l += _padn(file, arg, 16, pad, zlead, !leftalign);
+							l += _padn64(file, arg, 16, pad, zlead, !leftalign);
+#endif
 							break;
 						}
 					}
