@@ -14,16 +14,22 @@ _start:
 	movw %ax, %ss
 
 	# initialise stack pointer to top of ram.
-	movw $0xfffc, %sp
+	movl $0x0000fffc, %esp
 
 	# clear the BSS section and init .data section
 	call _init_ram
 
 	# Setup proper stack.
-	pushl $0     # boot stack alloc flags
-	pushl $1024  # size of new stack.
-	call boot_stack
-	# TODO: USE NEW RETURNED STACK
+	subw  $8, %sp        # alloc stack_struct on the stack
+	movw  %sp,%ax        # ax = pointer to stack_struct
+	pushw %ax            # store stack_struct pointer.
+	pushl $0             # boot stack alloc flags
+	pushl $1024          # size of new stack.
+	pushl %eax           # pointer to stack_struct
+	call boot_stack      # allocate some stack.
+	movw 8(%esp), %ax    # ax = pointer to stack_struct
+	movl  (%eax), %esp   # read stack base.
+	addl 4(%eax), %esp   # move to top of stack.
 
 	call setup_memory
 	#call exceptions_setup
