@@ -7,6 +7,11 @@
 	.global _start
 _start:
 
+	# 'Stage1.5' sig.
+	.long 0x766f6853
+	.long 0x67617453
+	.long 0x352E3165	
+
 	# zero segment registers...
 	#  we will MOSTLY be ignoring segmented memory.
 	xorw %ax, %ax
