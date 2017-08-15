@@ -74,6 +74,7 @@ i286_pc)
   AC_SUBST([LS_TEXT_MEMORY],[FLASH])
   AC_SUBST([LS_RODATA_MEMORY],[FLASH])
   AC_SUBST([LS_START_TEXT],[0x0500])
+  AC_SUBST([CPU_ARCH_FLAGS], ["-march=i386 -m16"])
   i286_pc=yes
   no_kthread=yes
   no_time=yes
