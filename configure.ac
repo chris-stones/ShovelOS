@@ -55,6 +55,7 @@ AM_PROG_AS
 case "$config_shov_machine" in
 i386_pc)
   i386_pc=yes
+  x86_mbr=yes
   AC_SUBST([SHOV_CONFIG_ARCH_DIR],[i386])
   ;;
 i286_pc)
@@ -76,6 +77,7 @@ i286_pc)
   AC_SUBST([LS_START_TEXT],[0x0500])
   AC_SUBST([CPU_ARCH_FLAGS], ["-march=i386 -m16"])
   i286_pc=yes
+  x86_mbr=yes
   no_kthread=yes
   no_time=yes
   config_tiny=yes
@@ -180,6 +182,7 @@ AM_CONDITIONAL([CONFIG_SHOV_DRIVER_ARM_NVIC],  [test "x$config_shov_arch_is_arm_
 AM_CONDITIONAL([CONFIG_SHOV_HOSTED_PLATFORM],  [test "x$hosted_platform" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_i386_PC],          [test "x$i386_pc" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_i286_PC],          [test "x$i286_pc" = "xyes"])
+AM_CONDITIONAL([CONFIG_SHOV_x86_MBR],          [test "x$x86_mbr" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_NO_KTHREAD],       [test "x$no_kthread" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_NO_TIME],          [test "x$no_time" = "xyes"])
 AM_CONDITIONAL([CONFIG_SHOV_TINY],             [test "x$config_tiny" = "xyes"])

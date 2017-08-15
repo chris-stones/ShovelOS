@@ -1,4 +1,4 @@
-if CONFIG_SHOV_i386_PC
+if CONFIG_SHOV_x86_MBR
 
 bin_PROGRAMS = mbr vbr
 
