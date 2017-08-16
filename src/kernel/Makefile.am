@@ -12,6 +12,9 @@ kernel_CFLAGS = \
   -std=gnu99 \
   -Os \
   -nostdinc \
+  -fdata-sections \
+  -ffunction-sections \
+  -Wl,--gc-sections \
   @CPU_ARCH_FLAGS@
 
 kernel_CCASFLAGS = \
