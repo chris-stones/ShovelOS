@@ -10,6 +10,7 @@ kernel_CFLAGS = \
   -Wall \
   -Werror \
   -std=gnu99 \
+  -fomit-frame-pointer \
   -Os \
   -nostdinc \
   -fdata-sections \
