@@ -14,6 +14,8 @@ SECTIONS
     *(.ARM.extab*)
     *(.eh_frame*)
     *(.rel.*)
+    *(.got*)
+    *(.igot*)
   }
   
   . = @LS_START_TEXT@;
