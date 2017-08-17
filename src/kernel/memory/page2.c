@@ -6,11 +6,22 @@
 #include <stdint.h>
 #include "memory.h"
 #include "boot_pages.h"
+#define __ENABLE_DEBUG_TRACE
+#include<stdlib/debug_trace.h>
+#include<stdlib/bug.h>
 #else
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#if !defined(DEBUG_TRACE)
+#define DEBUG_TRACE do{}while(0)
 #endif
+#if !defined(_BUG_ON)
+#define _BUG_ON do{}while(0)
+#endif
+#endif
+
+
 
 #include <stdlib.h>
 
@@ -192,9 +203,18 @@ static int _allocate_buddy_data(struct buddies * _b, word_t heap_length) {
   // Allocate enough memory to hold the buddy struct.
   const p_word_t base = _buddy_data_alloc(total_data_sz);
 
+  _BUG_ON(total_data_sz >= heap_length);
+  
   // Remove buddies struct from tracked-heap.
   _configure_geometry(_b, heap_length - total_data_sz);
 
+  DEBUG_TRACE("using %d bytes @0x%p",total_data_sz, base);
+  DEBUG_TRACE("tracking %d Bytes (0x%x), %dK, %dM",
+	      (heap_length - total_data_sz),
+	      (heap_length - total_data_sz),
+	      (heap_length - total_data_sz)/1024,
+	      (heap_length - total_data_sz)/(1024*1024));
+  
   if(base) {
     word_t order;
     p_word_t cur = base;
