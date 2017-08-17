@@ -69,6 +69,8 @@ SHOV_KERN_CORE = \
   stdlib/stdlib.c \
   stdlib/fgets.c \
   stdlib/fprintf.c \
+  lib/alloc/buddy_alloc.h \
+  lib/alloc/buddy_alloc.c \
   console/console.h \
   console/console.c \
   gpio/gpio.h \
