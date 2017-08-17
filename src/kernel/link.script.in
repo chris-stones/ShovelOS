@@ -48,6 +48,7 @@ SECTIONS
   {
     PROVIDE_HIDDEN (__DATA_BEGIN = .);
     *(.data)
+    *(.data.*)
     PROVIDE_HIDDEN (__DATA_END = .);
   } > RAM
 	
@@ -55,6 +56,7 @@ SECTIONS
   {
     PROVIDE_HIDDEN (__BSS_BEGIN = .);
     *(.bss)
+    *(.bss.*)
     PROVIDE_HIDDEN (__BSS_END = .);
   } > RAM
 
