@@ -8,6 +8,9 @@
 #include<stdlib/bug.h>
 #include"memory.h"
 
+#define __ENABLE_DEBUG_TRACE
+#include<stdlib/debug_trace.h>
+
 static size_t _boot_pages = 0;
 
 #if !defined(HOSTED_PLATFORM)
@@ -97,5 +100,11 @@ void * get_aligned_boot_pages(size_t alignment, size_t pages, int flags) {
 
 // Disables any future allocations by get_boot_pages.
 void end_boot_pages() {
+  DEBUG_TRACE("end_boot_pages (used = %d pages, %d bytes, %dK, %dM)\n",
+	      _boot_pages,
+	      _boot_pages * PAGE_SIZE,
+	      (_boot_pages * PAGE_SIZE)/1024,
+	      (_boot_pages * PAGE_SIZE)/(1024*1024));
+  
   _boot_pages = _heap_pages();
 }
