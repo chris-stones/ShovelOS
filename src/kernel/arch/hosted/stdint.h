@@ -65,3 +65,4 @@ typedef void*        		phy_ptr_t;
 
 typedef uint32_t irq_t;
 
+#include <arch/common/word_t.h>
