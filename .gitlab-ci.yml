@@ -66,3 +66,11 @@ build:hosted:
       - build/src/kernel/kernel
     expire_in: 1 day 
 
+build:i286_pc
+  stage: build
+  script:
+    - mkdir build
+    - ./autogen.sh
+    - cd build
+    - ../configure --with-machine=i286_pc --host=i386-elf
+    - make
