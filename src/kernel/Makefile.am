@@ -108,7 +108,9 @@ if CONFIG_SHOV_ARCH_IS_i286
     arch/i286/stdint.h \
     arch/i286/concurrency/kthread.h \
     arch/i286/concurrency/spinlock.c \
-    arch/i286/concurrency/spinlock.h
+    arch/i286/concurrency/spinlock.h \
+    arch/i286/asm/8086segment.h \
+    arch/i286/asm/8086segment.S
 endif
 
 SHOV_KERN_NORMAL_KMALLOC = \
