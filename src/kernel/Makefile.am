@@ -255,7 +255,10 @@ SHOV_KERN_DRIVER_HOSTED = \
 
 SHOV_KERN_DRIVER_i286_BIOS = \
   drivers/i286/bios/video/video.c \
-  drivers/i286/bios/video/video_asm.S
+  drivers/i286/bios/video/video_asm.S \
+  drivers/i286/bios/disk/disk.c \
+  drivers/i286/bios/disk/disk_asm.S \
+  drivers/i286/bios/disk/disk.h
 
 kernel_SOURCES = \
   $(SHOV_KERN_CORE) \

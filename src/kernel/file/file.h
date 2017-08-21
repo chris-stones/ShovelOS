@@ -9,6 +9,10 @@ struct file;
 // type of a block device interface.
 typedef const struct file * const * file_itf;
 
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
 struct file {
 
 	// IOCTL
